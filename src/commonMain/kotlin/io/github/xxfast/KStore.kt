@@ -12,7 +12,7 @@ import kotlinx.serialization.json.okio.encodeToBufferedSink
 import okio.*
 
 @OptIn(ExperimentalSerializationApi::class)
-class ValueStore<T : Any>(
+class KStore<T : Any>(
     val path: Path,
     default: T? = null,
     val serializer: Json = Json,

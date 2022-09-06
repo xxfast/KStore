@@ -20,8 +20,8 @@ data class Pet(
 
 enum class PetType { Cat, Dog }
 
-class ValueStoreTests {
-  private val store: ValueStore<Pet> = ValueStore(path = "test.json".toPath())
+class KStoreTests {
+  private val store: KStore<Pet> = KStore(path = "test.json".toPath())
 
   @Test
   fun testReadEmpty() = runTest {
