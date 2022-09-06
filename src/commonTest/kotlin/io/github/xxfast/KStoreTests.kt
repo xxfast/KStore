@@ -59,4 +59,13 @@ class KStoreTests {
       assertEquals(OREO, awaitItem())
     }
   }
+
+  @Test
+  fun testClear() = runTest {
+    store.set(MYLO)
+    store.clear()
+    val expect: Pet? = null
+    val actual: Pet? = store.get<Pet>()
+    assertSame(expect, actual)
+  }
 }

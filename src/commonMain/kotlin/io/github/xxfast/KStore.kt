@@ -42,5 +42,10 @@ class KStore<T : Any>(
     val sink: BufferedSink = FILE_SYSTEM.sink(path).buffer()
     sink.use { serializer.encodeToBufferedSink(value, it) }
   }
+
+  suspend fun clear(){
+    FILE_SYSTEM.delete(path)
+    stateFlow.emit(null)
+  }
 }
 
