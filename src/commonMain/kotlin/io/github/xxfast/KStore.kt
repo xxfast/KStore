@@ -18,18 +18,16 @@ class KStore<T : Any>(
     val serializer: Json = Json,
     val lock: Mutex = Mutex(),
 ) {
-  // TODO: Keep these private
-  val source: BufferedSource = FILE_SYSTEM.source(path).buffer()
-  val sink: BufferedSink = FILE_SYSTEM.sink(path).buffer()
   val stateFlow: MutableStateFlow<T?> = MutableStateFlow(default)
 
   val updates: Flow<T?> get() = this.stateFlow
 
   suspend inline fun <reified V : T> get(): T? = lock.withLock {
     val cached: T? = stateFlow.value
-    if(cached != null) return@withLock cached
+    if (cached != null) return@withLock cached
 
     val decoded: V? = try {
+      val source: BufferedSource = FILE_SYSTEM.source(path).buffer()
       serializer.decodeFromBufferedSource(source)
     } catch (e: Exception) {
       null
@@ -41,7 +39,8 @@ class KStore<T : Any>(
 
   suspend inline fun <reified V : T> set(value: V?) = lock.withLock {
     stateFlow.emit(value)
-    sink.use { sink -> serializer.encodeToBufferedSink(value, sink) }
+    val sink: BufferedSink = FILE_SYSTEM.sink(path).buffer()
+    sink.use { serializer.encodeToBufferedSink(value, it) }
   }
 }
 

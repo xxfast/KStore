@@ -2,26 +2,37 @@
 
 package io.github.xxfast
 
+import app.cash.turbine.test
 import io.github.xxfast.PetType.Cat
+import io.github.xxfast.utils.FILE_SYSTEM
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
+import okio.Path
 import okio.Path.Companion.toPath
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertSame
+import okio.buffer
+import kotlin.test.*
 
 @Serializable
 data class Pet(
-  val name: String,
-  val age: Int,
-  val type: PetType
+    val name: String,
+    val age: Int,
+    val type: PetType
 )
 
 enum class PetType { Cat, Dog }
 
+private val MYLO = Pet(name = "Mylo", age = 1, type = Cat)
+private val OREO = Pet(name = "Oreo", age = 1, type = Cat)
+
 class KStoreTests {
-  private val store: KStore<Pet> = KStore(path = "test.json".toPath())
+  private val path: Path = "test.json".toPath()
+  private val store: KStore<Pet> = KStore(path = path)
+
+  @AfterTest
+  fun setup(){
+    FILE_SYSTEM.delete(path)
+  }
 
   @Test
   fun testReadEmpty() = runTest {
@@ -31,11 +42,21 @@ class KStoreTests {
   }
 
   @Test
-  fun testWriteValue() = runTest {
-    val mylo = Pet(name = "Mylo", age = 1, type = Cat)
-    store.set(mylo)
+  fun testWrite() = runTest {
+    store.set(MYLO)
     val actual: Pet? = store.get<Pet>()
-    val expect: Pet = mylo
+    val expect: Pet = MYLO
     assertEquals(expect, actual)
+  }
+
+  @Test
+  fun testUpdates() = runTest {
+    store.updates.test {
+      assertEquals(null, awaitItem())
+      store.set(MYLO)
+      assertEquals(MYLO, awaitItem())
+      store.set(OREO)
+      assertEquals(OREO, awaitItem())
+    }
   }
 }
