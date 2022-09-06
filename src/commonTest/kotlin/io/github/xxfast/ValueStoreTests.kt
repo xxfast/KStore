@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import okio.Path.Companion.toPath
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 @Serializable
@@ -31,10 +32,10 @@ class ValueStoreTests {
 
   @Test
   fun testWriteValue() = runTest {
-    val mylo = Pet("Mylo", 1, Cat)
+    val mylo = Pet(name = "Mylo", age = 1, type = Cat)
     store.set(mylo)
     val actual: Pet? = store.get<Pet>()
     val expect: Pet = mylo
-    assertSame(expect, actual)
+    assertEquals(expect, actual)
   }
 }
