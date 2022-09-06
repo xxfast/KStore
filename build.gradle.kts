@@ -80,6 +80,9 @@ kotlin {
         implementation("com.squareup.okio:okio:3.2.0")
       }
     }
-    val nativeTest by getting
+
+    val nativeTest by getting {
+      dependsOn(nativeMain)
+    }
   }
 }
