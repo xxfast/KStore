@@ -10,7 +10,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import okio.Path
 import okio.Path.Companion.toPath
-import okio.buffer
 import kotlin.test.*
 
 @Serializable
@@ -27,7 +26,7 @@ private val OREO = Pet(name = "Oreo", age = 1, type = Cat)
 
 class KStoreTests {
   private val path: Path = "test.json".toPath()
-  private val store: KStore<Pet> = KStore(path = path)
+  private val store: KStore<Pet> = store(path = path)
 
   @AfterTest
   fun setup(){
@@ -37,14 +36,14 @@ class KStoreTests {
   @Test
   fun testReadEmpty() = runTest {
     val expect: Pet? = null
-    val actual: Pet? = store.get<Pet>()
+    val actual: Pet? = store.get()
     assertSame(expect, actual)
   }
 
   @Test
   fun testWrite() = runTest {
     store.set(MYLO)
-    val actual: Pet? = store.get<Pet>()
+    val actual: Pet? = store.get()
     val expect: Pet = MYLO
     assertEquals(expect, actual)
   }
@@ -65,7 +64,7 @@ class KStoreTests {
     store.set(MYLO)
     store.clear()
     val expect: Pet? = null
-    val actual: Pet? = store.get<Pet>()
+    val actual: Pet? = store.get()
     assertSame(expect, actual)
   }
 
@@ -74,17 +73,17 @@ class KStoreTests {
     store.set(MYLO)
     FILE_SYSTEM.delete(path)
     val expect: Pet = MYLO
-    val actual: Pet? = store.get<Pet>()
+    val actual: Pet? = store.get()
     assertSame(expect, actual)
   }
 
   @Test
   fun testNonCaching() = runTest {
-    val nonCachingStore = KStore<Pet>(enableCache = false, path = path)
+    val nonCachingStore: KStore<Pet> = store(enableCache = false, path = path)
     nonCachingStore.set(MYLO)
     FILE_SYSTEM.delete(path)
     val expect: Pet? = null
-    val actual: Pet? = nonCachingStore.get<Pet>()
+    val actual: Pet? = nonCachingStore.get()
     assertSame(expect, actual)
   }
 }
