@@ -68,4 +68,23 @@ class KStoreTests {
     val actual: Pet? = store.get<Pet>()
     assertSame(expect, actual)
   }
+
+  @Test
+  fun testCaching() = runTest {
+    store.set(MYLO)
+    FILE_SYSTEM.delete(path)
+    val expect: Pet = MYLO
+    val actual: Pet? = store.get<Pet>()
+    assertSame(expect, actual)
+  }
+
+  @Test
+  fun testNonCaching() = runTest {
+    val nonCachingStore = KStore<Pet>(enableCache = false, path = path)
+    nonCachingStore.set(MYLO)
+    FILE_SYSTEM.delete(path)
+    val expect: Pet? = null
+    val actual: Pet? = nonCachingStore.get<Pet>()
+    assertSame(expect, actual)
+  }
 }

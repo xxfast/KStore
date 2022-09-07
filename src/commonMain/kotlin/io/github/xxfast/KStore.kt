@@ -15,6 +15,7 @@ import okio.*
 class KStore<T : Any>(
     val path: Path,
     default: T? = null,
+    val enableCache: Boolean = true,
     val serializer: Json = Json,
     val lock: Mutex = Mutex(),
 ) {
@@ -23,8 +24,8 @@ class KStore<T : Any>(
   val updates: Flow<T?> get() = this.stateFlow
 
   suspend inline fun <reified V : T> get(): T? = lock.withLock {
-    val cached: T? = stateFlow.value
-    if (cached != null) return@withLock cached
+    if (enableCache && stateFlow.value != null)
+      return@withLock stateFlow.value
 
     val decoded: V? = try {
       val source: BufferedSource = FILE_SYSTEM.source(path).buffer()
