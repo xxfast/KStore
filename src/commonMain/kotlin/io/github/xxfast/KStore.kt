@@ -41,20 +41,25 @@ class KStore<T : @Serializable Any>(
 
   val updates: Flow<T?> get() = this.stateFlow
 
-  suspend fun set(value: T?) = lock.withLock {
+  private suspend fun write(value: T?){
     encoder.invoke(value)
     stateFlow.emit(value)
   }
 
-  suspend fun get(): T? = lock.withLock {
-    if (enableCache && stateFlow.value != null) return@withLock stateFlow.value
-    val decoded: T? = try {
-      decoder.invoke()
-    } catch (e: Exception) {
-      null
-    }
+  private suspend fun read(): T? {
+    if (enableCache && stateFlow.value != null) return stateFlow.value
+    val decoded: T? = try { decoder.invoke() } catch (e: Exception) { null }
     if (stateFlow.value == null && decoded != null) stateFlow.emit(decoded)
-    return@withLock decoded
+    return decoded
+  }
+
+  suspend fun set(value: T?) = lock.withLock { write(value) }
+  suspend fun get(): T? = lock.withLock { read() }
+
+  suspend fun update(operation: (T?) -> T?) = lock.withLock {
+    val previous: T? = read()
+    val updated: T? = operation(previous)
+    write(updated)
   }
 
   suspend fun clear() {

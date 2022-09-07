@@ -139,4 +139,13 @@ class KStoreTests {
     assertEquals(first, OREO)
     assertEquals(second, MYLO)
   }
+
+  @Test
+  fun testUpdate() = runTest {
+    store.set(MYLO)
+    store.update { value -> value?.copy(age = value.age + 1) } // Happy birthday! 🥳
+    val actual: Pet? = store.get()
+    val expect: Pet = MYLO.copy(age = MYLO.age + 1)
+    assertEquals(actual, expect)
+  }
 }
