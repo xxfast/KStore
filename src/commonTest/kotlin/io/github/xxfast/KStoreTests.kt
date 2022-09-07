@@ -15,9 +15,9 @@ import kotlin.test.*
 
 @Serializable
 data class Pet(
-    val name: String,
-    val age: Int,
-    val type: PetType
+  val name: String,
+  val age: Int,
+  val type: PetType
 )
 
 enum class PetType { Cat, Dog }
@@ -30,7 +30,7 @@ class KStoreTests {
   private val store: KStore<Pet> = KStore(path = path)
 
   @AfterTest
-  fun setup(){
+  fun setup() {
     FILE_SYSTEM.delete(path)
   }
 
@@ -38,6 +38,14 @@ class KStoreTests {
   fun testReadEmpty() = runTest {
     val expect: Pet? = null
     val actual: Pet? = store.get<Pet>()
+    assertSame(expect, actual)
+  }
+
+  @Test
+  fun testReadDefault() = runTest {
+    val storeWithDefault: KStore<Pet> = KStore(path = path, default = MYLO)
+    val expect: Pet = MYLO
+    val actual: Pet? = storeWithDefault.get<Pet>()
     assertSame(expect, actual)
   }
 
