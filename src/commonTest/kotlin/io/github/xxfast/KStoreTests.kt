@@ -1,22 +1,28 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSerializationApi::class)
 
 package io.github.xxfast
 
 import app.cash.turbine.test
 import io.github.xxfast.PetType.Cat
 import io.github.xxfast.utils.FILE_SYSTEM
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.okio.decodeFromBufferedSource
+import kotlinx.serialization.json.okio.encodeToBufferedSink
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.buffer
+import okio.use
 import kotlin.test.*
 
 @Serializable
 data class Pet(
-    val name: String,
-    val age: Int,
-    val type: PetType
+  val name: String,
+  val age: Int,
+  val type: PetType
 )
 
 enum class PetType { Cat, Dog }
@@ -29,7 +35,7 @@ class KStoreTests {
   private val store: KStore<Pet> = store(path = path)
 
   @AfterTest
-  fun setup(){
+  fun setup() {
     FILE_SYSTEM.delete(path)
   }
 
@@ -85,5 +91,38 @@ class KStoreTests {
     val expect: Pet? = null
     val actual: Pet? = nonCachingStore.get()
     assertSame(expect, actual)
+  }
+
+  @Test
+  fun testConcurrentWrite() = runTest {
+    store.updates.test {
+      assertEquals(null, awaitItem())
+      val firstWrite: Deferred<Unit> = async { store.set(MYLO) }
+      val secondWrite: Deferred<Unit> = async { delay(10); store.set(OREO) }
+      awaitAll(firstWrite, secondWrite)
+      assertEquals(MYLO, awaitItem())
+      assertEquals(OREO, awaitItem())
+    }
+  }
+
+  @Test
+  fun testConcurrentRead() = runTest {
+    val slowStoreForMylo: KStore<Pet> = KStore(
+      path = path,
+      encoder = { value: Pet? ->
+        if(value == MYLO) delay(100)
+        FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
+      },
+      decoder = { Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer()) }
+    )
+
+    slowStoreForMylo.updates.test {
+      assertEquals(null, awaitItem())
+      val firstWrite: Deferred<Unit> = async { slowStoreForMylo.set(MYLO) }
+      val secondWrite: Deferred<Unit> = async { slowStoreForMylo.set(OREO) }
+      awaitAll(firstWrite, secondWrite)
+      assertEquals(MYLO, awaitItem())
+      assertEquals(OREO, awaitItem())
+    }
   }
 }

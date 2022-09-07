@@ -33,8 +33,8 @@ class KStore<T : @Serializable Any>(
   default: T? = null,
   private val path: Path,
   private val enableCache: Boolean = true,
-  private val encoder: (T?) -> Unit,
-  private val decoder: () -> T?,
+  private val encoder: suspend (T?) -> Unit,
+  private val decoder: suspend () -> T?,
 ) {
   private val lock: Mutex = Mutex()
   private val stateFlow: MutableStateFlow<T?> = MutableStateFlow(default)
@@ -47,8 +47,7 @@ class KStore<T : @Serializable Any>(
   }
 
   suspend fun get(): T? = lock.withLock {
-    if (enableCache && stateFlow.value != null)
-      return@withLock stateFlow.value
+    if (enableCache && stateFlow.value != null) return@withLock stateFlow.value
     val decoded: T? = try {
       decoder.invoke()
     } catch (e: Exception) {
