@@ -16,7 +16,10 @@ import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertSame
 
 @Serializable
 data class Pet(
@@ -43,7 +46,7 @@ class KStoreTests {
   fun testReadEmpty() = runTest {
     val expect: Pet? = null
     val actual: Pet? = store.get()
-    assertSame(expect, actual)
+    assertEquals(expect, actual)
   }
 
   @Test
@@ -71,7 +74,7 @@ class KStoreTests {
     store.clear()
     val expect: Pet? = null
     val actual: Pet? = store.get()
-    assertSame(expect, actual)
+    assertEquals(expect, actual)
   }
 
   @Test
@@ -80,7 +83,7 @@ class KStoreTests {
     FILE_SYSTEM.delete(path)
     val expect: Pet = MYLO
     val actual: Pet? = store.get()
-    assertSame(expect, actual)
+    assertSame(expect, actual) // It must be the same *reference*
   }
 
   @Test
@@ -90,27 +93,15 @@ class KStoreTests {
     FILE_SYSTEM.delete(path)
     val expect: Pet? = null
     val actual: Pet? = nonCachingStore.get()
-    assertSame(expect, actual)
+    assertEquals(expect, actual)
   }
 
   @Test
   fun testConcurrentWrite() = runTest {
-    store.updates.test {
-      assertEquals(null, awaitItem())
-      val firstWrite: Deferred<Unit> = async { store.set(MYLO) }
-      val secondWrite: Deferred<Unit> = async { delay(10); store.set(OREO) }
-      awaitAll(firstWrite, secondWrite)
-      assertEquals(MYLO, awaitItem())
-      assertEquals(OREO, awaitItem())
-    }
-  }
-
-  @Test
-  fun testConcurrentRead() = runTest {
     val slowStoreForMylo: KStore<Pet> = KStore(
       path = path,
       encoder = { value: Pet? ->
-        if(value == MYLO) delay(100)
+        if (value == MYLO) delay(100) // Mylo usually takes his time
         FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
       },
       decoder = { Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer()) }
@@ -124,5 +115,28 @@ class KStoreTests {
       assertEquals(MYLO, awaitItem())
       assertEquals(OREO, awaitItem())
     }
+  }
+
+  @Test
+  fun testConcurrentRead() = runTest {
+    val slowStoreForOreo: KStore<Pet> = KStore(
+      path = path,
+      encoder = { value: Pet? ->
+        FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
+      },
+      decoder = {
+        val value: Pet? = Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer())
+        if (value == OREO) delay(100) // Oreo always stay out the longest
+        return@KStore value
+      }
+    )
+
+    slowStoreForOreo.set(OREO)
+    val first: Pet? = slowStoreForOreo.get()
+    slowStoreForOreo.set(MYLO)
+    val second: Pet? = slowStoreForOreo.get()
+
+    assertEquals(first, OREO)
+    assertEquals(second, MYLO)
   }
 }
