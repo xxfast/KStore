@@ -1,4 +1,4 @@
 rootProject.name = "KStore"
 
-include(":KStore")
+include(":kstore")
 
