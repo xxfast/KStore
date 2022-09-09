@@ -8,12 +8,12 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.okio.decodeFromBufferedSource
-import kotlinx.serialization.json.okio.encodeToBufferedSink
 import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
+import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
+import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T : @Serializable Any> store(
@@ -22,11 +22,8 @@ inline fun <reified T : @Serializable Any> store(
   enableCache: Boolean = true,
   serializer: Json = Json,
 ): KStore<T> {
-  val encoder: (T?) -> Unit = { value: T? ->
-    FILE_SYSTEM.sink(filePath.toPath()).buffer().use { serializer.encodeToBufferedSink(value, it) }
-  }
-
-  val decoder: () -> T? = { serializer.decodeFromBufferedSource(FILE_SYSTEM.source(filePath.toPath()).buffer()) }
+  val encoder: (T?) -> Unit = { value: T? -> FILE_SYSTEM.sink(filePath.toPath()).buffer().use { serializer.encode(value, it) } }
+  val decoder: () -> T? = { serializer.decode(FILE_SYSTEM.source(filePath.toPath()).buffer()) }
   return KStore(filePath.toPath(), default, enableCache, encoder, decoder)
 }
 

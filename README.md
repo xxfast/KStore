@@ -84,7 +84,7 @@ Everything you want in the factory me
 private val store: KStore<Pet> = storeOf(
   path = "whatever.json".toPath(), // path to file, required
   default = null, // optional
-  enableCache = true, , // optional
+  enableCache = true, // optional
   serializer = Json, // optional
 )
 ```

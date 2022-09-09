@@ -99,7 +99,6 @@ kotlin {
     }
 
     val commonTest by getting {
-      dependsOn(commonMain)
       dependencies {
         implementation(kotlin("test"))
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
@@ -108,36 +107,26 @@ kotlin {
     }
 
     val androidMain by getting
-    val androidTest by getting {
-      dependsOn(androidMain)
-    }
+    val androidTest by getting
 
     val desktopMain by getting {
       dependencies {
         implementation("com.squareup.okio:okio:3.2.0")
       }
     }
-    val desktopTest by getting {
-      dependsOn(desktopMain)
-    }
+    val desktopTest by getting
 
     val jsMain by getting {
       dependencies {
         implementation("com.squareup.okio:okio:3.2.0")
       }
     }
-
-    val jsTest by getting {
-      dependsOn(jsMain)
-    }
+    val jsTest by getting
 
     val appleMain by creating {
       dependsOn(commonMain)
     }
-
-    val appleTest by creating {
-      dependsOn(appleMain)
-    }
+    val appleTest by creating
 
     appleTargets.forEach{ target ->
       getByName("${target.targetName}Main") { dependsOn(appleMain) }
@@ -150,9 +139,7 @@ kotlin {
       }
     }
 
-    val linuxTest by getting {
-      dependsOn(linuxMain)
-    }
+    val linuxTest by getting
 
     val windowsMain by getting {
       dependencies {
@@ -160,8 +147,6 @@ kotlin {
       }
     }
 
-    val windowsTest by getting {
-      dependsOn(windowsMain)
-    }
+    val windowsTest by getting
   }
 }
