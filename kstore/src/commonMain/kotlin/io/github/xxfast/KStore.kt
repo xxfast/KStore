@@ -11,27 +11,28 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.okio.decodeFromBufferedSource
 import kotlinx.serialization.json.okio.encodeToBufferedSink
 import okio.Path
+import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
 
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T : @Serializable Any> store(
+  filePath: String,
   default: T? = null,
-  path: Path,
   enableCache: Boolean = true,
   serializer: Json = Json,
 ): KStore<T> {
   val encoder: (T?) -> Unit = { value: T? ->
-    FILE_SYSTEM.sink(path).buffer().use { serializer.encodeToBufferedSink(value, it) }
+    FILE_SYSTEM.sink(filePath.toPath()).buffer().use { serializer.encodeToBufferedSink(value, it) }
   }
 
-  val decoder: () -> T? = { serializer.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer()) }
-  return KStore(default, path, enableCache, encoder, decoder)
+  val decoder: () -> T? = { serializer.decodeFromBufferedSource(FILE_SYSTEM.source(filePath.toPath()).buffer()) }
+  return KStore(filePath.toPath(), default, enableCache, encoder, decoder)
 }
 
 class KStore<T : @Serializable Any>(
-  default: T? = null,
   private val path: Path,
+  default: T? = null,
   private val enableCache: Boolean = true,
   private val encoder: suspend (T?) -> Unit,
   private val decoder: suspend () -> T?,

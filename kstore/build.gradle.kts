@@ -3,6 +3,7 @@ plugins {
   kotlin("plugin.serialization")
   id("com.android.library")
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
+  id("maven-publish")
 }
 
 group = "io.github.xxfast"
@@ -83,15 +84,8 @@ kotlin {
     }
   }
 
-  val hostOs = System.getProperty("os.name")
-  val isMingwX64 = hostOs.startsWith("Windows")
-  val nativeTarget = when {
-    hostOs == "Mac OS X" -> macosX64("native")
-    hostOs == "Linux" -> linuxX64("native")
-    isMingwX64 -> mingwX64("native")
-    else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-  }
-
+  linuxX64("linux")
+  mingwX64("windows")
 
   sourceSets {
     val commonMain by getting {
@@ -150,14 +144,24 @@ kotlin {
       getByName("${target.targetName}Test") { dependsOn(appleTest) }
     }
 
-    val nativeMain by getting {
+    val linuxMain by getting {
       dependencies {
         implementation("com.squareup.okio:okio:3.2.0")
       }
     }
 
-    val nativeTest by getting {
-      dependsOn(nativeMain)
+    val linuxTest by getting {
+      dependsOn(linuxMain)
+    }
+
+    val windowsMain by getting {
+      dependencies {
+        implementation("com.squareup.okio:okio:3.2.0")
+      }
+    }
+
+    val windowsTest by getting {
+      dependsOn(windowsMain)
     }
   }
 }
