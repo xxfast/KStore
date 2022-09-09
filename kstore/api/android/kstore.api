@@ -1,9 +1,10 @@
 public final class io/github/xxfast/KStore {
 	public fun <init> (Lokio/Path;Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lokio/Path;Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun clear (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun delete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getUpdates ()Lkotlinx/coroutines/flow/Flow;
+	public final fun reset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun set (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun update (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }

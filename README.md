@@ -61,12 +61,20 @@ store.update { pet: Pet? ->
 }
 ```
 
-### Clear value
+### Delete/Reset value
 
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
 ```kotlin
-store.clear()
+store.delete()
+```
+
+You can also reset a value back to its default (if set, see [here](#configurations))
+
+<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+
+```kotlin
+store.reset()
 ```
 
 ## Configurations

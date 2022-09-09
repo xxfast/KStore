@@ -32,7 +32,7 @@ inline fun <reified T : @Serializable Any> store(
 
 class KStore<T : @Serializable Any>(
   private val path: Path,
-  default: T? = null,
+  private val default: T? = null,
   private val enableCache: Boolean = true,
   private val encoder: suspend (T?) -> Unit,
   private val decoder: suspend () -> T?,
@@ -63,8 +63,13 @@ class KStore<T : @Serializable Any>(
     write(updated)
   }
 
-  suspend fun clear() {
+  suspend fun delete() {
     FILE_SYSTEM.delete(path)
     stateFlow.emit(null)
+  }
+
+  suspend fun reset(){
+    set(default)
+    stateFlow.emit(default)
   }
 }

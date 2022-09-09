@@ -34,18 +34,26 @@ private val MYLO = Pet(name = "Mylo", age = 1, type = Cat)
 private val OREO = Pet(name = "Oreo", age = 1, type = Cat)
 
 class KStoreTests {
-  private val path: Path = "test.json".toPath()
-  private val store: KStore<Pet> = store(path = path)
+  private val filePath: String = "test.json"
+  private val store: KStore<Pet> = store(filePath = filePath)
 
   @AfterTest
   fun setup() {
-    FILE_SYSTEM.delete(path)
+    FILE_SYSTEM.delete(filePath.toPath())
   }
 
   @Test
   fun testReadEmpty() = runTest {
     val expect: Pet? = null
     val actual: Pet? = store.get()
+    assertEquals(expect, actual)
+  }
+
+  @Test
+  fun testReadDefault() = runTest {
+    val defaultStore: KStore<Pet> = store(filePath = filePath, default = MYLO)
+    val expect: Pet = MYLO
+    val actual: Pet? = defaultStore.get()
     assertEquals(expect, actual)
   }
 
@@ -69,18 +77,28 @@ class KStoreTests {
   }
 
   @Test
-  fun testClear() = runTest {
+  fun testDelete() = runTest {
     store.set(MYLO)
-    store.clear()
+    store.delete()
     val expect: Pet? = null
     val actual: Pet? = store.get()
     assertEquals(expect, actual)
   }
 
   @Test
+  fun testReset() = runTest {
+    val defaultStore: KStore<Pet> = store(filePath = filePath, default = MYLO)
+    defaultStore.set(OREO)
+    defaultStore.reset()
+    val expect: Pet = MYLO
+    val actual: Pet? = defaultStore.get()
+    assertEquals(expect, actual)
+  }
+
+  @Test
   fun testCaching() = runTest {
     store.set(MYLO)
-    FILE_SYSTEM.delete(path)
+    FILE_SYSTEM.delete(filePath.toPath())
     val expect: Pet = MYLO
     val actual: Pet? = store.get()
     assertSame(expect, actual) // It must be the same *reference*
@@ -88,9 +106,9 @@ class KStoreTests {
 
   @Test
   fun testNonCaching() = runTest {
-    val nonCachingStore: KStore<Pet> = store(enableCache = false, path = path)
+    val nonCachingStore: KStore<Pet> = store(enableCache = false, filePath = filePath)
     nonCachingStore.set(MYLO)
-    FILE_SYSTEM.delete(path)
+    FILE_SYSTEM.delete(filePath.toPath())
     val expect: Pet? = null
     val actual: Pet? = nonCachingStore.get()
     assertEquals(expect, actual)
@@ -98,6 +116,7 @@ class KStoreTests {
 
   @Test
   fun testConcurrentWrite() = runTest {
+    val path: Path = filePath.toPath()
     val slowStoreForMylo: KStore<Pet> = KStore(
       path = path,
       encoder = { value: Pet? ->
@@ -119,6 +138,7 @@ class KStoreTests {
 
   @Test
   fun testConcurrentRead() = runTest {
+    val path: Path = filePath.toPath()
     val slowStoreForOreo: KStore<Pet> = KStore(
       path = path,
       encoder = { value: Pet? ->
