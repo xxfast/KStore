@@ -26,6 +26,8 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
+      with:
+        cache-read-only: true
 
     - name: Check for binary compatability
       run: ./gradlew apiCheck
@@ -44,6 +46,8 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
+      with:
+        cache-read-only: true
 
     - name: Gradle Check
       run: ./gradlew check
@@ -62,6 +66,8 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
+      with:
+        cache-read-only: true
 
     - name: Gradle Build
       run: ./gradlew build
