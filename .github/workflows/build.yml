@@ -30,7 +30,7 @@ jobs:
     - name: Check for binary compatability
       run: ./gradlew apiCheck
 
-  build:
+  check:
     needs: lint
     runs-on: ubuntu-latest
 
@@ -45,5 +45,23 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Build and test with Gradle
+    - name: Gradle Check
+      run: ./gradlew check
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+
+    - name: Gradle Build
       run: ./gradlew build
