@@ -47,11 +47,7 @@ kotlin {
   }
 
   js(IR) {
-    browser {
-      commonWebpackConfig {
-        cssSupport.enabled = true
-      }
-    }
+    nodejs()
   }
 
   val macosX64 = macosX64()
@@ -118,7 +114,7 @@ kotlin {
 
     val jsMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio:3.2.0")
+        implementation("com.squareup.okio:okio-nodefilesystem:3.2.0")
       }
     }
     val jsTest by getting
