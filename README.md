@@ -31,7 +31,7 @@ val mylo = Pet(name = "Mylo", age = 1)
 ### Crate a store
 ```kotlin
 
-val storeOf: KStore<Pet> = store("whatever.json".toPath())
+val storeOf: KStore<Pet> = store("whatever.json")
 ```
 full confuguration [here](#configurations)
 
@@ -82,7 +82,7 @@ store.reset()
 Everything you want in the factory me
 ```kotlin
 private val store: KStore<Pet> = storeOf(
-  path = "whatever.json".toPath(), // path to file, required
+  path = "whatever.json", // path to file, required
   default = null, // optional
   enableCache = true, // optional
   serializer = Json, // optional
