@@ -52,6 +52,36 @@ kotlin {
     }
   }
 
+  val macosX64 = macosX64()
+  val macosArm64 = macosArm64()
+  val iosArm64 = iosArm64()
+  val iosX64 = iosX64()
+  val iosSimulatorArm64 = iosSimulatorArm64()
+  val watchosArm32 = watchosArm32()
+  val watchosArm64 = watchosArm64()
+  val watchosX64 = watchosX64()
+  val watchosSimulatorArm64 = watchosSimulatorArm64()
+  val tvosArm64 = tvosArm64()
+  val tvosX64 = tvosX64()
+  val tvosSimulatorArm64 = tvosSimulatorArm64()
+  val appleTargets = listOf(
+    macosX64, macosArm64,
+    iosArm64, iosX64, iosSimulatorArm64,
+    watchosArm32, watchosArm64, watchosX64,
+    watchosSimulatorArm64,
+    tvosArm64, tvosX64, tvosSimulatorArm64,
+  )
+
+  appleTargets.forEach { target ->
+    with(target) {
+      binaries {
+        framework {
+          baseName = "KStore"
+        }
+      }
+    }
+  }
+
   val hostOs = System.getProperty("os.name")
   val isMingwX64 = hostOs.startsWith("Windows")
   val nativeTarget = when {
@@ -101,8 +131,22 @@ kotlin {
         implementation("com.squareup.okio:okio:3.2.0")
       }
     }
+
     val jsTest by getting {
       dependsOn(jsMain)
+    }
+
+    val appleMain by creating {
+      dependsOn(commonMain)
+    }
+
+    val appleTest by creating {
+      dependsOn(appleMain)
+    }
+
+    appleTargets.forEach{ target ->
+      getByName("${target.targetName}Main") { dependsOn(appleMain) }
+      getByName("${target.targetName}Test") { dependsOn(appleTest) }
     }
 
     val nativeMain by getting {
