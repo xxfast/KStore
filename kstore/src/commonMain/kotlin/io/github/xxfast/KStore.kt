@@ -3,6 +3,7 @@ package io.github.xxfast
 import io.github.xxfast.utils.FILE_SYSTEM
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -38,6 +39,7 @@ class KStore<T : @Serializable Any>(
   private val stateFlow: MutableStateFlow<T?> = MutableStateFlow(default)
 
   val updates: Flow<T?> get() = this.stateFlow
+    .onStart { read() }
 
   private suspend fun write(value: T?){
     encoder.invoke(value)

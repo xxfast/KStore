@@ -77,6 +77,15 @@ class KStoreTests {
   }
 
   @Test
+  fun testUpdatesWithPreviouslyStoredValue() = runTest {
+    FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
+    val newStore: KStore<Pet> = store(filePath = filePath)
+    newStore.updates.test {
+      assertEquals(OREO, awaitItem())
+    }
+  }
+
+  @Test
   fun testDelete() = runTest {
     store.set(MYLO)
     store.delete()
