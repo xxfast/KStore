@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  build:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
@@ -22,13 +22,13 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-    - name: Setup Gradle
+    - name: Setup gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Gradle check api
+    - name: Check api
       run: ./gradlew check
 
-    - name: Gradle test all targets
+    - name: Test all targets
       run: ./gradlew testAll
 
     - name: Write secrets to local.properties
@@ -40,6 +40,6 @@ jobs:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
-    - name: Gradle publish to sonatype
+    - name: Publish to sonatype
       if: ${{ github.event_name != 'pull_request' }}
       run: ./gradlew publishAllPublicationsToMavenRepository

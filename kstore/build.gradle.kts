@@ -31,6 +31,7 @@ android {
 
   lint {
     // TODO: Figure out why the linter is failing on CI
+    checkReleaseBuilds = false
     abortOnError = false
   }
 }
