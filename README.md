@@ -20,17 +20,33 @@ A tiny Kotlin multiplatform library that assists in saving and restoring objects
   - 💾 In-memory caching; read once from disk and reuse
   - 🕺 Multiplatform!
 
+## Adding to your project
+
+KStore is not _yet_ published to Maven Central, but is available on sonatype snapshot repositories.
+```kotlin
+repositories {
+  maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+}
+```
+
+Include the dependency in `commonMain`
+```kotlin
+sourceSets {
+  val commonMain by getting {
+    implementation("io.github.xxfast:kstore:0.1-SNAPSHOT")
+  }
+}
+```
+
 ## Usage
-Say you have a model
+Given that you have a `@Serializable` model
 ```kotlin
 @Serializable data class Pet(val name: String, val age: Int) // Any serializable
-
 val mylo = Pet(name = "Mylo", age = 1)
 ```
 
 ### Crate a store
 ```kotlin
-
 val storeOf: KStore<Pet> = store("path/to/file")
 ```
 For full configuration and platform instructions, see [here](#configurations)
@@ -106,7 +122,7 @@ actual fun filePathTo(fileName: String): String = "${context.filesDir.path}/$fil
 actual fun filePathTo(fileName: String): String = "${NSHomeDirectory()}/$fileName"
 ```
 
-### On Desktop
+#### On Desktop
 This depends on where you want to save your files, but generally you should save your files in a user data directory.
 Here i'm using [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
 ```kotlin
@@ -117,10 +133,10 @@ actual fun filePathTo(fileName: String): String {
 }
 ```
 
-### On JS Browser
+#### On JS Browser
 
 TODO
 
-### On NodeJS
+#### On NodeJS
 
 TODO

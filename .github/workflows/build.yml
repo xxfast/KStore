@@ -13,8 +13,7 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
-
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: set up JDK 11
@@ -26,5 +25,21 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Gradle Check
+    - name: Gradle check api
       run: ./gradlew check
+
+    - name: Gradle test all targets
+      run: ./gradlew testAll
+
+    - name: Write secrets to local.properties
+      if: ${{ github.event_name != 'pull_request' }}
+      run: |
+        echo sonatypeUsername="${SONATYPE_USERNAME}" >> "local.properties"
+        echo sonatypePassword="${SONATYPE_PASSWORD}" >> "local.properties"
+      env:
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+
+    - name: Gradle publish to sonatype
+      if: ${{ github.event_name != 'pull_request' }}
+      run: ./gradlew publishAllPublicationsToMavenRepository
