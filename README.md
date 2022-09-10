@@ -31,9 +31,9 @@ val mylo = Pet(name = "Mylo", age = 1)
 ### Crate a store
 ```kotlin
 
-val storeOf: KStore<Pet> = store("whatever.json")
+val storeOf: KStore<Pet> = store("path/to/file")
 ```
-full confuguration [here](#configurations)
+For full configuration and platform instructions, see [here](#configurations)
 
 ### Set value  
 
@@ -79,12 +79,48 @@ store.reset()
 
 ## Configurations
 
-Everything you want in the factory me
+Everything you want is in the factory method
 ```kotlin
 private val store: KStore<Pet> = storeOf(
-  path = "whatever.json", // path to file, required
+  path = filePathTo("file.json"), // required
   default = null, // optional
   enableCache = true, // optional
   serializer = Json, // optional
 )
 ```
+
+### Platform configurations
+
+Getting a path to a file is different for each platform and you will need to define how this works for each platform 
+```kotlin
+expect fun filePathTo(fileName: String): String
+```
+
+#### On Android
+```kotlin
+actual fun filePathTo(fileName: String): String = "${context.filesDir.path}/$fileName"
+```
+
+#### On iOS & other Apple platforms
+```kotlin
+actual fun filePathTo(fileName: String): String = "${NSHomeDirectory()}/$fileName"
+```
+
+### On Desktop
+This depends on where you want to save your files, but generally you should save your files in a user data directory.
+Here i'm using [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
+```kotlin
+actual fun filePathTo(fileName: String): String {
+  // implementation("net.harawata:appdirs:1.2.1")
+  val appDir: String = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
+  return "$appDir/$fileName"
+}
+```
+
+### On JS Browser
+
+TODO
+
+### On NodeJS
+
+TODO
