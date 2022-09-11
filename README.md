@@ -13,7 +13,8 @@
 ![badge-js](http://img.shields.io/badge/platform-js-F8DB5D.svg?style=flat)
 ![badge-nodejs](https://img.shields.io/badge/platform-nodejs-F8DB5D.svg?style=flat)
 
-A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio
+A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio.
+Inspired by [RxStore](https://github.com/Gridstone/RxStore)
 
 ## Features
   - 🔒 Read-write locks; with a mutex FIFO lock
@@ -51,20 +52,27 @@ val storeOf: KStore<Pet> = store("path/to/file")
 ```
 For full configuration and platform instructions, see [here](#configurations)
 
+### Get value
+
+Get a value once
+
+<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+
+```kotlin
+val mylo: Pet? = store.get()
+```
+
+Or observe for changes
+```kotlin
+val pets: Flow<Pet?> = store.updates
+```
+
 ### Set value  
 
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
 ```kotlin
 store.set(mylo)
-```
-
-### Get value
-
-<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
-
-```kotlin
-val mylo: Pet? = store.get()
 ```
 
 ### Update a value
@@ -76,6 +84,8 @@ store.update { pet: Pet? ->
   pet?.copy(age = pet.age + 1)
 }
 ```
+
+Note: this maintains a single mutex lock transaction, unlike `get()` and a subsequent `set()`
 
 ### Delete/Reset value
 
