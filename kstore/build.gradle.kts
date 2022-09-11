@@ -31,7 +31,6 @@ android {
 
   lint {
     // TODO: Figure out why the linter is failing on CI
-    checkReleaseBuilds = false
     abortOnError = false
   }
 }
@@ -111,7 +110,14 @@ kotlin {
     }
 
     val androidMain by getting
-    val androidTest by getting
+    val androidTest by getting {
+      dependencies {
+        implementation("junit:junit:4.13.2")
+        implementation( "org.junit.jupiter:junit-jupiter-api:5.8.1")
+        implementation( "org.junit.jupiter:junit-jupiter-engine:5.8.1")
+        implementation( "androidx.test.ext:junit:1.1.3")
+      }
+    }
 
     val desktopMain by getting {
       dependencies {
