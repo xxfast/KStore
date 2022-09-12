@@ -17,7 +17,7 @@ import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
 @OptIn(ExperimentalSerializationApi::class)
-inline fun <reified T : @Serializable Any> store(
+inline fun <reified T : @Serializable Any> storeOf(
   filePath: String,
   default: T? = null,
   enableCache: Boolean = true,

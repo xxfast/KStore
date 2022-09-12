@@ -48,7 +48,7 @@ val mylo = Pet(name = "Mylo", age = 1)
 
 ### Crate a store
 ```kotlin
-val storeOf: KStore<Pet> = store("path/to/file")
+val store: KStore<Pet> = storeOf("path/to/file")
 ```
 For full configuration and platform instructions, see [here](#configurations)
 

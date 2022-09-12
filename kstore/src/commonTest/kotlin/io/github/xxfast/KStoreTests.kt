@@ -35,7 +35,7 @@ private val OREO = Pet(name = "Oreo", age = 1, type = Cat)
 
 class KStoreTests {
   private val filePath: String = "test.json"
-  private val store: KStore<Pet> = store(filePath = filePath)
+  private val store: KStore<Pet> = storeOf(filePath = filePath)
 
   @AfterTest
   fun setup() {
@@ -51,7 +51,7 @@ class KStoreTests {
 
   @Test
   fun testReadDefault() = runTest {
-    val defaultStore: KStore<Pet> = store(filePath = filePath, default = MYLO)
+    val defaultStore: KStore<Pet> = storeOf(filePath = filePath, default = MYLO)
     val expect: Pet = MYLO
     val actual: Pet? = defaultStore.get()
     assertEquals(expect, actual)
@@ -79,7 +79,7 @@ class KStoreTests {
   @Test
   fun testUpdatesWithPreviouslyStoredValue() = runTest {
     FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
-    val newStore: KStore<Pet> = store(filePath = filePath)
+    val newStore: KStore<Pet> = storeOf(filePath = filePath)
     newStore.updates.test {
       assertEquals(OREO, awaitItem())
     }
@@ -96,7 +96,7 @@ class KStoreTests {
 
   @Test
   fun testReset() = runTest {
-    val defaultStore: KStore<Pet> = store(filePath = filePath, default = MYLO)
+    val defaultStore: KStore<Pet> = storeOf(filePath = filePath, default = MYLO)
     defaultStore.set(OREO)
     defaultStore.reset()
     val expect: Pet = MYLO
@@ -115,7 +115,7 @@ class KStoreTests {
 
   @Test
   fun testNonCaching() = runTest {
-    val nonCachingStore: KStore<Pet> = store(enableCache = false, filePath = filePath)
+    val nonCachingStore: KStore<Pet> = storeOf(enableCache = false, filePath = filePath)
     nonCachingStore.set(MYLO)
     FILE_SYSTEM.delete(filePath.toPath())
     val expect: Pet? = null
