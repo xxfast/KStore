@@ -133,6 +133,7 @@ jobs:
         run: ./gradlew desktopTest
 
   release:
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     needs:
       - build-android
@@ -163,5 +164,4 @@ jobs:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
     - name: Publish to sonatype
-      if: ${{ github.event_name != 'pull_request' }}
       run: ./gradlew publishAllPublicationsToMavenRepository
