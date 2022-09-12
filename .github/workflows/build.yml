@@ -63,7 +63,6 @@ jobs:
         run: ./gradlew iosX64Test iosSimulatorArm64Test macosX64Test macosArm64Test tvosX64Test tvosSimulatorArm64Test watchosX64Test watchosSimulatorArm64Test
 
   build-windows:
-    continue-on-error: true # https://github.com/square/okio/issues/951
     runs-on: windows-latest
     needs: check
     steps:
@@ -78,6 +77,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Test windows targets
+        continue-on-error: true # https://github.com/square/okio/issues/951
         run: ./gradlew windowsTest
 
   build-linux:
