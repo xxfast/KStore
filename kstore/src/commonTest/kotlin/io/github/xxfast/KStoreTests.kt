@@ -3,7 +3,6 @@
 package io.github.xxfast
 
 import app.cash.turbine.test
-import io.github.xxfast.PetType.Cat
 import io.github.xxfast.utils.FILE_SYSTEM
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
@@ -22,20 +21,27 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 @Serializable
-data class Pet(
-  val name: String,
-  val age: Int,
-  val type: PetType
-)
+sealed class Pet {
+  abstract val name: String
+  abstract val age: Int
+}
 
-enum class PetType { Cat, Dog }
+@Serializable
+data class Cat(
+  override val name: String,
+  override val age: Int,
+  val lives: Int = 9,
+) : Pet()
 
-private val MYLO = Pet(name = "Mylo", age = 1, type = Cat)
-private val OREO = Pet(name = "Oreo", age = 1, type = Cat)
+@Serializable
+data class Kennel<T : Pet>(val pet: T)
+
+private val MYLO = Cat(name = "Mylo", age = 1)
+private val OREO = Cat(name = "Oreo", age = 1)
 
 class KStoreTests {
   private val filePath: String = "test.json"
-  private val store: KStore<Pet> = storeOf(filePath = filePath)
+  private val store: KStore<Cat> = storeOf(filePath = filePath)
 
   @AfterTest
   fun setup() {
@@ -58,10 +64,35 @@ class KStoreTests {
   }
 
   @Test
+  fun testReadGeneric() = runTest {
+    val genericStore: KStore<Kennel<Cat>> = storeOf(filePath = filePath)
+    val expect: Kennel<Cat>? = null
+    val actual: Kennel<Cat>? = genericStore.get()
+    assertEquals(expect, actual)
+  }
+
+  @Test
+  fun testReadGenericDefault() = runTest {
+    val genericStore: KStore<Kennel<Cat>> = storeOf(filePath = filePath, Kennel(MYLO))
+    val expect: Kennel<Cat> = Kennel(MYLO)
+    val actual: Kennel<Cat>? = genericStore.get()
+    assertEquals(expect, actual)
+  }
+
+  @Test
   fun testWrite() = runTest {
     store.set(MYLO)
-    val actual: Pet? = store.get()
     val expect: Pet = MYLO
+    val actual: Pet? = store.get()
+    assertEquals(expect, actual)
+  }
+
+  @Test
+  fun testWriteGeneric() = runTest {
+    val genericStore: KStore<Kennel<Cat>> = storeOf(filePath = filePath)
+    genericStore.set(Kennel(MYLO))
+    val expect: Kennel<Cat> = Kennel(MYLO)
+    val actual: Kennel<Cat>? = genericStore.get()
     assertEquals(expect, actual)
   }
 
@@ -79,7 +110,7 @@ class KStoreTests {
   @Test
   fun testUpdatesWithPreviouslyStoredValue() = runTest {
     FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
-    val newStore: KStore<Pet> = storeOf(filePath = filePath)
+    val newStore: KStore<Cat> = storeOf(filePath = filePath)
     newStore.updates.test {
       assertEquals(OREO, awaitItem())
     }
