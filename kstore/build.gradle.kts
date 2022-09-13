@@ -6,6 +6,7 @@ plugins {
   id("com.android.library")
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
   id("maven-publish")
+  id("org.jetbrains.kotlinx.kover") version "0.6.0"
 }
 
 group = "io.github.xxfast"
@@ -113,9 +114,9 @@ kotlin {
     val androidTest by getting {
       dependencies {
         implementation("junit:junit:4.13.2")
-        implementation( "org.junit.jupiter:junit-jupiter-api:5.8.1")
-        implementation( "org.junit.jupiter:junit-jupiter-engine:5.8.1")
-        implementation( "androidx.test.ext:junit:1.1.3")
+        implementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+        implementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+        implementation("androidx.test.ext:junit:1.1.3")
       }
     }
 
@@ -138,7 +139,7 @@ kotlin {
     }
     val appleTest by creating
 
-    appleTargets.forEach{ target ->
+    appleTargets.forEach { target ->
       getByName("${target.targetName}Main") { dependsOn(appleMain) }
       getByName("${target.targetName}Test") { dependsOn(appleTest) }
     }

@@ -28,6 +28,20 @@ jobs:
       - name: Check api
         run: ./gradlew apiCheck
 
+      - name: Generate kover coverage report
+        run: ./gradlew koverXmlReport
+
+      - name: Add coverage report to PR
+        id: kover
+        uses: mi-kas/kover-report@v1
+        with:
+          path: ${{ github.workspace }}/kstore/build/reports/kover/xml/report.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Code Coverage
+          update-comment: true
+          min-coverage-overall: 80
+          min-coverage-changed-files: 80
+
   build-android:
     runs-on: ubuntu-latest
     needs: check
