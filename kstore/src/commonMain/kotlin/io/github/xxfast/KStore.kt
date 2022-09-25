@@ -39,17 +39,17 @@ class KStore<T : @Serializable Any>(
   private val stateFlow: MutableStateFlow<T?> = MutableStateFlow(default)
 
   val updates: Flow<T?> get() = this.stateFlow
-    .onStart { read() }
+    .onStart { read(fromCache = false) } // updates will always start with a fresh read
 
   private suspend fun write(value: T?){
     encoder.invoke(value)
     stateFlow.emit(value)
   }
 
-  private suspend fun read(): T? {
-    if (enableCache && stateFlow.value != null) return stateFlow.value
+  private suspend fun read(fromCache: Boolean = enableCache): T? {
+    if (fromCache && stateFlow.value != null) return stateFlow.value
     val decoded: T? = try { decoder.invoke() } catch (e: Exception) { null }
-    if (stateFlow.value == null && decoded != null) stateFlow.emit(decoded)
+    stateFlow.emit(decoded)
     return decoded
   }
 
