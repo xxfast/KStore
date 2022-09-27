@@ -49,8 +49,9 @@ class KStore<T : @Serializable Any>(
   private suspend fun read(fromCache: Boolean): T? {
     if (fromCache && stateFlow.value != null) return stateFlow.value
     val decoded: T? = try { decoder.invoke() } catch (e: Exception) { null }
-    stateFlow.emit(decoded)
-    return decoded
+    val emitted: T? = decoded ?: default
+    stateFlow.emit(emitted)
+    return emitted
   }
 
   suspend fun set(value: T?) = lock.withLock { write(value) }

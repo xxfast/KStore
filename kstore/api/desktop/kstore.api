@@ -1,3 +1,13 @@
+public final class io/github/xxfast/kstore/KListStoreKt {
+	public static final fun get (Lio/github/xxfast/kstore/KStore;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getOrEmpty (Lio/github/xxfast/kstore/KStore;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getUpdatesOrEmpty (Lio/github/xxfast/kstore/KStore;)Lkotlinx/coroutines/flow/Flow;
+	public static final fun map (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun mapIndexed (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun minus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun plus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class io/github/xxfast/kstore/KStore {
 	public fun <init> (Lokio/Path;Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lokio/Path;Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
