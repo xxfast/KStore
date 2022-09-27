@@ -36,8 +36,8 @@ data class Cat(
 @Serializable
 data class Kennel<T : Pet>(val pet: T)
 
-private val MYLO = Cat(name = "Mylo", age = 1)
-private val OREO = Cat(name = "Oreo", age = 1)
+internal val MYLO = Cat(name = "Mylo", age = 1)
+internal  val OREO = Cat(name = "Oreo", age = 1)
 
 class KStoreTests {
   private val filePath: String = "test.json"
