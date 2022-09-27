@@ -1,4 +1,4 @@
-package io.github.xxfast.utils
+package io.github.xxfast.kstore.utils
 
 import okio.FileSystem
 import okio.NodeJsFileSystem

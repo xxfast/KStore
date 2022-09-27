@@ -1,6 +1,6 @@
-package io.github.xxfast
+package io.github.xxfast.kstore
 
-import io.github.xxfast.utils.FILE_SYSTEM
+import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onStart

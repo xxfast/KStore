@@ -1,9 +1,9 @@
 @file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSerializationApi::class)
 
-package io.github.xxfast
+package io.github.xxfast.kstore
 
 import app.cash.turbine.test
-import io.github.xxfast.utils.FILE_SYSTEM
+import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -119,6 +119,7 @@ class KStoreTests {
   @Test
   fun testUpdatesWithPreviouslyStoredValueWithDefault() = runTest {
     FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
+    // Mylo will never be sent 😿 because there is already a stored value
     val newStore: KStore<Cat> = storeOf(filePath = filePath, default = MYLO)
     newStore.updates.test {
       assertEquals(OREO, awaitItem())
