@@ -46,7 +46,7 @@ Given that you have a `@Serializable` model
 val mylo = Pet(name = "Mylo", age = 1)
 ```
 
-### Crate a store
+### Create a store
 ```kotlin
 val store: KStore<Pet> = storeOf("path/to/file")
 ```
@@ -101,6 +101,47 @@ You can also reset a value back to its default (if set, see [here](#configuratio
 
 ```kotlin
 store.reset()
+```
+
+## Lists
+
+KStore provides you with some convenient extensions to manage stores that contain lists. 
+
+### Create a list store
+```kotlin
+val listStore: KStore<List<Pet>> = listStoreOf("path/to/file") // same as [storeOf], but defaults to empty list
+```
+
+### Get values
+
+<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+
+```kotlin
+val pets: List<Cat> = store.getOrEmpty()
+val pet: Cat = store.get(0)
+```
+
+or observe values
+
+```kotlin
+val pets: Flow<List<Cat>> = store.updatesOrEmpty
+```
+
+### Add or remove elements
+
+<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+
+```kotlin
+store.plus(cat)
+store.minus(cat)
+```
+
+### Map elements
+<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+
+```kotlin
+store.map { cat -> cat.copy(cat.age = cat.age + 1) }
+store.mapIndexed { index, cat -> cat.copy(cat.age = index) }
 ```
 
 ## Configurations
