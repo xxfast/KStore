@@ -6,6 +6,7 @@ plugins {
   id("com.android.library")
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
   id("maven-publish")
+  id("signing")
   id("org.jetbrains.kotlinx.kover") version "0.6.0"
 }
 
@@ -177,4 +178,49 @@ publishing {
       }
     }
   }
+
+  // TODO: Use dokka to generate javadoc instead of empty ones
+  val javadocJar = tasks.register("javadocJar", Jar::class.java) {
+    archiveClassifier.set("javadoc")
+  }
+
+  publications {
+    withType<MavenPublication> {
+      artifact(javadocJar)
+
+      pom {
+        name.set("KStore")
+        description.set("A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio")
+        licenses {
+          license {
+            name.set("Apache-2.0")
+            url.set("https://opensource.org/licenses/Apache-2.0")
+          }
+        }
+        url.set("https://xxfast.github.io/KStore/")
+        issueManagement {
+          system.set("Github")
+          url.set("https://github.com/xxfast/KStore/issues")
+        }
+        scm {
+          connection.set("https://github.com/xxfast/KStore.git")
+          url.set("https://github.com/xxfast/KStore")
+        }
+        developers {
+          developer {
+            name.set("Isuru Rajapakse")
+            email.set("isurukusumal36@gmail.com")
+          }
+        }
+      }
+    }
+  }
+}
+
+signing {
+  useInMemoryPgpKeys(
+    gradleLocalProperties(rootDir).getProperty("gpgKeySecret"),
+    gradleLocalProperties(rootDir).getProperty("gpgKeyPassword"),
+  )
+  sign(publishing.publications)
 }

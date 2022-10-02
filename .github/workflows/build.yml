@@ -94,9 +94,13 @@ jobs:
         run: |
           echo sonatypeUsername="${SONATYPE_USERNAME}" >> "local.properties"
           echo sonatypePassword="${SONATYPE_PASSWORD}" >> "local.properties"
+          echo gpgKeyPassword="${GPG_KEY_PASSWORD}" >> "local.properties"
+          echo gpgKeySecret="${GPG_KEY_SECRET}" >> "local.properties"
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GPG_KEY_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
+          GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
 
       - name: Publish to sonatype
         run: ./gradlew publishAllPublicationsToMavenRepository
