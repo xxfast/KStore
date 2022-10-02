@@ -1,6 +1,7 @@
 # <img src="https://kotlinlang.org/assets/images/favicon.svg" height="23"/> Store
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.7.10-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
 ![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
@@ -23,18 +24,18 @@ Inspired by [RxStore](https://github.com/Gridstone/RxStore)
 
 ## Adding to your project
 
-KStore is not _yet_ published to Maven Central, but is available on sonatype snapshot repositories.
+KStore is published on Maven Central
 ```kotlin
-repositories {
-  maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+repositories { 
+  mavenCentral()
 }
 ```
 
-Include the dependency in `commonMain`
+Include the dependency in `commonMain`. Latest version [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 ```kotlin
 sourceSets {
   val commonMain by getting {
-    implementation("io.github.xxfast:kstore:0.1-SNAPSHOT")
+    implementation("io.github.xxfast:kstore:<version>")
   }
 }
 ```
@@ -191,3 +192,19 @@ TODO
 #### On NodeJS
 
 TODO
+
+## Licence
+
+    Copyright 2021 Isuru Rajapakse
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
