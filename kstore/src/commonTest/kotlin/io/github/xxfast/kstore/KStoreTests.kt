@@ -40,7 +40,7 @@ internal val MYLO = Cat(name = "Mylo", age = 1)
 internal  val OREO = Cat(name = "Oreo", age = 1)
 
 class KStoreTests {
-  private val filePath: String = "test.json"
+  private val filePath: String = "build/test.json"
   private val store: KStore<Cat> = storeOf(filePath = filePath)
 
   @AfterTest

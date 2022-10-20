@@ -12,7 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class KListStoreTests {
-  private val filePath: String = "test_lists.json"
+  private val filePath: String = "build/test_lists.json"
   private val store: KStore<List<Cat>> = listStoreOf(filePath = filePath)
 
   @AfterTest
