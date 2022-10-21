@@ -80,6 +80,16 @@ class KStoreTests {
   }
 
   @Test
+  fun testReadPreviouslyStoredWithDefault() = runTest {
+    FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
+    // Mylo will never be sent 😿 because there is already a stored value
+    val defaultStore: KStore<Cat> = storeOf(filePath = filePath, default = MYLO)
+    val expect: Pet = OREO
+    val actual: Pet? = defaultStore.get()
+    assertEquals(expect, actual)
+  }
+
+  @Test
   fun testWrite() = runTest {
     store.set(MYLO)
     val expect: Pet = MYLO

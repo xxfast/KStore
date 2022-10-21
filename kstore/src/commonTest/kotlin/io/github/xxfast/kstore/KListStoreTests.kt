@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSerializationApi::class)
 
 package io.github.xxfast.kstore
 
@@ -6,7 +6,12 @@ import app.cash.turbine.test
 import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.okio.encodeToBufferedSink
 import okio.Path.Companion.toPath
+import okio.buffer
+import okio.use
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,6 +45,16 @@ class KListStoreTests {
     val defaultStore: KStore<List<Cat>> = listStoreOf(filePath = filePath, default = listOf(MYLO))
     val expect: List<Cat> = listOf(MYLO)
     val actual: List<Cat> = defaultStore.getOrEmpty()
+    assertEquals(expect, actual)
+  }
+
+  @Test
+  fun testReadPreviouslyStoredList() = runTest {
+    FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(listOf(OREO) , it) }
+    // Mylo will never be sent 😿 because there is already a stored value
+    val newStore: KStore<List<Cat>> = listStoreOf(filePath = filePath, default = listOf(MYLO))
+    val expect: List<Cat> = listOf(OREO)
+    val actual: List<Cat> = newStore.getOrEmpty()
     assertEquals(expect, actual)
   }
 

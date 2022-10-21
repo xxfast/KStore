@@ -47,7 +47,7 @@ class KStore<T : @Serializable Any>(
   }
 
   private suspend fun read(fromCache: Boolean): T? {
-    if (fromCache && stateFlow.value != null) return stateFlow.value
+    if (fromCache && stateFlow.value != default) return stateFlow.value
     val decoded: T? = try { decoder.invoke() } catch (e: Exception) { null }
     val emitted: T? = decoded ?: default
     stateFlow.emit(emitted)
