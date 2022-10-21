@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.xxfast"
-version = "0.2-SNAPSHOT"
+version = "0.1.1"
 
 repositories {
   mavenCentral()
