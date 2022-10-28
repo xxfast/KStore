@@ -1,6 +1,6 @@
 # <img src="https://kotlinlang.org/assets/images/favicon.svg" height="23"/> Store
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.7.10-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.7.20-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
@@ -20,6 +20,7 @@ Inspired by [RxStore](https://github.com/Gridstone/RxStore)
 ## Features
   - 🔒 Read-write locks; with a mutex FIFO lock
   - 💾 In-memory caching; read once from disk and reuse
+  - 📬 Default values; no file? no problem!
   - 🕺 Multiplatform!
 
 ## Adding to your project
