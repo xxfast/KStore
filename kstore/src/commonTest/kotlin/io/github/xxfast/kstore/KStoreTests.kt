@@ -34,10 +34,18 @@ data class Cat(
 ) : Pet()
 
 @Serializable
+data class Dog(
+  override val name: String,
+  override val age: Int,
+  val isGoodBoy: Boolean,
+): Pet()
+
+@Serializable
 data class Kennel<T : Pet>(val pet: T)
 
 internal val MYLO = Cat(name = "Mylo", age = 1)
-internal  val OREO = Cat(name = "Oreo", age = 1)
+internal val OREO = Cat(name = "Oreo", age = 1)
+internal val KATY = Dog(name = "Katy", age = 12, isGoodBoy = true)
 
 class KStoreTests {
   private val filePath: String = "test.json"
@@ -227,5 +235,14 @@ class KStoreTests {
     val actual: Pet? = store.get()
     val expect: Pet = MYLO.copy(age = MYLO.age + 1)
     assertEquals(actual, expect)
+  }
+
+  @Test
+  fun testMalformedFile() = runTest {
+    FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(KATY, it) }
+    val nonCachingStore: KStore<Cat> = storeOf(enableCache = false, filePath = filePath)
+    val actual: Pet? = nonCachingStore.get()
+    val expect: Pet? = null
+    assertEquals(expect, actual)
   }
 }
