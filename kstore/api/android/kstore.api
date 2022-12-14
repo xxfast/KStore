@@ -26,8 +26,8 @@ public final class io/github/xxfast/kstore/KListStoreKt {
 }
 
 public final class io/github/xxfast/kstore/KStore {
-	public fun <init> (Lokio/Path;Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lokio/Path;Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun delete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getUpdates ()Lkotlinx/coroutines/flow/Flow;
