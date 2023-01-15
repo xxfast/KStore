@@ -4,10 +4,10 @@ plugins {
   kotlin("multiplatform")
   kotlin("plugin.serialization")
   id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.12.1"
   id("maven-publish")
   id("signing")
-  id("org.jetbrains.kotlinx.kover") version "0.6.0"
+  id("org.jetbrains.kotlinx.kover") version "0.6.1"
 }
 
 group = "io.github.xxfast"
@@ -95,7 +95,7 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio:3.2.0")
+        implementation("com.squareup.okio:okio:3.3.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.4.1")
@@ -117,20 +117,20 @@ kotlin {
         implementation("junit:junit:4.13.2")
         implementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
         implementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
-        implementation("androidx.test.ext:junit:1.1.3")
+        implementation("androidx.test.ext:junit:1.1.5")
       }
     }
 
     val desktopMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio:3.2.0")
+        implementation("com.squareup.okio:okio:3.3.0")
       }
     }
     val desktopTest by getting
 
     val jsMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio-nodefilesystem:3.2.0")
+        implementation("com.squareup.okio:okio-nodefilesystem:3.3.0")
       }
     }
     val jsTest by getting
@@ -147,7 +147,7 @@ kotlin {
 
     val linuxMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio:3.2.0")
+        implementation("com.squareup.okio:okio:3.3.0")
       }
     }
 
@@ -155,7 +155,7 @@ kotlin {
 
     val windowsMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio:3.2.0")
+        implementation("com.squareup.okio:okio:3.3.0")
       }
     }
 
