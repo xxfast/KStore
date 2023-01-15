@@ -1,6 +1,6 @@
 # <img src="https://kotlinlang.org/assets/images/favicon.svg" height="23"/> Store
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.7.20-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.8.0-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
@@ -196,7 +196,7 @@ TODO
 
 ## Licence
 
-    Copyright 2021 Isuru Rajapakse
+    Copyright 2023 Isuru Rajapakse
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
