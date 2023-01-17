@@ -44,7 +44,7 @@ class KStoreTests {
   private val store: KStore<Cat> = storeOf(filePath = filePath)
 
   @AfterTest
-  fun setup() {
+  fun cleanup() {
     FILE_SYSTEM.delete(filePath.toPath())
   }
 
@@ -178,7 +178,6 @@ class KStoreTests {
   fun testConcurrentWrite() = runTest {
     val path: Path = filePath.toPath()
     val slowStoreForMylo: KStore<Pet> = KStore(
-      path = path,
       encoder = { value: Pet? ->
         if (value == MYLO) delay(100) // Mylo usually takes his time
         FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
@@ -200,7 +199,6 @@ class KStoreTests {
   fun testConcurrentRead() = runTest {
     val path: Path = filePath.toPath()
     val slowStoreForOreo: KStore<Pet> = KStore(
-      path = path,
       encoder = { value: Pet? ->
         FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
       },

@@ -21,15 +21,21 @@ inline fun <reified T : @Serializable Any> storeOf(
   filePath: String,
   default: T? = null,
   enableCache: Boolean = true,
-  serializer: Json = Json,
+  serializer: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
 ): KStore<T> {
-  val encoder: (T?) -> Unit = { value: T? -> FILE_SYSTEM.sink(filePath.toPath()).buffer().use { serializer.encode(value, it) } }
+  val path: Path = filePath.toPath()
+
+  val encoder: (T?) -> Unit = { value: T? ->
+    if(value != null) FILE_SYSTEM.sink(filePath.toPath()).buffer().use { serializer.encode(value, it) }
+    else FILE_SYSTEM.delete(path)
+  }
+
   val decoder: () -> T? = { serializer.decode(FILE_SYSTEM.source(filePath.toPath()).buffer()) }
-  return KStore(filePath.toPath(), default, enableCache, encoder, decoder)
+
+  return KStore(default, enableCache, encoder, decoder)
 }
 
 class KStore<T : @Serializable Any>(
-  private val path: Path,
   private val default: T? = null,
   private val enableCache: Boolean = true,
   private val encoder: suspend (T?) -> Unit,
@@ -64,7 +70,7 @@ class KStore<T : @Serializable Any>(
   }
 
   suspend fun delete() {
-    FILE_SYSTEM.delete(path)
+    set(null)
     stateFlow.emit(null)
   }
 
