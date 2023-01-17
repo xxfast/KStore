@@ -55,7 +55,7 @@ val store: KStore<Pet> = storeOf("path/to/file")
 ```
 For full configuration and platform instructions, see [here](#configurations)
 
-### Get value
+#### Get value
 
 Get a value once
 
@@ -70,7 +70,7 @@ Or observe for changes
 val pets: Flow<Pet?> = store.updates
 ```
 
-### Set value  
+#### Set value  
 
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
@@ -78,7 +78,7 @@ val pets: Flow<Pet?> = store.updates
 store.set(mylo)
 ```
 
-### Update a value
+#### Update a value
 
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
@@ -90,7 +90,7 @@ store.update { pet: Pet? ->
 
 Note: this maintains a single mutex lock transaction, unlike `get()` and a subsequent `set()`
 
-### Delete/Reset value
+#### Delete/Reset value
 
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
@@ -106,60 +106,73 @@ You can also reset a value back to its default (if set, see [here](#configuratio
 store.reset()
 ```
 
-## Lists
+### Create a list store
 
 KStore provides you with some convenient extensions to manage stores that contain lists. 
-
-### Create a list store
+`listStoreOf` is the same as `storeOf`, but defaults to empty list instead of `null`
 ```kotlin
-val listStore: KStore<List<Pet>> = listStoreOf("path/to/file") // same as [storeOf], but defaults to empty list
+val listStore: KStore<List<Pet>> = listStoreOf("path/to/file") 
 ```
 
-### Get values
+#### Get values
 
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
 ```kotlin
-val pets: List<Cat> = store.getOrEmpty()
+val pets: List<Cat> = listStore.getOrEmpty()
 val pet: Cat = store.get(0)
 ```
 
 or observe values
 
 ```kotlin
-val pets: Flow<List<Cat>> = store.updatesOrEmpty
+val pets: Flow<List<Cat>> = listStore.updatesOrEmpty
 ```
 
-### Add or remove elements
+#### Add or remove elements
 
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
 ```kotlin
-store.plus(cat)
-store.minus(cat)
+listStore.plus(cat)
+listStore.minus(cat)
 ```
 
-### Map elements
+#### Map elements
 <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
 ```kotlin
-store.map { cat -> cat.copy(cat.age = cat.age + 1) }
-store.mapIndexed { index, cat -> cat.copy(cat.age = index) }
+listStore.map { cat -> cat.copy(cat.age = cat.age + 1) }
+listStore.mapIndexed { index, cat -> cat.copy(cat.age = index) }
 ```
 
 ## Configurations
-
 Everything you want is in the factory method
+
 ```kotlin
 private val store: KStore<Pet> = storeOf(
-  path = filePathTo("file.json"), // required
-  default = null, // optional
-  enableCache = true, // optional
-  serializer = Json, // optional
+  // Required, see 🚉 Platform configurations 
+  path = filePathTo("file.json"),
+
+  // Returns this value if the file is not found. Defaults to null
+  default = null,
+
+  // Maintain a cache. If set to false, it always reads from disk
+  enableCache = true,
+  
+  // Optional, see 🚚 Migrating stores
+  version = 0, 
+  migration = { version, jsonElement -> default },
+  
+  // Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
+  serializer = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = true 
+  }, // optional
 )
 ```
 
-### Platform configurations
+### 🚉 Platform configurations
 
 Getting a path to a file is different for each platform and you will need to define how this works for each platform 
 ```kotlin
@@ -178,7 +191,7 @@ actual fun filePathTo(fileName: String): String = "${NSHomeDirectory()}/$fileNam
 
 #### On Desktop
 This depends on where you want to save your files, but generally you should save your files in a user data directory.
-Here i'm using [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
+Recommending to use [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
 ```kotlin
 actual fun filePathTo(fileName: String): String {
   // implementation("net.harawata:appdirs:1.2.1")
