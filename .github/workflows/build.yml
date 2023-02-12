@@ -102,5 +102,36 @@ jobs:
           GPG_KEY_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
           GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
 
-      - name: Publish to sonatype
+      - name: Release to sonatype
         run: ./gradlew publishAllPublicationsToMavenRepository
+
+  publish:
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Setup gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Generate docs with dokka
+        run: ./gradlew dokkaHtml
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ${{ github.workspace }}/kstore/build/dokka/html
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+
