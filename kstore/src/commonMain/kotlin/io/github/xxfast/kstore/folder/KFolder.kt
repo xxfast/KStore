@@ -20,6 +20,15 @@ import okio.use
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
+/**
+ * Creates a store that manages a folder that contains values of type [T]
+ *
+ * @param folderPath path to the folder that is managed by this store
+ * @param serializer Serializer to use.
+ * @param indexWith lambda that returns a index of the file given the the value [T]
+ *
+ * @return store that contains a folder of values type [T]
+ */
 @ExperimentalKStoreApi
 inline fun <reified T : @Serializable Any> folderOf(
   folderPath: String,
@@ -31,6 +40,16 @@ inline fun <reified T : @Serializable Any> folderOf(
   return KFolder(folderPath, indexWith, encoder, decoder)
 }
 
+/**
+ * Creates a store that manages a folder that contains values of type [T] with a custom encoder and decoder
+ *
+ * @param folderPath path to the folder that is managed by this store
+ * @param indexWith lambda that returns a index of the file given the the value [T]
+ * @param encoder lambda to encode the values with
+ * @param decoder lambda to decode the values with
+ *
+ * @return store that contains a folder of values type [T]
+ */
 @ExperimentalKStoreApi
 class KFolder<T : @Serializable Any>(
   private val folderPath: String,
