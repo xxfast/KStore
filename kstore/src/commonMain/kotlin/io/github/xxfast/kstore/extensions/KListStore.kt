@@ -11,7 +11,7 @@ inline fun <reified T : @Serializable Any> listStoreOf(
   filePath: String,
   default: List<T> = emptyList(),
   enableCache: Boolean = true,
-  serializer: Json = Json,
+  serializer: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
 ): KStore<List<T>> =
   storeOf(filePath, default, enableCache, serializer)
 
@@ -26,8 +26,13 @@ suspend fun <T : @Serializable Any> KStore<List<T>>.plus(vararg value: T) {
 }
 
 suspend fun <T : @Serializable Any> KStore<List<T>>.minus(vararg value: T) =
-  update { list -> list?.minus(value.toSet()) ?: emptyList()  }
+  update { list -> list?.minus(value.toSet()) ?: emptyList() }
 
+/**
+ * Updates the list by applying the given [operation] lambda to each element in the stored list.
+ *
+ * @param operation lambda to update each list item
+ */
 suspend fun <T : @Serializable Any> KStore<List<T>>.map(operation: (T) -> T) {
   update { list -> list?.map { t -> operation(t) } }
 }
