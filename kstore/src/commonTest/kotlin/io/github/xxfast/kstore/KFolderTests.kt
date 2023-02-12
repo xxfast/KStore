@@ -3,6 +3,8 @@
 package io.github.xxfast.kstore
 
 import app.cash.turbine.test
+import io.github.xxfast.kstore.folder.KFolder
+import io.github.xxfast.kstore.folder.folderOf
 import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

@@ -1,23 +1,3 @@
-public final class io/github/xxfast/kstore/KFolder {
-	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
-	public final fun add (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun delete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun get (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getIndexUpdates ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getIndexes ()Ljava/util/Set;
-	public final fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/github/xxfast/kstore/KListStoreKt {
-	public static final fun get (Lio/github/xxfast/kstore/KStore;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun getOrEmpty (Lio/github/xxfast/kstore/KStore;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun getUpdatesOrEmpty (Lio/github/xxfast/kstore/KStore;)Lkotlinx/coroutines/flow/Flow;
-	public static final fun map (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun mapIndexed (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun minus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun plus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public final class io/github/xxfast/kstore/KStore {
 	public fun <init> (Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -27,6 +7,26 @@ public final class io/github/xxfast/kstore/KStore {
 	public final fun reset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun set (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun update (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/xxfast/kstore/extensions/KListStoreKt {
+	public static final fun get (Lio/github/xxfast/kstore/KStore;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getOrEmpty (Lio/github/xxfast/kstore/KStore;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getUpdatesOrEmpty (Lio/github/xxfast/kstore/KStore;)Lkotlinx/coroutines/flow/Flow;
+	public static final fun map (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun mapIndexed (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun minus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun plus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/xxfast/kstore/folder/KFolder {
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
+	public final fun add (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun delete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun get (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getIndexUpdates ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getIndexes ()Ljava/util/Set;
+	public final fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/github/xxfast/kstore/utils/FileSystemKt {

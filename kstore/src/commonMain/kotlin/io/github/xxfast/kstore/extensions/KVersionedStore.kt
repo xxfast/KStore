@@ -1,5 +1,6 @@
-package io.github.xxfast.kstore
+package io.github.xxfast.kstore.extensions
 
+import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 
-package io.github.xxfast.kstore
+package io.github.xxfast.kstore.folder
 
 import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.flow.Flow

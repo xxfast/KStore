@@ -27,9 +27,13 @@ class KVersionedStoreTests {
 
   private val storeV0: KStore<CatV0> = storeOf(filePath = filePath)
 
-  private val storeV1: KStore<CatV1> = storeOf(filePath = filePath, version = 1)
+  private val storeV1: KStore<CatV1> =
+    io.github.xxfast.kstore.extensions.storeOf(filePath = filePath, version = 1)
 
-  private val storeV2: KStore<CatV2> = storeOf(filePath = filePath, version = 2) { version, jsonElement ->
+  private val storeV2: KStore<CatV2> = io.github.xxfast.kstore.extensions.storeOf(
+    filePath = filePath,
+    version = 2
+  ) { version, jsonElement ->
     when (version) {
       1 -> jsonElement?.jsonObject?.let {
         val name = it["name"]!!.jsonPrimitive.content
@@ -43,7 +47,10 @@ class KVersionedStoreTests {
     }
   }
 
-  private val storeV3: KStore<CatV3> = storeOf(filePath = filePath, version = 3) { version, jsonElement ->
+  private val storeV3: KStore<CatV3> = io.github.xxfast.kstore.extensions.storeOf(
+    filePath = filePath,
+    version = 3
+  ) { version, jsonElement ->
     when (version) {
       1 -> jsonElement?.jsonObject?.let {
         val name = it["name"]!!.jsonPrimitive.content

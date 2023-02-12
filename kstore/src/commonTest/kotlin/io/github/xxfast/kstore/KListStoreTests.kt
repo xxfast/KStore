@@ -3,6 +3,14 @@
 package io.github.xxfast.kstore
 
 import app.cash.turbine.test
+import io.github.xxfast.kstore.extensions.get
+import io.github.xxfast.kstore.extensions.getOrEmpty
+import io.github.xxfast.kstore.extensions.listStoreOf
+import io.github.xxfast.kstore.extensions.map
+import io.github.xxfast.kstore.extensions.mapIndexed
+import io.github.xxfast.kstore.extensions.minus
+import io.github.xxfast.kstore.extensions.plus
+import io.github.xxfast.kstore.extensions.updatesOrEmpty
 import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

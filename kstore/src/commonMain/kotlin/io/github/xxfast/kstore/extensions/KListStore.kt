@@ -1,5 +1,7 @@
-package io.github.xxfast.kstore
+package io.github.xxfast.kstore.extensions
 
+import io.github.xxfast.kstore.KStore
+import io.github.xxfast.kstore.storeOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
