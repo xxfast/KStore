@@ -2,6 +2,7 @@
 
 package io.github.xxfast.kstore.folder
 
+import io.github.xxfast.kstore.utils.ExperimentalKStoreApi
 import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ import okio.use
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
+@ExperimentalKStoreApi
 inline fun <reified T : @Serializable Any> folderOf(
   folderPath: String,
   serializer: Json = Json,
@@ -29,6 +31,7 @@ inline fun <reified T : @Serializable Any> folderOf(
   return KFolder(folderPath, indexWith, encoder, decoder)
 }
 
+@ExperimentalKStoreApi
 class KFolder<T : @Serializable Any>(
   private val folderPath: String,
   private val indexWith: (T) -> String,

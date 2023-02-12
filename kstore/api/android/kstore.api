@@ -36,6 +36,9 @@ public final class io/github/xxfast/kstore/folder/KFolder {
 	public final fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public abstract interface annotation class io/github/xxfast/kstore/utils/ExperimentalKStoreApi : java/lang/annotation/Annotation {
+}
+
 public final class io/github/xxfast/kstore/utils/FileSystemKt {
 	public static final fun getFILE_SYSTEM ()Lokio/FileSystem;
 }
