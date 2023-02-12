@@ -16,6 +16,16 @@ import okio.use
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
+/**
+ * Creates a store
+ *
+ * @param filePath path to the file that is managed by this store
+ * @param default returns this value if the file is not found. defaults to null
+ * @param enableCache maintain a cache. If set to false, it always reads from disk
+ * @param serializer Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
+ *
+ * @return store that contains a value of type [T]
+ */
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T : @Serializable Any> storeOf(
   filePath: String,
@@ -35,6 +45,14 @@ inline fun <reified T : @Serializable Any> storeOf(
   return KStore(default, enableCache, encoder, decoder)
 }
 
+/**
+ * Creates a store with a custom encoder and a decoder
+ *
+ * @param default returns this value if the decoder returns null. defaults to null
+ * @param enableCache maintain a cache. If set to false, it always reads from decoder
+ * @param encoder lambda to encode the value with
+ * @param decoder lambda to decode the value with
+ */
 class KStore<T : @Serializable Any>(
   private val default: T? = null,
   private val enableCache: Boolean = true,
@@ -44,6 +62,7 @@ class KStore<T : @Serializable Any>(
   private val lock: Mutex = Mutex()
   private val stateFlow: MutableStateFlow<T?> = MutableStateFlow(default)
 
+  /** Observe store for updates */
   val updates: Flow<T?> get() = this.stateFlow
     .onStart { read(fromCache = false) } // updates will always start with a fresh read
 
@@ -60,20 +79,43 @@ class KStore<T : @Serializable Any>(
     return emitted
   }
 
+  /**
+   * Set a value to the store
+   *
+   * @param value to set
+   */
   suspend fun set(value: T?) = lock.withLock { write(value) }
+
+  /**
+   * Get a value from the store
+   *
+   * @return value stored/cached (if enabled)
+   */
   suspend fun get(): T? = lock.withLock { read(enableCache) }
 
+  /**
+   * Update a value in a store.
+   * Note: This maintains a single mutex lock for both get and set
+   *
+   * @param operation lambda to update a given value of type [T]
+   */
   suspend fun update(operation: (T?) -> T?) = lock.withLock {
     val previous: T? = read(enableCache)
     val updated: T? = operation(previous)
     write(updated)
   }
 
+  /**
+   * Set the value of the store to null
+   */
   suspend fun delete() {
     set(null)
     stateFlow.emit(null)
   }
 
+  /**
+   * Set the value of the store to the default
+   */
   suspend fun reset(){
     set(default)
     stateFlow.emit(default)

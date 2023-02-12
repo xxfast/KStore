@@ -15,6 +15,17 @@ import okio.use
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
+/**
+ * Creates a store with a versioned encoder and decoder
+ * Note: An additional file will be written to manage metadata on the same path with `.version` suffix
+ *
+ * @param filePath path to the file that is managed by this store
+ * @param default returns this value if the file is not found. defaults to null
+ * @param enableCache maintain a cache. If set to false, it always reads from disk
+ * @param serializer Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
+ *
+ * @return store that contains a value of type [T]
+ */
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T : @Serializable Any> storeOf(
   filePath: String,
