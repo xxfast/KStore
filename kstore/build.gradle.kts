@@ -180,9 +180,10 @@ publishing {
     }
   }
 
-  // TODO: Use dokka to generate javadoc instead of empty ones
-  val javadocJar = tasks.register("javadocJar", Jar::class.java) {
+  val javadocJar = tasks.register<Jar>("javadocJar") {
+    dependsOn(tasks.dokkaHtml)
     archiveClassifier.set("javadoc")
+    from("$buildDir/dokka")
   }
 
   publications {
