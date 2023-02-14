@@ -60,22 +60,22 @@ class KStore<T : @Serializable Any>(
   private val decoder: suspend () -> T?,
 ) {
   private val lock: Mutex = Mutex()
-  private val stateFlow: MutableStateFlow<T?> = MutableStateFlow(default)
+  internal val cache: MutableStateFlow<T?> = MutableStateFlow(default)
 
   /** Observe store for updates */
-  val updates: Flow<T?> get() = this.stateFlow
+  val updates: Flow<T?> get() = this.cache
     .onStart { read(fromCache = false) } // updates will always start with a fresh read
 
   private suspend fun write(value: T?){
     encoder.invoke(value)
-    stateFlow.emit(value)
+    cache.emit(value)
   }
 
-  private suspend fun read(fromCache: Boolean): T? {
-    if (fromCache && stateFlow.value != default) return stateFlow.value
+  internal suspend fun read(fromCache: Boolean): T? {
+    if (fromCache && cache.value != default) return cache.value
     val decoded: T? = try { decoder.invoke() } catch (e: Exception) { null }
     val emitted: T? = decoded ?: default
-    stateFlow.emit(emitted)
+    cache.emit(emitted)
     return emitted
   }
 
@@ -110,7 +110,7 @@ class KStore<T : @Serializable Any>(
    */
   suspend fun delete() {
     set(null)
-    stateFlow.emit(null)
+    cache.emit(null)
   }
 
   /**
@@ -118,6 +118,6 @@ class KStore<T : @Serializable Any>(
    */
   suspend fun reset(){
     set(default)
-    stateFlow.emit(default)
+    cache.emit(default)
   }
 }
