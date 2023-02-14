@@ -41,6 +41,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         id: kover
         uses: mi-kas/kover-report@v1
+        continue-on-error: true # https://github.com/mi-kas/kover-report/issues/111
         with:
           path: ${{ github.workspace }}/kstore/build/reports/kover/xml/report.xml
           token: ${{ secrets.GITHUB_TOKEN }}
