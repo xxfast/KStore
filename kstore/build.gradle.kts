@@ -117,7 +117,7 @@ kotlin {
       dependencies {
         implementation("junit:junit:4.13.2")
         implementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-        implementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+        implementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
         implementation("androidx.test.ext:junit:1.1.5")
       }
     }
