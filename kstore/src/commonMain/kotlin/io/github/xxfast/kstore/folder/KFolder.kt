@@ -30,7 +30,7 @@ import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
  * @return store that contains a folder of values type [T]
  */
 @ExperimentalKStoreApi
-inline fun <reified T : @Serializable Any> folderOf(
+public inline fun <reified T : @Serializable Any> folderOf(
   folderPath: String,
   serializer: Json = Json,
   noinline indexWith: (T) -> String,
@@ -51,7 +51,7 @@ inline fun <reified T : @Serializable Any> folderOf(
  * @return store that contains a folder of values type [T]
  */
 @ExperimentalKStoreApi
-class KFolder<T : @Serializable Any>(
+public class KFolder<T : @Serializable Any>(
   private val folderPath: String,
   private val indexWith: (T) -> String,
   private val encoder: (BufferedSink, T?) -> Unit,
@@ -60,20 +60,20 @@ class KFolder<T : @Serializable Any>(
   private val lock: Mutex = Mutex()
   private val stateFlow: MutableStateFlow<Set<String>> = MutableStateFlow(indexes)
 
-  val indexes: Set<String> get() {
+  public val indexes: Set<String> get() {
     if(!FILE_SYSTEM.exists(folderPath.toPath())) return emptySet()
     return FILE_SYSTEM.list(folderPath.toPath()).map { it.name }.toSet()
   }
 
-  val indexUpdates: Flow<Set<String>> = stateFlow
+  public val indexUpdates: Flow<Set<String>> = stateFlow
 
-  suspend fun get(index: String): T? = lock.withLock {
+  public suspend fun get(index: String): T? = lock.withLock {
     val path: Path = "$folderPath/$index".toPath()
     if(!FILE_SYSTEM.exists(path)) return@withLock null
     decoder(FILE_SYSTEM.source(path).buffer())
   }
 
-  suspend fun add(value: T) {
+  public suspend fun add(value: T) {
     if(!FILE_SYSTEM.exists(folderPath.toPath()))
       FILE_SYSTEM.createDirectory(folderPath.toPath(), false)
 
@@ -82,13 +82,13 @@ class KFolder<T : @Serializable Any>(
     stateFlow.emit(indexes)
   }
 
-  suspend fun remove(index: String) {
+  public suspend fun remove(index: String) {
     if(!FILE_SYSTEM.exists(folderPath.toPath())) return
     lock.withLock { FILE_SYSTEM.delete("$folderPath/$index".toPath()) }
     stateFlow.emit(indexes)
   }
 
-  suspend fun delete(){
+  public suspend fun delete(){
     if(!FILE_SYSTEM.exists(folderPath.toPath())) return
     lock.withLock { FILE_SYSTEM.deleteRecursively(folderPath.toPath()) }
     stateFlow.emit(indexes)

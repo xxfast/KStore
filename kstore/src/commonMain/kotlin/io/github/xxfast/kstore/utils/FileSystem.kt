@@ -5,4 +5,4 @@ import okio.FileSystem
 /***
  * Okio file system for the given platform
  */
-expect val FILE_SYSTEM: FileSystem
+public expect val FILE_SYSTEM: FileSystem
