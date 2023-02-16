@@ -9,6 +9,10 @@ public final class io/github/xxfast/kstore/KStore {
 	public final fun update (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class io/github/xxfast/kstore/extensions/KCachedStoreKt {
+	public static final fun getCached (Lio/github/xxfast/kstore/KStore;)Ljava/lang/Object;
+}
+
 public final class io/github/xxfast/kstore/extensions/KListStoreKt {
 	public static final fun get (Lio/github/xxfast/kstore/KStore;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun getOrEmpty (Lio/github/xxfast/kstore/KStore;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
