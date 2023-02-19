@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
  *
  * @return store that contains a list of type [T]
  */
-inline fun <reified T : @Serializable Any> listStoreOf(
+public inline fun <reified T : @Serializable Any> listStoreOf(
   filePath: String,
   default: List<T> = emptyList(),
   enableCache: Boolean = true,
@@ -30,7 +30,7 @@ inline fun <reified T : @Serializable Any> listStoreOf(
  *
  * @return stored list of type [T]
  */
-suspend fun <T : @Serializable Any> KStore<List<T>>.getOrEmpty(): List<T> =
+public suspend fun <T : @Serializable Any> KStore<List<T>>.getOrEmpty(): List<T> =
   get() ?: emptyList()
 
 /**
@@ -38,7 +38,7 @@ suspend fun <T : @Serializable Any> KStore<List<T>>.getOrEmpty(): List<T> =
  *
  * @param index index of the item from the list
  */
-suspend fun <T : @Serializable Any> KStore<List<T>>.get(index: Int): T? =
+public suspend fun <T : @Serializable Any> KStore<List<T>>.get(index: Int): T? =
   get()?.get(index)
 
 /**
@@ -46,7 +46,7 @@ suspend fun <T : @Serializable Any> KStore<List<T>>.get(index: Int): T? =
  *
  * @param value item(s) to be added to the end of the list
  */
-suspend fun <T : @Serializable Any> KStore<List<T>>.plus(vararg value: T) {
+public suspend fun <T : @Serializable Any> KStore<List<T>>.plus(vararg value: T) {
   update { list -> list?.plus(value) ?: listOf(*value) }
 }
 
@@ -55,15 +55,16 @@ suspend fun <T : @Serializable Any> KStore<List<T>>.plus(vararg value: T) {
  *
  * @param value item(s) to be removed from the list
  */
-suspend fun <T : @Serializable Any> KStore<List<T>>.minus(vararg value: T) =
+public suspend fun <T : @Serializable Any> KStore<List<T>>.minus(vararg value: T) {
   update { list -> list?.minus(value.toSet()) ?: emptyList() }
+}
 
 /**
  * Updates the list by applying the given [operation] lambda to each element in the stored list.
  *
  * @param operation lambda to update each list item
  */
-suspend fun <T : @Serializable Any> KStore<List<T>>.map(operation: (T) -> T) {
+public suspend fun <T : @Serializable Any> KStore<List<T>>.map(operation: (T) -> T) {
   update { list -> list?.map { t -> operation(t) } }
 }
 
@@ -73,10 +74,10 @@ suspend fun <T : @Serializable Any> KStore<List<T>>.map(operation: (T) -> T) {
  *
  * @param operation lambda to update each list item
  */
-suspend fun <T : @Serializable Any> KStore<List<T>>.mapIndexed(operation: (Int, T) -> T) {
+public suspend fun <T : @Serializable Any> KStore<List<T>>.mapIndexed(operation: (Int, T) -> T) {
   update { list -> list?.mapIndexed { index, t -> operation(index, t) } }
 }
 
 /** Observe a list store for updates */
-val <T : @Serializable Any> KStore<List<T>>.updatesOrEmpty: Flow<List<T>> get() =
+public val <T : @Serializable Any> KStore<List<T>>.updatesOrEmpty: Flow<List<T>> get() =
   updates.filterNotNull()

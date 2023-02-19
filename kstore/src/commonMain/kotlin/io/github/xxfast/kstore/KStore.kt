@@ -27,7 +27,7 @@ import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
  * @return store that contains a value of type [T]
  */
 @OptIn(ExperimentalSerializationApi::class)
-inline fun <reified T : @Serializable Any> storeOf(
+public inline fun <reified T : @Serializable Any> storeOf(
   filePath: String,
   default: T? = null,
   enableCache: Boolean = true,
@@ -53,7 +53,7 @@ inline fun <reified T : @Serializable Any> storeOf(
  * @param encoder lambda to encode the value with
  * @param decoder lambda to decode the value with
  */
-class KStore<T : @Serializable Any>(
+public class KStore<T : @Serializable Any>(
   private val default: T? = null,
   private val enableCache: Boolean = true,
   private val encoder: suspend (T?) -> Unit,
@@ -63,7 +63,7 @@ class KStore<T : @Serializable Any>(
   internal val cache: MutableStateFlow<T?> = MutableStateFlow(default)
 
   /** Observe store for updates */
-  val updates: Flow<T?> get() = this.cache
+  public val updates: Flow<T?> get() = this.cache
     .onStart { read(fromCache = false) } // updates will always start with a fresh read
 
   private suspend fun write(value: T?){
@@ -84,14 +84,14 @@ class KStore<T : @Serializable Any>(
    *
    * @param value to set
    */
-  suspend fun set(value: T?) = lock.withLock { write(value) }
+  public suspend fun set(value: T?): Unit = lock.withLock { write(value) }
 
   /**
    * Get a value from the store
    *
    * @return value stored/cached (if enabled)
    */
-  suspend fun get(): T? = lock.withLock { read(enableCache) }
+  public suspend fun get(): T? = lock.withLock { read(enableCache) }
 
   /**
    * Update a value in a store.
@@ -99,7 +99,7 @@ class KStore<T : @Serializable Any>(
    *
    * @param operation lambda to update a given value of type [T]
    */
-  suspend fun update(operation: (T?) -> T?) = lock.withLock {
+  public suspend fun update(operation: (T?) -> T?): Unit = lock.withLock {
     val previous: T? = read(enableCache)
     val updated: T? = operation(previous)
     write(updated)
@@ -108,7 +108,7 @@ class KStore<T : @Serializable Any>(
   /**
    * Set the value of the store to null
    */
-  suspend fun delete() {
+  public suspend fun delete() {
     set(null)
     cache.emit(null)
   }
@@ -116,7 +116,7 @@ class KStore<T : @Serializable Any>(
   /**
    * Set the value of the store to the default
    */
-  suspend fun reset(){
+  public suspend fun reset(){
     set(default)
     cache.emit(default)
   }

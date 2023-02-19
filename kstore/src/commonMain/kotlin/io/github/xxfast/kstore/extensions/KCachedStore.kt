@@ -12,4 +12,4 @@ import kotlinx.serialization.Serializable
  *   2. there's no active subscriber to [KStore.updates]
  */
 @ExperimentalKStoreApi
-val <T: @Serializable Any> KStore<T>.cached: T? get() = cache.value
+public val <T: @Serializable Any> KStore<T>.cached: T? get() = cache.value

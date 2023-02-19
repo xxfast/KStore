@@ -27,7 +27,7 @@ import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
  * @return store that contains a value of type [T]
  */
 @OptIn(ExperimentalSerializationApi::class)
-inline fun <reified T : @Serializable Any> storeOf(
+public inline fun <reified T : @Serializable Any> storeOf(
   filePath: String,
   version: Int,
   default: T? = null,
