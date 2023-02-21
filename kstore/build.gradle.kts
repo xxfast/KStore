@@ -4,7 +4,7 @@ plugins {
   kotlin("multiplatform")
   kotlin("plugin.serialization")
   id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.12.1"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.13.0"
   id("maven-publish")
   id("signing")
   id("org.jetbrains.kotlinx.kover") version "0.6.1"
