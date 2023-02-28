@@ -32,6 +32,8 @@ KStore is published on Maven Central
 ```kotlin
 repositories { 
   mavenCentral()
+  // or for snapshot builds
+  maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
 }
 ```
 
