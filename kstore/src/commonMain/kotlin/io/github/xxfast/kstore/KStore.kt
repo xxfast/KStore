@@ -36,11 +36,16 @@ public inline fun <reified T : @Serializable Any> storeOf(
   val path: Path = filePath.toPath()
 
   val encoder: (T?) -> Unit = { value: T? ->
-    if(value != null) FILE_SYSTEM.sink(filePath.toPath()).buffer().use { serializer.encode(value, it) }
+    val parentFolder: Path? = path.parent
+
+    if (parentFolder != null && !FILE_SYSTEM.exists(parentFolder))
+      FILE_SYSTEM.createDirectories(parentFolder, mustCreate = false)
+
+    if (value != null) FILE_SYSTEM.sink(path).buffer().use { serializer.encode(value, it) }
     else FILE_SYSTEM.delete(path)
   }
 
-  val decoder: () -> T? = { serializer.decode(FILE_SYSTEM.source(filePath.toPath()).buffer()) }
+  val decoder: () -> T? = { serializer.decode(FILE_SYSTEM.source(path).buffer()) }
 
   return KStore(default, enableCache, encoder, decoder)
 }
@@ -66,7 +71,7 @@ public class KStore<T : @Serializable Any>(
   public val updates: Flow<T?> get() = this.cache
     .onStart { read(fromCache = false) } // updates will always start with a fresh read
 
-  private suspend fun write(value: T?){
+  private suspend fun write(value: T?) {
     encoder.invoke(value)
     cache.emit(value)
   }
@@ -116,7 +121,7 @@ public class KStore<T : @Serializable Any>(
   /**
    * Set the value of the store to the default
    */
-  public suspend fun reset(){
+  public suspend fun reset() {
     set(default)
     cache.emit(default)
   }
