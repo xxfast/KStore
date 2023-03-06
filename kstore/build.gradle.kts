@@ -8,7 +8,7 @@ plugins {
   id("maven-publish")
   id("signing")
   id("org.jetbrains.kotlinx.kover") version "0.6.1"
-  id("org.jetbrains.dokka") version "1.7.20"
+  id("org.jetbrains.dokka") version "1.8.10"
 }
 
 group = "io.github.xxfast"
