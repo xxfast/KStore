@@ -1,0 +1,3 @@
+[submodule "sample"]
+	path = sample
+	url = https://github.com/xxfast/NYTimes-KMP
