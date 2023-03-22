@@ -1,5 +1,6 @@
 package io.github.xxfast.kstore
 
+import io.github.xxfast.kstore.extensions.storeOf
 import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
@@ -27,10 +28,9 @@ class KVersionedStoreTests {
 
   private val storeV0: KStore<CatV0> = storeOf(filePath = filePath)
 
-  private val storeV1: KStore<CatV1> =
-    io.github.xxfast.kstore.extensions.storeOf(filePath = filePath, version = 1)
+  private val storeV1: KStore<CatV1> = storeOf(filePath = filePath, version = 1)
 
-  private val storeV2: KStore<CatV2> = io.github.xxfast.kstore.extensions.storeOf(
+  private val storeV2: KStore<CatV2> = storeOf(
     filePath = filePath,
     version = 2
   ) { version, jsonElement ->
@@ -47,7 +47,7 @@ class KVersionedStoreTests {
     }
   }
 
-  private val storeV3: KStore<CatV3> = io.github.xxfast.kstore.extensions.storeOf(
+  private val storeV3: KStore<CatV3> = storeOf(
     filePath = filePath,
     version = 3
   ) { version, jsonElement ->
