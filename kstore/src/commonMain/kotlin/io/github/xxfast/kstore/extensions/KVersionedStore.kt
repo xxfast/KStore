@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import okio.FileNotFoundException
 import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
@@ -53,13 +54,13 @@ public inline fun <reified T : @Serializable Any> storeOf(
       serializer.decode(FILE_SYSTEM.source(dataPath).buffer())
     } catch (e: SerializationException) {
       val previousVersion: Int =
-        if (FILE_SYSTEM.exists(versionPath))
-          serializer.decode(FILE_SYSTEM.source(versionPath).buffer())
-        else
-          0
+        if (FILE_SYSTEM.exists(versionPath)) serializer.decode(FILE_SYSTEM.source(versionPath).buffer())
+        else 0
 
       val data: JsonElement = serializer.decode(FILE_SYSTEM.source(dataPath).buffer())
       migration(previousVersion, data)
+    } catch (e: FileNotFoundException) {
+      default
     }
   }
 

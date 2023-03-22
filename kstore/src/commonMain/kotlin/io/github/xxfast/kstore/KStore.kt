@@ -9,6 +9,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okio.FileNotFoundException
 import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
@@ -45,7 +46,10 @@ public inline fun <reified T : @Serializable Any> storeOf(
     else FILE_SYSTEM.delete(path)
   }
 
-  val decoder: () -> T? = { serializer.decode(FILE_SYSTEM.source(path).buffer()) }
+  val decoder: () -> T? = {
+    try { serializer.decode(FILE_SYSTEM.source(path).buffer()) }
+    catch (e: FileNotFoundException) { null }
+  }
 
   return KStore(default, enableCache, encoder, decoder)
 }
@@ -78,7 +82,7 @@ public class KStore<T : @Serializable Any>(
 
   internal suspend fun read(fromCache: Boolean): T? {
     if (fromCache && cache.value != default) return cache.value
-    val decoded: T? = try { decoder.invoke() } catch (e: Exception) { null }
+    val decoded: T? = decoder.invoke()
     val emitted: T? = decoded ?: default
     cache.emit(emitted)
     return emitted
