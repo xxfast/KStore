@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.okio.decodeFromBufferedSource
 import kotlinx.serialization.json.okio.encodeToBufferedSink
@@ -22,6 +23,7 @@ import okio.use
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
 @Serializable
@@ -189,7 +191,10 @@ class KStoreTests {
         if (value == MYLO) delay(100) // Mylo usually takes his time
         FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
       },
-      decoder = { Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer()) }
+      decoder = {
+        try {Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer()) }
+        catch (e: Exception) { null }
+      }
     )
 
     slowStoreForMylo.updates.test {
@@ -241,5 +246,11 @@ class KStoreTests {
     val expect: Pet = MYLO
     val actual: Pet? = storeInDirectory.get()
     assertEquals(expect, actual)
+  }
+
+  @Test
+  fun testReadingMalformedFile() = runTest {
+    FILE_SYSTEM.sink(FILE.toPath()).buffer().use { it.writeUtf8("💩") }
+    assertFailsWith<SerializationException> { store.get() }
   }
 }
