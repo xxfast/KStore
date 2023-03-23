@@ -67,14 +67,6 @@ public class DefaultCodec<T: @Serializable Any>(
 }
 
 /**
- * Encoding and decoding behavior that is used by the store
- */
-public interface Codec<T: @Serializable Any> {
-  public suspend fun encode(value: T?)
-  public suspend fun decode(): T?
-}
-
-/**
  * Creates a store with a custom encoder and a decoder
  *
  * @param default returns this value if the decoder returns null. defaults to null
