@@ -37,7 +37,7 @@ jobs:
         run: ./gradlew apiCheck
 
       - name: Generate kover coverage report
-        run: ./gradlew koverXmlReport
+        run: ./gradlew koverMergedXmlReport
 
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
@@ -45,7 +45,7 @@ jobs:
         uses: mi-kas/kover-report@v1
         continue-on-error: true # https://github.com/mi-kas/kover-report/issues/111
         with:
-          path: ${{ github.workspace }}/kstore/build/reports/kover/xml/report.xml
+          path: ${{ github.workspace }}/build/reports/kover/merged/xml/report.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Code Coverage
           update-comment: true
@@ -133,12 +133,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Generate docs with dokka
-        run: ./gradlew dokkaHtml
+        run: ./gradlew dokkaHtmlMultiModule
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ${{ github.workspace }}/kstore/build/dokka/html
+          path: ${{ github.workspace }}/build/dokka/htmlMultiModule
 
       - name: Deploy to GitHub Pages
         id: deployment
