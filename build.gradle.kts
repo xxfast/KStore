@@ -1,3 +1,10 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
+plugins {
+  id("org.jetbrains.kotlinx.kover") version "0.6.1"
+  id("org.jetbrains.dokka") version "1.8.10"
+}
+
 buildscript {
   repositories {
     mavenCentral()
@@ -92,3 +99,9 @@ allprojects {
     sign(publishing.publications)
   }
 }
+
+koverMerged {
+  enable()
+}
+
+

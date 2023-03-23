@@ -3,11 +3,8 @@ public abstract interface class io/github/xxfast/kstore/Codec {
 	public abstract fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class io/github/xxfast/kstore/DefaultCodec : io/github/xxfast/kstore/Codec {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+public final class io/github/xxfast/kstore/JsonKt {
+	public static final fun getDefaultJson ()Lkotlinx/serialization/json/Json;
 }
 
 public final class io/github/xxfast/kstore/KStore {
@@ -25,41 +22,6 @@ public final class io/github/xxfast/kstore/extensions/KCachedStoreKt {
 	public static final fun getCached (Lio/github/xxfast/kstore/KStore;)Ljava/lang/Object;
 }
 
-public final class io/github/xxfast/kstore/extensions/KListStoreKt {
-	public static final fun get (Lio/github/xxfast/kstore/KStore;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun getOrEmpty (Lio/github/xxfast/kstore/KStore;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun getUpdatesOrEmpty (Lio/github/xxfast/kstore/KStore;)Lkotlinx/coroutines/flow/Flow;
-	public static final fun map (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun mapIndexed (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun minus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun plus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/github/xxfast/kstore/extensions/KVersionedStoreKt {
-	public static final fun DefaultMigration (Ljava/lang/Object;)Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/github/xxfast/kstore/extensions/VersionedCodec : io/github/xxfast/kstore/Codec {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Object;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/github/xxfast/kstore/folder/KFolder {
-	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
-	public final fun add (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun delete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun get (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getIndexUpdates ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getIndexes ()Ljava/util/Set;
-	public final fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public abstract interface annotation class io/github/xxfast/kstore/utils/ExperimentalKStoreApi : java/lang/annotation/Annotation {
-}
-
-public final class io/github/xxfast/kstore/utils/FileSystemKt {
-	public static final fun getFILE_SYSTEM ()Lokio/FileSystem;
 }
 

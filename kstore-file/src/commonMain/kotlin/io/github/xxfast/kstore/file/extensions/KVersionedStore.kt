@@ -40,7 +40,7 @@ public inline fun <reified T : @Serializable Any> storeOf(
   json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
   noinline migration: Migration<T> = DefaultMigration(default),
 ): KStore<T> {
-  val codec: Codec<T> = VersionedCodec(filePath, default, version, json, json.serializersModule.serializer(), migration)
+  val codec: Codec<T> = VersionedCodec(filePath, version, json, json.serializersModule.serializer(), migration)
   return KStore(default, enableCache, codec)
 }
 
@@ -52,7 +52,6 @@ public typealias Migration<T> = (version: Int?, JsonElement?) -> T?
 @OptIn(ExperimentalSerializationApi::class)
 public class VersionedCodec<T: @Serializable Any>(
   filePath: String,
-  private val default: T? = null,
   private val version: Int = 0,
   private val json: Json,
   private val serializer: KSerializer<T>,
@@ -72,7 +71,7 @@ public class VersionedCodec<T: @Serializable Any>(
       val data: JsonElement = json.decode(FILE_SYSTEM.source(dataPath).buffer())
       migration(previousVersion, data)
     } catch (e: FileNotFoundException) {
-      default
+      null
     }
 
   override suspend fun encode(value: T?) {
