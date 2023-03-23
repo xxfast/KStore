@@ -3,23 +3,21 @@ package io.github.xxfast.kstore.extensions
 import io.github.xxfast.kstore.Cat
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.MYLO
-import io.github.xxfast.kstore.storeOf
+import io.github.xxfast.kstore.TestCodec
+import io.github.xxfast.kstore.stored
 import io.github.xxfast.kstore.utils.ExperimentalKStoreApi
-import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.test.runTest
-import okio.Path.Companion.toPath
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalKStoreApi::class)
 class KCachedStoreTests {
-  private val filePath: String = "test_cached.json"
-  private val store: KStore<Cat> = storeOf(filePath)
+  private val store: KStore<Cat> = KStore(codec = TestCodec())
 
   @AfterTest
   fun setup() {
-    FILE_SYSTEM.delete(filePath.toPath())
+    stored = null
   }
 
   @Test
@@ -39,7 +37,7 @@ class KCachedStoreTests {
 
   @Test
   fun testCachedWhenCacheDisabled() = runTest {
-    val nonCachingStore: KStore<Cat> = storeOf(enableCache = false, filePath = filePath)
+    val nonCachingStore: KStore<Cat> = KStore(enableCache = false, codec = TestCodec())
     nonCachingStore.set(MYLO)
     val expect: Cat = MYLO
     val actual: Cat? = nonCachingStore.cached

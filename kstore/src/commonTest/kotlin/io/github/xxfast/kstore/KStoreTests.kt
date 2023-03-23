@@ -1,80 +1,25 @@
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSerializationApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package io.github.xxfast.kstore
 
 import app.cash.turbine.test
-import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.okio.decodeFromBufferedSource
-import kotlinx.serialization.json.okio.encodeToBufferedSink
-import okio.Path
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.use
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
-@Serializable
-sealed class Pet {
-  abstract val name: String
-  abstract val age: Int
-}
-
-@Serializable
-data class Cat(
-  override val name: String,
-  override val age: Int,
-  val lives: Int = 9,
-) : Pet()
-
-@Serializable
-data class Kennel<T : Pet>(val pet: T)
-
-internal val MYLO = Cat(name = "Mylo", age = 1)
-internal val OREO = Cat(name = "Oreo", age = 1)
-
-private const val FILE = "test.json"
-private const val FOLDER = "build/bin/tests"
-
-/**
- * For [KStoreTests.testConcurrentRead] and [KStoreTests.testConcurrentWrite] we need to fake some delays
- */
-private class DelayedPetCodec(
-  private val path: Path,
-  private val delay: suspend (value: Pet?) -> Unit,
-) : Codec<Pet> {
-  override suspend fun encode(value: Pet?) {
-    delay(value)
-    FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
-  }
-
-  override suspend fun decode(): Pet? {
-    val pet: Pet? = try { Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer())
-    } catch (e: Exception) { null }
-    delay(pet)
-    return pet
-  }
-}
-
 class KStoreTests {
-  private val store: KStore<Cat> = storeOf(filePath = FILE)
+  private val store: KStore<Cat> = KStore(codec = TestCodec())
 
   @AfterTest
   fun cleanup() {
-    FILE_SYSTEM.delete(FILE.toPath())
-    FILE_SYSTEM.deleteRecursively(FOLDER.toPath())
+    stored = null
   }
 
   @Test
@@ -86,7 +31,7 @@ class KStoreTests {
 
   @Test
   fun testReadDefault() = runTest {
-    val defaultStore: KStore<Pet> = storeOf(filePath = FILE, default = MYLO)
+    val defaultStore: KStore<Pet> = KStore(codec = TestCodec(), default = MYLO)
     val expect: Pet = MYLO
     val actual: Pet? = defaultStore.get()
     assertEquals(expect, actual)
@@ -94,7 +39,7 @@ class KStoreTests {
 
   @Test
   fun testReadGeneric() = runTest {
-    val genericStore: KStore<Kennel<Cat>> = storeOf(filePath = FILE)
+    val genericStore: KStore<Kennel<Cat>> = KStore(codec = TestCodec())
     val expect: Kennel<Cat>? = null
     val actual: Kennel<Cat>? = genericStore.get()
     assertEquals(expect, actual)
@@ -102,7 +47,7 @@ class KStoreTests {
 
   @Test
   fun testReadGenericDefault() = runTest {
-    val genericStore: KStore<Kennel<Cat>> = storeOf(filePath = FILE, Kennel(MYLO))
+    val genericStore: KStore<Kennel<Cat>> = KStore(codec = TestCodec(), default = Kennel(MYLO))
     val expect: Kennel<Cat> = Kennel(MYLO)
     val actual: Kennel<Cat>? = genericStore.get()
     assertEquals(expect, actual)
@@ -110,9 +55,9 @@ class KStoreTests {
 
   @Test
   fun testReadPreviouslyStoredWithDefault() = runTest {
-    FILE_SYSTEM.sink(FILE.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
+    stored = OREO
     // Mylo will never be sent 😿 because there is already a stored value
-    val defaultStore: KStore<Cat> = storeOf(filePath = FILE, default = MYLO)
+    val defaultStore: KStore<Cat> = KStore(codec = TestCodec(), default = MYLO)
     val expect: Pet = OREO
     val actual: Pet? = defaultStore.get()
     assertEquals(expect, actual)
@@ -128,7 +73,7 @@ class KStoreTests {
 
   @Test
   fun testWriteGeneric() = runTest {
-    val genericStore: KStore<Kennel<Cat>> = storeOf(filePath = FILE)
+    val genericStore: KStore<Kennel<Cat>> = KStore(codec = TestCodec())
     genericStore.set(Kennel(MYLO))
     val expect: Kennel<Cat> = Kennel(MYLO)
     val actual: Kennel<Cat>? = genericStore.get()
@@ -148,8 +93,8 @@ class KStoreTests {
 
   @Test
   fun testUpdatesWithPreviouslyStoredValue() = runTest {
-    FILE_SYSTEM.sink(FILE.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
-    val newStore: KStore<Cat> = storeOf(filePath = FILE)
+    stored = OREO
+    val newStore: KStore<Cat> = KStore(codec = TestCodec())
     newStore.updates.test {
       assertEquals(OREO, awaitItem())
     }
@@ -157,9 +102,9 @@ class KStoreTests {
 
   @Test
   fun testUpdatesWithPreviouslyStoredValueWithDefault() = runTest {
-    FILE_SYSTEM.sink(FILE.toPath()).buffer().use { Json.encodeToBufferedSink(OREO, it) }
+    stored = OREO
     // Mylo will never be sent 😿 because there is already a stored value
-    val newStore: KStore<Cat> = storeOf(filePath = FILE, default = MYLO)
+    val newStore: KStore<Cat> = KStore(codec = TestCodec(), default = MYLO)
     newStore.updates.test {
       assertEquals(OREO, awaitItem())
     }
@@ -176,7 +121,7 @@ class KStoreTests {
 
   @Test
   fun testReset() = runTest {
-    val defaultStore: KStore<Pet> = storeOf(filePath = FILE, default = MYLO)
+    val defaultStore: KStore<Pet> = KStore(codec = TestCodec(), default = MYLO)
     defaultStore.set(OREO)
     defaultStore.reset()
     val expect: Pet = MYLO
@@ -187,7 +132,7 @@ class KStoreTests {
   @Test
   fun testCaching() = runTest {
     store.set(MYLO)
-    FILE_SYSTEM.delete(FILE.toPath())
+    stored = null
     val expect: Pet = MYLO
     val actual: Pet? = store.get()
     assertSame(expect, actual) // It must be the same *reference*
@@ -195,9 +140,9 @@ class KStoreTests {
 
   @Test
   fun testNonCaching() = runTest {
-    val nonCachingStore: KStore<Pet> = storeOf(enableCache = false, filePath = FILE)
+    val nonCachingStore: KStore<Pet> = KStore(codec = TestCodec(), enableCache = false)
     nonCachingStore.set(MYLO)
-    FILE_SYSTEM.delete(FILE.toPath())
+    stored = null
     val expect: Pet? = null
     val actual: Pet? = nonCachingStore.get()
     assertEquals(expect, actual)
@@ -205,10 +150,8 @@ class KStoreTests {
 
   @Test
   fun testConcurrentWrite() = runTest {
-    val path: Path = FILE.toPath()
     val slowStoreForMylo: KStore<Pet> = KStore(
-      // Mylo usually takes his time
-      codec = DelayedPetCodec(path) { pet -> if (pet == MYLO) delay(100) }
+      codec = TestCodec { pet -> if (pet == MYLO) delay(100) }
     )
 
     slowStoreForMylo.updates.test {
@@ -223,10 +166,9 @@ class KStoreTests {
 
   @Test
   fun testConcurrentRead() = runTest {
-    val path: Path = FILE.toPath()
     val slowStoreForOreo: KStore<Pet> = KStore(
       // Oreo always stay out the longest
-      codec = DelayedPetCodec(path) { pet -> if (pet == OREO) delay(100) }
+      codec = TestCodec { pet -> if (pet == OREO) delay(100) }
     )
 
     slowStoreForOreo.set(OREO)
@@ -245,20 +187,5 @@ class KStoreTests {
     val actual: Pet? = store.get()
     val expect: Pet = MYLO.copy(age = MYLO.age + 1)
     assertEquals(actual, expect)
-  }
-
-  @Test
-  fun testWriteInDirectory() = runTest {
-    val storeInDirectory: KStore<Pet> = storeOf(filePath = "$FOLDER/$FILE")
-    storeInDirectory.set(MYLO)
-    val expect: Pet = MYLO
-    val actual: Pet? = storeInDirectory.get()
-    assertEquals(expect, actual)
-  }
-
-  @Test
-  fun testReadingMalformedFile() = runTest {
-    FILE_SYSTEM.sink(FILE.toPath()).buffer().use { it.writeUtf8("💩") }
-    assertFailsWith<SerializationException> { store.get() }
   }
 }

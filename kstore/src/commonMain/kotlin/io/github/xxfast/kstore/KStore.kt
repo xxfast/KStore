@@ -1,70 +1,12 @@
 package io.github.xxfast.kstore
 
-import io.github.xxfast.kstore.utils.FILE_SYSTEM
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
-import okio.FileNotFoundException
-import okio.Path
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.use
 
-import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
-import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
-
-/**
- * Creates a store with [DefaultCodec]
- *
- * @param filePath path to the file that is managed by this store
- * @param default returns this value if the file is not found. defaults to null
- * @param enableCache maintain a cache. If set to false, it always reads from disk
- * @param json Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
- *
- * @return store that contains a value of type [T]
- */
-public inline fun <reified T : @Serializable Any> storeOf(
-  filePath: String,
-  default: T? = null,
-  enableCache: Boolean = true,
-  json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
-): KStore<T> = KStore(
-  default = default,
-  enableCache = enableCache,
-  codec = DefaultCodec(filePath, default, json, json.serializersModule.serializer())
-)
-
-/**
- * Encoding and decoding behavior with a [default] value
- */
-@OptIn(ExperimentalSerializationApi::class)
-public class DefaultCodec<T: @Serializable Any>(
-  filePath: String,
-  private val default: T? = null,
-  private val json: Json,
-  private val serializer: KSerializer<T>,
-): Codec<T> {
-  private val path: Path = filePath.toPath()
-
-  override suspend fun decode(): T? =
-    try { json.decode(serializer, FILE_SYSTEM.source(path).buffer()) }
-    catch (e: FileNotFoundException) { default }
-
-  override suspend fun encode(value: T?) {
-    val parentFolder: Path? = path.parent
-    if (parentFolder != null && !FILE_SYSTEM.exists(parentFolder))
-      FILE_SYSTEM.createDirectories(parentFolder, mustCreate = false)
-    if (value != null) FILE_SYSTEM.sink(path).buffer().use { json.encode(serializer, value, it) }
-    else FILE_SYSTEM.delete(path)
-  }
-}
 
 /**
  * Creates a store with a custom encoder and a decoder

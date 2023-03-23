@@ -11,13 +11,6 @@ plugins {
   id("org.jetbrains.dokka") version "1.8.10"
 }
 
-group = "io.github.xxfast"
-version = "0.5.0-SNAPSHOT"
-
-repositories {
-  mavenCentral()
-}
-
 android {
   compileSdk = 33
   defaultConfig {
@@ -36,6 +29,8 @@ android {
     // TODO: Figure out why the linter is failing on CI
     abortOnError = false
   }
+
+  namespace = "io.github.xxfast.kstore"
 }
 
 kotlin {
@@ -98,11 +93,8 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.5.0")
-
       }
     }
 
@@ -124,18 +116,10 @@ kotlin {
       }
     }
 
-    val desktopMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
-      }
-    }
+    val desktopMain by getting
     val desktopTest by getting
 
-    val jsMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio-nodefilesystem:3.3.0")
-      }
-    }
+    val jsMain by getting
     val jsTest by getting
 
     val appleMain by creating {
@@ -148,20 +132,10 @@ kotlin {
       getByName("${target.targetName}Test") { dependsOn(appleTest) }
     }
 
-    val linuxMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
-      }
-    }
-
+    val linuxMain by getting
     val linuxTest by getting
 
-    val windowsMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
-      }
-    }
-
+    val windowsMain by getting
     val windowsTest by getting
   }
 }
