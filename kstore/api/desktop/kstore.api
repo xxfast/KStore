@@ -1,6 +1,18 @@
+public abstract interface class io/github/xxfast/kstore/Codec {
+	public abstract fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/xxfast/kstore/DefaultCodec : io/github/xxfast/kstore/Codec {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class io/github/xxfast/kstore/KStore {
-	public fun <init> (Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Ljava/lang/Object;ZLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/Object;ZLio/github/xxfast/kstore/Codec;)V
+	public synthetic fun <init> (Ljava/lang/Object;ZLio/github/xxfast/kstore/Codec;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun delete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getUpdates ()Lkotlinx/coroutines/flow/Flow;
@@ -21,6 +33,17 @@ public final class io/github/xxfast/kstore/extensions/KListStoreKt {
 	public static final fun mapIndexed (Lio/github/xxfast/kstore/KStore;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun minus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun plus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/xxfast/kstore/extensions/KVersionedStoreKt {
+	public static final fun DefaultMigration (Ljava/lang/Object;)Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/github/xxfast/kstore/extensions/VersionedCodec : io/github/xxfast/kstore/Codec {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/github/xxfast/kstore/folder/KFolder {

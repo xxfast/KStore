@@ -7,51 +7,71 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import okio.FileNotFoundException
 import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
+
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
 /**
- * Creates a store
+ * Creates a store with [DefaultCodec]
  *
  * @param filePath path to the file that is managed by this store
  * @param default returns this value if the file is not found. defaults to null
  * @param enableCache maintain a cache. If set to false, it always reads from disk
- * @param serializer Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
+ * @param json Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
  *
  * @return store that contains a value of type [T]
  */
-@OptIn(ExperimentalSerializationApi::class)
 public inline fun <reified T : @Serializable Any> storeOf(
   filePath: String,
   default: T? = null,
   enableCache: Boolean = true,
-  serializer: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
-): KStore<T> {
-  val path: Path = filePath.toPath()
+  json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
+): KStore<T> = KStore(
+  default = default,
+  enableCache = enableCache,
+  codec = DefaultCodec(filePath, default, json, json.serializersModule.serializer())
+)
 
-  val encoder: (T?) -> Unit = { value: T? ->
+/**
+ * Encoding and decoding behavior with a [default] value
+ */
+@OptIn(ExperimentalSerializationApi::class)
+public class DefaultCodec<T: @Serializable Any>(
+  filePath: String,
+  private val default: T? = null,
+  private val json: Json,
+  private val serializer: KSerializer<T>,
+): Codec<T> {
+  private val path: Path = filePath.toPath()
+
+  override suspend fun decode(): T? =
+    try { json.decode(serializer, FILE_SYSTEM.source(path).buffer()) }
+    catch (e: FileNotFoundException) { default }
+
+  override suspend fun encode(value: T?) {
     val parentFolder: Path? = path.parent
-
     if (parentFolder != null && !FILE_SYSTEM.exists(parentFolder))
       FILE_SYSTEM.createDirectories(parentFolder, mustCreate = false)
-
-    if (value != null) FILE_SYSTEM.sink(path).buffer().use { serializer.encode(value, it) }
+    if (value != null) FILE_SYSTEM.sink(path).buffer().use { json.encode(serializer, value, it) }
     else FILE_SYSTEM.delete(path)
   }
+}
 
-  val decoder: () -> T? = {
-    try { serializer.decode(FILE_SYSTEM.source(path).buffer()) }
-    catch (e: FileNotFoundException) { null }
-  }
-
-  return KStore(default, enableCache, encoder, decoder)
+/**
+ * Encoding and decoding behavior that is used by the store
+ */
+public interface Codec<T: @Serializable Any> {
+  public suspend fun encode(value: T?)
+  public suspend fun decode(): T?
 }
 
 /**
@@ -59,14 +79,12 @@ public inline fun <reified T : @Serializable Any> storeOf(
  *
  * @param default returns this value if the decoder returns null. defaults to null
  * @param enableCache maintain a cache. If set to false, it always reads from decoder
- * @param encoder lambda to encode the value with
- * @param decoder lambda to decode the value with
+ * @param codec codec to use to encode/decode a value with/from
  */
 public class KStore<T : @Serializable Any>(
   private val default: T? = null,
   private val enableCache: Boolean = true,
-  private val encoder: suspend (T?) -> Unit,
-  private val decoder: suspend () -> T?,
+  private val codec: Codec<T>,
 ) {
   private val lock: Mutex = Mutex()
   internal val cache: MutableStateFlow<T?> = MutableStateFlow(default)
@@ -76,13 +94,13 @@ public class KStore<T : @Serializable Any>(
     .onStart { read(fromCache = false) } // updates will always start with a fresh read
 
   private suspend fun write(value: T?) {
-    encoder.invoke(value)
+    codec.encode(value)
     cache.emit(value)
   }
 
   internal suspend fun read(fromCache: Boolean): T? {
     if (fromCache && cache.value != default) return cache.value
-    val decoded: T? = decoder.invoke()
+    val decoded: T? = codec.decode()
     val emitted: T? = decoded ?: default
     cache.emit(emitted)
     return emitted

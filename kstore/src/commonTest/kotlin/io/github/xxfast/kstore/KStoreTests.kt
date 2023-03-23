@@ -48,6 +48,26 @@ internal val OREO = Cat(name = "Oreo", age = 1)
 private const val FILE = "test.json"
 private const val FOLDER = "build/bin/tests"
 
+/**
+ * For [KStoreTests.testConcurrentRead] and [KStoreTests.testConcurrentWrite] we need to fake some delays
+ */
+private class DelayedPetCodec(
+  private val path: Path,
+  private val delay: suspend (value: Pet?) -> Unit,
+) : Codec<Pet> {
+  override suspend fun encode(value: Pet?) {
+    delay(value)
+    FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
+  }
+
+  override suspend fun decode(): Pet? {
+    val pet: Pet? = try { Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer())
+    } catch (e: Exception) { null }
+    delay(pet)
+    return pet
+  }
+}
+
 class KStoreTests {
   private val store: KStore<Cat> = storeOf(filePath = FILE)
 
@@ -187,14 +207,8 @@ class KStoreTests {
   fun testConcurrentWrite() = runTest {
     val path: Path = FILE.toPath()
     val slowStoreForMylo: KStore<Pet> = KStore(
-      encoder = { value: Pet? ->
-        if (value == MYLO) delay(100) // Mylo usually takes his time
-        FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
-      },
-      decoder = {
-        try {Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer()) }
-        catch (e: Exception) { null }
-      }
+      // Mylo usually takes his time
+      codec = DelayedPetCodec(path) { pet -> if (pet == MYLO) delay(100) }
     )
 
     slowStoreForMylo.updates.test {
@@ -211,14 +225,8 @@ class KStoreTests {
   fun testConcurrentRead() = runTest {
     val path: Path = FILE.toPath()
     val slowStoreForOreo: KStore<Pet> = KStore(
-      encoder = { value: Pet? ->
-        FILE_SYSTEM.sink(path).buffer().use { Json.encodeToBufferedSink(value, it) }
-      },
-      decoder = {
-        val value: Pet? = Json.decodeFromBufferedSource(FILE_SYSTEM.source(path).buffer())
-        if (value == OREO) delay(100) // Oreo always stay out the longest
-        return@KStore value
-      }
+      // Oreo always stay out the longest
+      codec = DelayedPetCodec(path) { pet -> if (pet == OREO) delay(100) }
     )
 
     slowStoreForOreo.set(OREO)
