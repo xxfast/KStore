@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
  * @param filePath path to the file that is managed by this store
  * @param default returns this value if the file is not found. defaults to empty list
  * @param enableCache maintain a cache. If set to false, it always reads from disk
- * @param serializer Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
+ * @param json Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
  *
  * @return store that contains a list of type [T]
  */
@@ -21,9 +21,9 @@ public inline fun <reified T : @Serializable Any> listStoreOf(
   filePath: String,
   default: List<T> = emptyList(),
   enableCache: Boolean = true,
-  serializer: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
+  json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
 ): KStore<List<T>> =
-  storeOf(filePath, default, enableCache, serializer)
+  storeOf(filePath, default, enableCache, json)
 
 /**
  * Get a list of type [T] from the store, or empty list if the store is empty
