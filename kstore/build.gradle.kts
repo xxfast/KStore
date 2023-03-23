@@ -27,6 +27,8 @@ android {
 }
 
 kotlin {
+  explicitApi()
+
   android {
     compilations.all {
       kotlinOptions {
