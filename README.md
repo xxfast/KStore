@@ -39,10 +39,54 @@ repositories {
 Include the dependency in `commonMain`. Latest version [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 ```kotlin
 sourceSets {
-  val commonMain by getting {
-    implementation("io.github.xxfast:kstore:<version>")
+  val commonMain by getting { 
+    dependencies { 
+      implementation("io.github.xxfast:kstore:<version>") 
+    } 
   }
 }
+```
+
+## Platform configurations
+KStore provides factory methods to create your platform specific store. There's two variants
+
+### 1. kstore-file 
+This includes factory methods to create a store that read/writes to a file. 
+This is suitable for `android`, `ios`, `desktop` and `js { nodejs() }` targets where we have a file system
+
+Include the dependency in `androidMain`, `iosMain`, `desktopMain` or `jsMain` (only for `nodejs()`).
+```kotlin
+sourceSets {
+  // for file-based storage
+  val androidMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
+  val iosMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
+  val desktopMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
+  
+  // only for js { nodejs() }.
+  val jsMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
+}
+```
+
+Then create a store
+```kotlin
+val store: KStore<Pet> = storeOf(filePath = "path/to/my_cats.json")
+```
+For full configurations, see [here](#configurations)
+
+### 2. kstore-storage 
+This includes a store that read/writes to a key-value storage provider
+This is suitable for `js { browser() }` target where we have storage providers (e.g:- localStorage, sessionStorage)
+
+Include the dependency in `jsMain` (only for `browser()`).
+```kotlin
+sourceSets {
+  // only for js { browser() }
+  val jsMain by getting { dependencies { implementation("io.github.xxfast:kstore-storage:<version>") } }
+}
+```
+Then create a store
+```kotlin
+val store: KStore<Pet> = storeOf(key = "my_cats")
 ```
 
 ## Usage
@@ -51,12 +95,6 @@ Given that you have a `@Serializable` model
 @Serializable data class Pet(val name: String, val age: Int) // Any serializable
 val mylo = Pet(name = "Mylo", age = 1)
 ```
-
-### Create a store
-```kotlin
-val store: KStore<Pet> = storeOf("path/to/file")
-```
-For full configuration and platform instructions, see [here](#configurations)
 
 #### Get value
 
@@ -154,8 +192,8 @@ Everything you want is in the factory method
 
 ```kotlin
 private val store: KStore<Pet> = storeOf(
-  // Required, see 🚉 Platform configurations 
-  path = filePathTo("file.json"),
+  // see 🚉 Platform configurations 
+  key/filePath = keyOrFilePathTo("file"),
 
   // Returns this value if the file is not found. Defaults to null
   default = null,
@@ -179,37 +217,39 @@ private val store: KStore<Pet> = storeOf(
 
 Getting a path to a file is different for each platform and you will need to define how this works for each platform 
 ```kotlin
-expect fun filePathTo(fileName: String): String
+expect fun keyOrFilePathTo(name: String): String
 ```
 
 #### On Android
 ```kotlin
-actual fun filePathTo(fileName: String): String = "${context.filesDir.path}/$fileName"
+actual fun keyOrFilePathTo(name: String): String = "${context.filesDir.path}/$name.json"
 ```
 
 #### On iOS & other Apple platforms
 ```kotlin
-actual fun filePathTo(fileName: String): String = "${NSHomeDirectory()}/$fileName"
+actual fun keyOrFilePathTo(name: String): String = "${NSHomeDirectory()}/$name.json"
 ```
 
 #### On Desktop
 This depends on where you want to save your files, but generally you should save your files in a user data directory.
 Recommending to use [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
 ```kotlin
-actual fun filePathTo(fileName: String): String {
+actual fun keyOrFilePathTo(name: String): String {
   // implementation("net.harawata:appdirs:1.2.1")
   val appDir: String = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
-  return "$appDir/$fileName"
+  return "$appDir/$name.json"
 }
 ```
-
-#### On JS Browser
-
-TODO
-
 #### On NodeJS
+```kotlin
+TODO()
+```
 
-TODO
+#### On Browser
+This is straight-forward on a browser, 
+```kotlin
+actual fun keyOrFilePathTo(name: String): String = name
+```
 
 ### 🚚 Migrating stores
 You can use the existing fields to derive the new fields without needing to write your own migrations

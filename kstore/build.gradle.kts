@@ -1,21 +1,7 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-
 plugins {
   kotlin("multiplatform")
-  kotlin("plugin.serialization")
   id("com.android.library")
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.13.0"
-  id("maven-publish")
-  id("signing")
-  id("org.jetbrains.kotlinx.kover") version "0.6.1"
-  id("org.jetbrains.dokka") version "1.8.10"
-}
-
-group = "io.github.xxfast"
-version = "0.5.0-SNAPSHOT"
-
-repositories {
-  mavenCentral()
 }
 
 android {
@@ -36,6 +22,8 @@ android {
     // TODO: Figure out why the linter is failing on CI
     abortOnError = false
   }
+
+  namespace = "io.github.xxfast.kstore"
 }
 
 kotlin {
@@ -59,6 +47,7 @@ kotlin {
   }
 
   js(IR) {
+    browser()
     nodejs()
   }
 
@@ -98,11 +87,8 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.5.0")
-
       }
     }
 
@@ -124,18 +110,10 @@ kotlin {
       }
     }
 
-    val desktopMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
-      }
-    }
+    val desktopMain by getting
     val desktopTest by getting
 
-    val jsMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio-nodefilesystem:3.3.0")
-      }
-    }
+    val jsMain by getting
     val jsTest by getting
 
     val appleMain by creating {
@@ -148,83 +126,10 @@ kotlin {
       getByName("${target.targetName}Test") { dependsOn(appleTest) }
     }
 
-    val linuxMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
-      }
-    }
-
+    val linuxMain by getting
     val linuxTest by getting
 
-    val windowsMain by getting {
-      dependencies {
-        implementation("com.squareup.okio:okio:3.3.0")
-      }
-    }
-
+    val windowsMain by getting
     val windowsTest by getting
   }
-}
-
-publishing {
-  repositories {
-    maven {
-      val isSnapshot = version.toString().endsWith("SNAPSHOT")
-      url = uri(
-        if (!isSnapshot) "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
-        else "https://s01.oss.sonatype.org/content/repositories/snapshots"
-      )
-
-      credentials {
-        username = gradleLocalProperties(rootDir).getProperty("sonatypeUsername")
-        password = gradleLocalProperties(rootDir).getProperty("sonatypePassword")
-      }
-    }
-  }
-
-  val javadocJar = tasks.register<Jar>("javadocJar") {
-    dependsOn(tasks.dokkaHtml)
-    archiveClassifier.set("javadoc")
-    from("$buildDir/dokka")
-  }
-
-  publications {
-    withType<MavenPublication> {
-      artifact(javadocJar)
-
-      pom {
-        name.set("KStore")
-        description.set("A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio")
-        licenses {
-          license {
-            name.set("Apache-2.0")
-            url.set("https://opensource.org/licenses/Apache-2.0")
-          }
-        }
-        url.set("https://xxfast.github.io/KStore/")
-        issueManagement {
-          system.set("Github")
-          url.set("https://github.com/xxfast/KStore/issues")
-        }
-        scm {
-          connection.set("https://github.com/xxfast/KStore.git")
-          url.set("https://github.com/xxfast/KStore")
-        }
-        developers {
-          developer {
-            name.set("Isuru Rajapakse")
-            email.set("isurukusumal36@gmail.com")
-          }
-        }
-      }
-    }
-  }
-}
-
-signing {
-  useInMemoryPgpKeys(
-    gradleLocalProperties(rootDir).getProperty("gpgKeySecret"),
-    gradleLocalProperties(rootDir).getProperty("gpgKeyPassword"),
-  )
-  sign(publishing.publications)
 }
