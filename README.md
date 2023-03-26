@@ -57,13 +57,12 @@ This is suitable for `android`, `ios`, `desktop` and `js { nodejs() }` targets w
 Include the dependency in `androidMain`, `iosMain`, `desktopMain` or `jsMain` (only for `nodejs()`).
 ```kotlin
 sourceSets {
-  // for file-based storage
-  val androidMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
-  val iosMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
-  val desktopMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
-  
-  // only for js { nodejs() }.
-  val jsMain by getting { dependencies { implementation("io.github.xxfast:kstore-file:<version>") } }
+  // You may define this on commonMain if your js targets nodejs.
+  val commonMain by getting {
+    dependencies {
+      implementation("io.github.xxfast:kstore-file:<version>")
+    }
+  }
 }
 ```
 
@@ -74,7 +73,7 @@ val store: KStore<Pet> = storeOf(filePath = "path/to/my_cats.json")
 For full configurations, see [here](#configurations)
 
 ### 2. kstore-storage 
-This includes a store that read/writes to a key-value storage provider
+This includes factory methods to create a store that read/writes to a key-value storage provider
 This is suitable for `js { browser() }` target where we have storage providers (e.g:- localStorage, sessionStorage)
 
 Include the dependency in `jsMain` (only for `browser()`).
@@ -192,8 +191,8 @@ Everything you want is in the factory method
 
 ```kotlin
 private val store: KStore<Pet> = storeOf(
-  // see 🚉 Platform configurations 
-  key/filePath = keyOrFilePathTo("file"),
+  // see 🚏Getting the path
+  key/filePath = pathTo("id"),
 
   // Returns this value if the file is not found. Defaults to null
   default = null,
@@ -210,45 +209,55 @@ private val store: KStore<Pet> = storeOf(
     ignoreUnknownKeys = true
     encodeDefaults = true 
   }, // optional
+
+  // Optional, storage provider to use (Only for kstore-storage)
+  storage = localStorage, 
 )
 ```
 
-### 🚉 Platform configurations
+### 🚏Getting the path
 
 Getting a path to a file is different for each platform and you will need to define how this works for each platform 
 ```kotlin
-expect fun keyOrFilePathTo(name: String): String
+expect fun pathTo(id: String): String
 ```
 
 #### On Android
+
+Getting a path on android involves invoking from `filesDir` from `Context`. 
 ```kotlin
-actual fun keyOrFilePathTo(name: String): String = "${context.filesDir.path}/$name.json"
+actual fun pathTo(id: String): String = "${context.filesDir.path}/$id.json"
 ```
 
 #### On iOS & other Apple platforms
+
+To get a path on iOS, you can use `NSHomeDirectory`.
 ```kotlin
-actual fun keyOrFilePathTo(name: String): String = "${NSHomeDirectory()}/$name.json"
+actual fun pathTo(id: String): String = "${NSHomeDirectory()}/$id.json"
 ```
 
 #### On Desktop
+
 This depends on where you want to save your files, but generally you should save your files in a user data directory.
 Recommending to use [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
 ```kotlin
-actual fun keyOrFilePathTo(name: String): String {
+actual fun pathTo(id: String): String {
   // implementation("net.harawata:appdirs:1.2.1")
   val appDir: String = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
-  return "$appDir/$name.json"
+  return "$appDir/$id.json"
 }
-```
-#### On NodeJS
-```kotlin
-TODO()
 ```
 
 #### On Browser
-This is straight-forward on a browser, 
+
+This is straight-forward on a browser, since we are storing on localStorage/sessionStorage, we just need a key name
 ```kotlin
-actual fun keyOrFilePathTo(name: String): String = name
+actual fun pathTo(name: String): String = name
+```
+
+#### On NodeJS
+```kotlin
+TODO()
 ```
 
 ### 🚚 Migrating stores
