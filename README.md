@@ -13,7 +13,8 @@
 ![badge-jvm](http://img.shields.io/badge/platform-jvm-DB413D.svg?style=flat)
 ![badge-linux](http://img.shields.io/badge/platform-linux-2D3F6C.svg?style=flat)
 ![badge-windows](http://img.shields.io/badge/platform-windows-4D76CD.svg?style=flat)
-![badge-nodejs](https://img.shields.io/badge/platform-nodejs-F8DB5D.svg?style=flat)
+![badge-nodejs](https://img.shields.io/badge/platform-jsNode-F8DB5D.svg?style=flat)
+![badge-browser](https://img.shields.io/badge/platform-jsBrowser-F8DB5D.svg?style=flat)
 
 A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio.
 Inspired by [RxStore](https://github.com/Gridstone/RxStore)
