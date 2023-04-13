@@ -87,26 +87,26 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+        implementation(libs.kotlinx.coroutines)
+        implementation(libs.kotlinx.serialization.json)
       }
     }
 
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-        implementation("app.cash.turbine:turbine:0.12.3")
+        implementation(libs.kotlinx.coroutines.test)
+        implementation(libs.turbine)
       }
     }
 
     val androidMain by getting
     val androidTest by getting {
       dependencies {
-        implementation("junit:junit:4.13.2")
-        implementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-        implementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
-        implementation("androidx.test.ext:junit:1.1.5")
+        implementation(libs.junit)
+        implementation(libs.junit.jupiter.api)
+        implementation(libs.junit.jupiter.engine)
+        implementation(libs.androidx.test.junit)
       }
     }
 

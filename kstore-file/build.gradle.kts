@@ -88,18 +88,18 @@ kotlin {
       val commonMain by getting {
         dependencies {
           implementation(project(":kstore"))
-          implementation("com.squareup.okio:okio:3.3.0")
-          implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-          implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-          implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.5.0")
+          implementation(libs.okio)
+          implementation(libs.kotlinx.coroutines)
+          implementation(libs.kotlinx.serialization.json)
+          implementation(libs.kotlinx.serialization.json.okio)
         }
       }
 
       val commonTest by getting {
         dependencies {
           implementation(kotlin("test"))
-          implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-          implementation("app.cash.turbine:turbine:0.12.3")
+          implementation(libs.kotlinx.coroutines.test)
+          implementation(libs.turbine)
         }
       }
 
@@ -108,14 +108,13 @@ kotlin {
 
       val desktopMain by getting {
         dependencies {
-          implementation("com.squareup.okio:okio:3.3.0")
         }
       }
       val desktopTest by getting
 
       val jsMain by getting {
         dependencies {
-          implementation("com.squareup.okio:okio-nodefilesystem:3.3.0")
+          implementation(libs.okio.nodefilesystem)
         }
       }
       val jsTest by getting
@@ -132,18 +131,14 @@ kotlin {
 
       val linuxMain by getting {
         dependencies {
-          implementation("com.squareup.okio:okio:3.3.0")
         }
       }
-
       val linuxTest by getting
 
       val windowsMain by getting {
         dependencies {
-          implementation("com.squareup.okio:okio:3.3.0")
         }
       }
-
       val windowsTest by getting
     }
   }
