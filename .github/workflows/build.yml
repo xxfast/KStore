@@ -86,6 +86,10 @@ jobs:
     runs-on: macos-latest
     needs:
       - build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -97,6 +101,9 @@ jobs:
 
       - name: Setup gradle
         uses: gradle/gradle-build-action@v2
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
 
       - name: Write secrets to local.properties
         if: ${{ github.event_name != 'pull_request' }}
@@ -114,24 +121,6 @@ jobs:
       - name: Release to sonatype
         run: ./gradlew publishAllPublicationsToMavenRepository
 
-  publish:
-    if: ${{ github.event_name != 'pull_request' }}
-    needs:
-      - build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
-
       - name: Generate docs with dokka
         run: ./gradlew dokkaHtmlMultiModule
 
@@ -140,7 +129,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/build/dokka/htmlMultiModule
 
-      - name: Deploy to GitHub Pages
+      - name: Release to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
-
