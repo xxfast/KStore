@@ -1,10 +1,3 @@
-public final class io/github/xxfast/kstore/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
-}
-
 public abstract interface class io/github/xxfast/kstore/Codec {
 	public abstract fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
