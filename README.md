@@ -2,7 +2,7 @@
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
 
 [![Kotlin Alpha](https://kotl.in/badges/alpha.svg)](https://kotlinlang.org/docs/components-stability.html)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.8.20-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.8.21-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
@@ -25,6 +25,27 @@ Inspired by [RxStore](https://github.com/Gridstone/RxStore)
   - 📬 Default values; no file? no problem!
   - 🚚 Migration support; moving shop? take your data with you
   - 🚉 Multiplatform!
+
+## At a glace
+
+```kotlin
+// Take any serializable model 
+@Serializable data class Pet(val name: String, val age: Int) 
+
+// Create a store
+val store: KStore<Pet> = storeOf(filePath = "path/to/my_cats.json")
+
+// Get, set, update or delete values 
+val mylo: Pet? = store.get()
+store.set(mylo)
+store.update { pet: Pet? ->
+  pet?.copy(age = pet.age + 1)
+}
+store.delete()
+
+// Observe for updates
+val pets: Flow<Pet?> = store.updates
+```
 
 ## Adding to your project
 
@@ -51,45 +72,54 @@ sourceSets {
 ## Platform configurations
 KStore provides factory methods to create your platform specific store. There's two variants
 
-### 1. kstore-file 
-This includes factory methods to create a store that read/writes to a file. 
-This is suitable for `android`, `ios`, `desktop` and `js { nodejs() }` targets where we have a file system
+<details>
+  <summary>1. kstore-file</summary>
 
-Include the dependency in `androidMain`, `iosMain`, `desktopMain` or `jsMain` (only for `nodejs()`).
-```kotlin
-sourceSets {
-  // You may define this on commonMain if your js targets nodejs.
-  val commonMain by getting {
-    dependencies {
-      implementation("io.github.xxfast:kstore-file:<version>")
+  ### kstore-file 
+  This includes factory methods to create a store that read/writes to a file. 
+  This is suitable for `android`, `ios`, `desktop` and `js { nodejs() }` targets where we have a file system
+
+  Include the dependency in `androidMain`, `iosMain`, `desktopMain` or `jsMain` (only for `nodejs()`).
+  ```kotlin
+  sourceSets {
+    // You may define this on commonMain if your js targets nodejs.
+    val commonMain by getting {
+      dependencies {
+        implementation("io.github.xxfast:kstore-file:<version>")
+      }
     }
   }
-}
-```
+  ```
 
-Then create a store
-```kotlin
-val store: KStore<Pet> = storeOf(filePath = "path/to/my_cats.json")
-```
-For full configurations, see [here](#configurations)
+  Then create a store
+  ```kotlin
+  val store: KStore<Pet> = storeOf(filePath = "path/to/my_cats.json")
+  ```
+  For full configurations, see [here](#configurations)
+</details>
 
-### 2. kstore-storage 
-This includes factory methods to create a store that read/writes to a key-value storage provider
-This is suitable for `js { browser() }` target where we have storage providers (e.g:- localStorage, sessionStorage)
+<details>
+  <summary>2. kstore-storage</summary>
 
-Include the dependency in `jsMain` (only for `browser()`).
-```kotlin
-sourceSets {
-  // only for js { browser() }
-  val jsMain by getting { dependencies { implementation("io.github.xxfast:kstore-storage:<version>") } }
-}
-```
-Then create a store
-```kotlin
-val store: KStore<Pet> = storeOf(key = "my_cats")
-```
+  ### kstore-storage 
 
-## Usage
+  This includes factory methods to create a store that read/writes to a key-value storage provider
+  This is suitable for `js { browser() }` target where we have storage providers (e.g:- localStorage, sessionStorage)
+
+  Include the dependency in `jsMain` (only for `browser()`).
+  ```kotlin
+  sourceSets {
+    // only for js { browser() }
+    val jsMain by getting { dependencies { implementation("io.github.xxfast:kstore-storage:<version>") } }
+  }
+  ```
+  Then create a store
+  ```kotlin
+  val store: KStore<Pet> = storeOf(key = "my_cats")
+  ```
+</details>
+
+## Full usage
 Given that you have a `@Serializable` model
 ```kotlin
 @Serializable data class Pet(val name: String, val age: Int) // Any serializable
@@ -147,45 +177,50 @@ You can also reset a value back to its default (if set, see [here](#configuratio
 store.reset()
 ```
 
-### Create a list store
+<details>
+  <summary>Create a list store</summary>
 
-KStore provides you with some convenient extensions to manage stores that contain lists. 
-`listStoreOf` is the same as `storeOf`, but defaults to empty list instead of `null`
-```kotlin
-val listStore: KStore<List<Pet>> = listStoreOf("path/to/file") 
-```
+  ### Create a list store
 
-#### Get values
+  KStore provides you with some convenient extensions to manage stores that contain lists. 
+  `listStoreOf` is the same as `storeOf`, but defaults to empty list instead of `null`
+  ```kotlin
+  val listStore: KStore<List<Pet>> = listStoreOf("path/to/file") 
+  ```
 
-<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+  #### Get values
 
-```kotlin
-val pets: List<Cat> = listStore.getOrEmpty()
-val pet: Cat = store.get(0)
-```
+  <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
-or observe values
+  ```kotlin
+  val pets: List<Cat> = listStore.getOrEmpty()
+  val pet: Cat = store.get(0)
+  ```
 
-```kotlin
-val pets: Flow<List<Cat>> = listStore.updatesOrEmpty
-```
+  or observe values
 
-#### Add or remove elements
+  ```kotlin
+  val pets: Flow<List<Cat>> = listStore.updatesOrEmpty
+  ```
 
-<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+  #### Add or remove elements
 
-```kotlin
-listStore.plus(cat)
-listStore.minus(cat)
-```
+  <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
 
-#### Map elements
-<img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+  ```kotlin
+  listStore.plus(cat)
+  listStore.minus(cat)
+  ```
 
-```kotlin
-listStore.map { cat -> cat.copy(cat.age = cat.age + 1) }
-listStore.mapIndexed { index, cat -> cat.copy(cat.age = index) }
-```
+  #### Map elements
+  <img src="https://user-images.githubusercontent.com/13775137/188902401-121fd1a2-c506-4982-82dd-c8c4404c81a0.png" align="right"/>
+
+  ```kotlin
+  listStore.map { cat -> cat.copy(cat.age = cat.age + 1) }
+  listStore.mapIndexed { index, cat -> cat.copy(cat.age = index) }
+  ```
+
+</details>
 
 ## Configurations
 Everything you want is in the factory method
@@ -222,44 +257,55 @@ Getting a path to a file is different for each platform and you will need to def
 ```kotlin
 expect fun pathTo(id: String): String
 ```
+<details>
+  <summary>On Android</summary>
 
-#### On Android
+  Getting a path on android involves invoking from `filesDir` from `Context`. 
+  ```kotlin
+  actual fun pathTo(id: String): String = "${context.filesDir.path}/$id.json"
+  ```
+</details>
 
-Getting a path on android involves invoking from `filesDir` from `Context`. 
-```kotlin
-actual fun pathTo(id: String): String = "${context.filesDir.path}/$id.json"
-```
+<details>
+  <summary>On iOS & other Apple platforms</summary>
 
-#### On iOS & other Apple platforms
+  To get a path on iOS, you can use `NSHomeDirectory`.
+  ```kotlin
+  actual fun pathTo(id: String): String = "${NSHomeDirectory()}/$id.json"
+  ```
+</details>
 
-To get a path on iOS, you can use `NSHomeDirectory`.
-```kotlin
-actual fun pathTo(id: String): String = "${NSHomeDirectory()}/$id.json"
-```
+<details>
+  <summary>On Desktop (JVM)</summary>
 
-#### On Desktop
+  This depends on where you want to save your files, but generally you should save your files in a user data directory.
+  Recommending to use [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
+  ```kotlin
+  actual fun pathTo(id: String): String {
+    // implementation("net.harawata:appdirs:1.2.1")
+    val appDir: String = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
+    return "$appDir/$id.json"
+  }
+  ```
+</details>
 
-This depends on where you want to save your files, but generally you should save your files in a user data directory.
-Recommending to use [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
-```kotlin
-actual fun pathTo(id: String): String {
-  // implementation("net.harawata:appdirs:1.2.1")
-  val appDir: String = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
-  return "$appDir/$id.json"
-}
-```
+<details>
+  <summary>On Browser</summary>
 
-#### On Browser
+  This is straight-forward on a browser, since we are storing on localStorage/sessionStorage, we just need a key name
+  ```kotlin
+  actual fun pathTo(name: String): String = name
+  ```
+</details>
 
-This is straight-forward on a browser, since we are storing on localStorage/sessionStorage, we just need a key name
-```kotlin
-actual fun pathTo(name: String): String = name
-```
 
-#### On NodeJS
-```kotlin
-TODO()
-```
+<details>
+  <summary>On NodeJS</summary>
+
+  ```kotlin
+  TODO()
+  ```
+</details>
 
 ### 🚚 Migrating stores
 You can use the existing fields to derive the new fields without needing to write your own migrations
@@ -269,36 +315,40 @@ You can use the existing fields to derive the new fields without needing to writ
 @Serializable data class CatV2(val name: String, val lives: Int = 9, val age: Int = 9 - lives)
 ```
 
-#### Binary incompatible changes
-If the new models are [binary incompatible](https://github.com/Kotlin/binary-compatibility-validator#what-makes-an-incompatible-change-to-the-public-binary-api) you will need to specify how to migrate the models from version to version
+<details>
+  <summary>What about binary incompatible changes?</summary>
 
-```kotlin
-@Serializable data class CatV1(val name: String, val lives: Int = 9, val cuteness: Int) 
-@Serializable data class CatV2(val name: String, val lives: Int = 9, val age: Int = 9 - lives, val kawaiiness: Long)
-@Serializable data class CatV3(val name: String, val lives: Int = 9, val age: Int = 9 - lives, val isCute: Boolean)
+  #### Binary incompatible changes
+  If the new models are [binary incompatible](https://github.com/Kotlin/binary-compatibility-validator#what-makes-an-incompatible-change-to-the-public-binary-api) you will need to specify how to migrate the models from version to version
 
-private val storeV3: KStore<CatV3> = storeOf(filePath = filePath, version = 3) { version, jsonElement ->
-  when (version) {
-    1 -> jsonElement?.jsonObject?.let {
-      val name = it["name"]!!.jsonPrimitive.content
-      val lives = it["lives"]!!.jsonPrimitive.int
-      val age = it["age"]?.jsonPrimitive?.int ?: (9 - lives)
-      val isCute = it["cuteness"]!!.jsonPrimitive.int.toLong() > 1
-      CatV3(name, lives, age, isCute)
+  ```kotlin
+  @Serializable data class CatV1(val name: String, val lives: Int = 9, val cuteness: Int) 
+  @Serializable data class CatV2(val name: String, val lives: Int = 9, val age: Int = 9 - lives, val kawaiiness: Long)
+  @Serializable data class CatV3(val name: String, val lives: Int = 9, val age: Int = 9 - lives, val isCute: Boolean)
+
+  private val storeV3: KStore<CatV3> = storeOf(filePath = filePath, version = 3) { version, jsonElement ->
+    when (version) {
+      1 -> jsonElement?.jsonObject?.let {
+        val name = it["name"]!!.jsonPrimitive.content
+        val lives = it["lives"]!!.jsonPrimitive.int
+        val age = it["age"]?.jsonPrimitive?.int ?: (9 - lives)
+        val isCute = it["cuteness"]!!.jsonPrimitive.int.toLong() > 1
+        CatV3(name, lives, age, isCute)
+      }
+
+      2 -> jsonElement?.jsonObject?.let {
+        val name = it["name"]!!.jsonPrimitive.content
+        val lives = it["lives"]!!.jsonPrimitive.int
+        val age = it["age"]?.jsonPrimitive?.int ?: (9 - lives)
+        val isCute = it["kawaiiness"]!!.jsonPrimitive.long > 1
+        CatV3(name, lives, age, isCute)
+      }
+
+      else -> null
     }
-
-    2 -> jsonElement?.jsonObject?.let {
-      val name = it["name"]!!.jsonPrimitive.content
-      val lives = it["lives"]!!.jsonPrimitive.int
-      val age = it["age"]?.jsonPrimitive?.int ?: (9 - lives)
-      val isCute = it["kawaiiness"]!!.jsonPrimitive.long > 1
-      CatV3(name, lives, age, isCute)
-    }
-
-    else -> null
   }
-}
-```
+  ```
+</details>
 
 ## Licence
 
