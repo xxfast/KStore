@@ -1,10 +1,12 @@
 package io.github.xxfast.kstore
 
+import io.github.xxfast.kstore.utils.StoreDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 
@@ -24,20 +26,21 @@ public class KStore<T : @Serializable Any>(
   internal val cache: MutableStateFlow<T?> = MutableStateFlow(default)
 
   /** Observe store for updates */
-  public val updates: Flow<T?> get() = this.cache
-    .onStart { read(fromCache = false) } // updates will always start with a fresh read
+  public val updates: Flow<T?>
+    get() = this.cache
+      .onStart { read(fromCache = false) } // updates will always start with a fresh read
 
-  private suspend fun write(value: T?) {
+  private suspend fun write(value: T?): Unit = withContext(StoreDispatcher) {
     codec.encode(value)
     cache.emit(value)
   }
 
-  internal suspend fun read(fromCache: Boolean): T? {
-    if (fromCache && cache.value != default) return cache.value
+  private suspend fun read(fromCache: Boolean): T? = withContext(StoreDispatcher) {
+    if (fromCache && cache.value != default) return@withContext cache.value
     val decoded: T? = codec.decode()
     val emitted: T? = decoded ?: default
     cache.emit(emitted)
-    return emitted
+    return@withContext emitted
   }
 
   /**
