@@ -26,7 +26,7 @@ Inspired by [RxStore](https://github.com/Gridstone/RxStore)
   - 🚚 Migration support; moving shop? take your data with you
   - 🚉 Multiplatform!
 
-## At a glace
+## At a glance
 
 ```kotlin
 // Take any serializable model 
