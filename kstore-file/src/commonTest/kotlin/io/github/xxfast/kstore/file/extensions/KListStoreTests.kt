@@ -1,9 +1,16 @@
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSerializationApi::class)
+@file:OptIn(ExperimentalSerializationApi::class)
 
 package io.github.xxfast.kstore.file.extensions
 
 import app.cash.turbine.test
 import io.github.xxfast.kstore.KStore
+import io.github.xxfast.kstore.extensions.get
+import io.github.xxfast.kstore.extensions.getOrEmpty
+import io.github.xxfast.kstore.extensions.map
+import io.github.xxfast.kstore.extensions.mapIndexed
+import io.github.xxfast.kstore.extensions.minus
+import io.github.xxfast.kstore.extensions.plus
+import io.github.xxfast.kstore.extensions.updatesOrEmpty
 import io.github.xxfast.kstore.file.Cat
 import io.github.xxfast.kstore.file.MYLO
 import io.github.xxfast.kstore.file.OREO
