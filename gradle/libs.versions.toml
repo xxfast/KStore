@@ -7,7 +7,7 @@ kotlin = "1.8.21"
 kotlinx-coroutines = "1.7.0"
 kotlinx-serialization = "1.5.0"
 okio = "3.3.0"
-turbine = "0.12.3"
+turbine = "0.13.0"
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
