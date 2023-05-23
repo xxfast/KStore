@@ -5,7 +5,7 @@ junit = "4.13.2"
 junit-jupiter="5.9.3"
 kotlin = "1.8.21"
 kotlinx-coroutines = "1.7.1"
-kotlinx-serialization = "1.5.0"
+kotlinx-serialization = "1.5.1"
 okio = "3.3.0"
 turbine = "0.13.0"
 
