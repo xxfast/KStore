@@ -6,7 +6,7 @@ junit-jupiter="5.9.3"
 kotlin = "1.8.21"
 kotlinx-coroutines = "1.7.1"
 kotlinx-serialization = "1.5.1"
-okio = "3.3.0"
+okio = "3.4.0"
 turbine = "1.0.0"
 
 [libraries]
