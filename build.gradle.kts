@@ -1,7 +1,7 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
-  id("org.jetbrains.kotlinx.kover") version "0.6.1"
+  id("org.jetbrains.kotlinx.kover") version "0.7.3"
   id("org.jetbrains.dokka") version "1.8.10"
 }
 
