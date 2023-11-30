@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
 ## On iOS & other Apple platforms
 To get a path on iOS, you can use `NSHomeDirectory`.
 ```kotlin
-appDir = "${NSHomeDirectory()}/$id.json"
+appDir = NSHomeDirectory()
 ```
 
 ## On Desktop (JVM)
