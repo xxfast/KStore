@@ -1,4 +1,4 @@
-# <img src="https://kotlinlang.org/assets/images/favicon.svg" height="23"/> Store
+# <img src="docs/images/kstore.svg" height="30"/> KStore
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
 
 [![Kotlin Alpha](https://kotl.in/badges/alpha.svg)](https://kotlinlang.org/docs/components-stability.html)
@@ -49,7 +49,8 @@ val pets: Flow<Pet?> = store.updates
 
 ### Installation and Usage
 
-Documentation [here](xxfast.github.io/KStore/docs) & API Reference [here](xxfast.github.io/KStore/api)
+Documentation [here](https://xxfast.github.io/KStore)
+API Reference [here](https://xxfast.github.io/KStore/docs/)
 
 ## Licence
 
