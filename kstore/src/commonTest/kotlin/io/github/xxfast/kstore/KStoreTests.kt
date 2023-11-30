@@ -1,10 +1,7 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package io.github.xxfast.kstore
 
 import app.cash.turbine.test
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay

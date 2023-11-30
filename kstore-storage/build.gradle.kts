@@ -14,6 +14,7 @@ kotlin {
     val jsMain by getting {
       dependencies {
         implementation(project(":kstore"))
+        implementation(libs.kotlinx.serialization.json)
       }
     }
 
