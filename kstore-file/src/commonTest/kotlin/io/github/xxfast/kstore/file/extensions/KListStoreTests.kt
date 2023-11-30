@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.okio.encodeToBufferedSink
+import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
@@ -28,12 +29,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class KListStoreTests {
-  private val filePath: String = "test_lists.json"
-  private val store: KStore<List<Cat>> = listStoreOf(filePath = filePath)
+  private val file: Path = "test_lists.json".toPath()
+  private val store: KStore<List<Cat>> = listStoreOf(file = file)
 
   @AfterTest
   fun setup() {
-    FILE_SYSTEM.delete(filePath.toPath())
+    FILE_SYSTEM.delete(file)
   }
 
   @Test
@@ -53,7 +54,7 @@ class KListStoreTests {
 
   @Test
   fun testReadDefault() = runTest {
-    val defaultStore: KStore<List<Cat>> = listStoreOf(filePath = filePath, default = listOf(MYLO))
+    val defaultStore: KStore<List<Cat>> = listStoreOf(file = file, default = listOf(MYLO))
     val expect: List<Cat> = listOf(MYLO)
     val actual: List<Cat> = defaultStore.getOrEmpty()
     assertEquals(expect, actual)
@@ -61,9 +62,9 @@ class KListStoreTests {
 
   @Test
   fun testReadPreviouslyStoredList() = runTest {
-    FILE_SYSTEM.sink(filePath.toPath()).buffer().use { Json.encodeToBufferedSink(listOf(OREO) , it) }
+    FILE_SYSTEM.sink(file).buffer().use { Json.encodeToBufferedSink(listOf(OREO) , it) }
     // Mylo will never be sent 😿 because there is already a stored value
-    val newStore: KStore<List<Cat>> = listStoreOf(filePath = filePath, default = listOf(MYLO))
+    val newStore: KStore<List<Cat>> = listStoreOf(file = file, default = listOf(MYLO))
     val expect: List<Cat> = listOf(OREO)
     val actual: List<Cat> = newStore.getOrEmpty()
     assertEquals(expect, actual)

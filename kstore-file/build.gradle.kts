@@ -88,7 +88,7 @@ kotlin {
       val commonMain by getting {
         dependencies {
           implementation(project(":kstore"))
-          implementation(libs.okio)
+          api(libs.okio)
           implementation(libs.kotlinx.coroutines)
           implementation(libs.kotlinx.serialization.json)
           implementation(libs.kotlinx.serialization.json.okio)

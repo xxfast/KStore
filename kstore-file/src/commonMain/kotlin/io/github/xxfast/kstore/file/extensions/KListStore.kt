@@ -6,11 +6,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okio.Path
 
 /**
  * Creates a store that contains a list
  *
- * @param filePath path to the file that is managed by this store
+ * @param file path to the file that is managed by this store
  * @param default returns this value if the file is not found. defaults to empty list
  * @param enableCache maintain a cache. If set to false, it always reads from disk
  * @param json Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
@@ -18,9 +19,9 @@ import kotlinx.serialization.json.Json
  * @return store that contains a list of type [T]
  */
 public inline fun <reified T : @Serializable Any> listStoreOf(
-  filePath: String,
+  file: Path,
   default: List<T> = emptyList(),
   enableCache: Boolean = true,
   json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
 ): KStore<List<T>> =
-  storeOf(filePath, default, enableCache, json)
+  storeOf(file, default, enableCache, json)

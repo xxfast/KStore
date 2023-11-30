@@ -9,6 +9,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
+import okio.Path
 import okio.Path.Companion.toPath
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -25,14 +26,14 @@ val MYLO_V2 = CatV2(name = "mylo", lives = 7, age = 2, kawaiiness = 12L)
 val MYLO_V3 = CatV3(name = "mylo", lives = 7, age = 2, isCute = true)
 
 class KVersionedStoreTests {
-  private val filePath: String = "test_migration.json"
+  private val file: Path = "test_migration.json".toPath()
 
-  private val storeV0: KStore<CatV0> = storeOf(filePath = filePath)
+  private val storeV0: KStore<CatV0> = storeOf(file = file)
 
-  private val storeV1: KStore<CatV1> = storeOf(filePath = filePath, version = 1)
+  private val storeV1: KStore<CatV1> = storeOf(file = file, version = 1)
 
   private val storeV2: KStore<CatV2> = storeOf(
-    filePath = filePath,
+    file = file,
     version = 2
   ) { version, jsonElement ->
     when (version) {
@@ -49,7 +50,7 @@ class KVersionedStoreTests {
   }
 
   private val storeV3: KStore<CatV3> = storeOf(
-    filePath = filePath,
+    file = file,
     version = 3
   ) { version, jsonElement ->
     when (version) {
@@ -75,8 +76,8 @@ class KVersionedStoreTests {
 
   @AfterTest
   fun cleanup() {
-    FILE_SYSTEM.delete(filePath.toPath())
-    FILE_SYSTEM.delete("$filePath.version".toPath())
+    FILE_SYSTEM.delete(file)
+    FILE_SYSTEM.delete("${file.name}.version".toPath())
   }
 
   @Test
