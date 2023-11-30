@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidTestResultsUserPreferences">
+    <option name="androidTestResultsTableState">
+      <map>
+        <entry key="28629151">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Automotive_1024p_landscape_API_32" value="120" />
+                  <entry key="Duration" value="90" />
+                  <entry key="Pixel_Fold_API_34" value="120" />
+                  <entry key="Resizable_Experimental_API_34" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="Wear_OS_API_30" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
