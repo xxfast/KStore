@@ -1,5 +1,5 @@
 # KStore
-<img src="docs/images/kstore.svg" height="360" align="right"/> 
+<img src="docs/images/kstore.svg" height="240" align="right"/> 
 
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
 
