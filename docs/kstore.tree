@@ -4,8 +4,9 @@
 
 <instance-profile id="kstore"
                  name="KStore"
-                 start-page="installation.md">
+                 start-page="overview.md">
 
+    <toc-element topic="overview.md" toc-title="Overview"/>
     <toc-element topic="installation.md"/>
     <toc-element topic="usage.md">
     </toc-element>
