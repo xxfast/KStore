@@ -141,10 +141,8 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
 
-      - name: Generate docs with dokka
-        run: | 
-          ./gradlew dokkaHtmlMultiModule
-          mv build/dokka/htmlMultiModule build/reports/docs/api
+      - name: Generate api docs with dokka
+        run: ./gradlew dokkaHtmlMultiModule
 
       - name: Build Writerside docs using Docker
         uses: JetBrains/writerside-github-action@v4
@@ -165,13 +163,18 @@ jobs:
       - name: Unzip artifact
         uses: montudor/action-zip@v1
         with:
-          args: unzip -qq artifacts/webHelpKSTORE2-all.zip -d build/reports/docs
+          args: unzip -qq artifacts/webHelpKSTORE2-all.zip -d build/docs
+
+      - name: Move dokka api-doc to docs/api
+        run: |
+          mkdir build/docs/api
+          mv build/dokka/htmlMultiModule build/docs/api
 
       - name: Upload pages
         uses: actions/upload-pages-artifact@v1
         with:
           name: api
-          path: ${{ github.workspace }}/build/reports/docs
+          path: ${{ github.workspace }}/build/docs
 
       - name: Release to GitHub Pages
         id: deployment
