@@ -119,8 +119,8 @@ jobs:
 
   documentation:
     name: Publish documentation
-#    if: ${{ github.event_name != 'pull_request' }}
-    runs-on: macos-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
     needs:
       - build
     environment:
