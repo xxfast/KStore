@@ -82,13 +82,11 @@ jobs:
         run: ./gradlew ${{ matrix.config.tasks }}
 
   release:
+    name: Release to Sonatype
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: macos-latest
     needs:
       - build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v3
@@ -101,9 +99,6 @@ jobs:
 
       - name: Setup gradle
         uses: gradle/gradle-build-action@v2
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
 
       - name: Write secrets to local.properties
         if: ${{ github.event_name != 'pull_request' }}
@@ -121,13 +116,62 @@ jobs:
       - name: Release to sonatype
         run: ./gradlew publishAllPublicationsToMavenRepository
 
-      - name: Generate docs with dokka
-        run: ./gradlew dokkaHtmlMultiModule
 
-      - name: Upload artifact
+  documentation:
+    name: Publish documentation
+#    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: macos-latest
+    needs:
+      - build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Generate docs with dokka
+        run: | 
+          ./gradlew dokkaHtmlMultiModule
+          mv build/dokka/htmlMultiModule build/reports/docs/api
+
+      - name: Build Writerside docs using Docker
+        uses: JetBrains/writerside-github-action@v4
+        with:
+          instance: docs/kstore
+          artifact: webHelpKSTORE2-all.zip
+          docker-version: 232.10275
+
+      - name: Upload documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs
+          path: |
+            artifacts/webHelpKSTORE2-all.zip
+            artifacts/report.json
+          retention-days: 7
+
+      - name: Unzip artifact
+        uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq artifacts/webHelpKSTORE2-all.zip -d build/reports/docs
+
+      - name: Upload pages
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ${{ github.workspace }}/build/dokka/htmlMultiModule
+          name: api
+          path: ${{ github.workspace }}/build/reports/docs
 
       - name: Release to GitHub Pages
         id: deployment
