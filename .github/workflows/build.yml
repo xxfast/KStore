@@ -173,7 +173,6 @@ jobs:
       - name: Upload pages
         uses: actions/upload-pages-artifact@v1
         with:
-          name: api
           path: ${{ github.workspace }}/build/docs
 
       - name: Release to GitHub Pages
