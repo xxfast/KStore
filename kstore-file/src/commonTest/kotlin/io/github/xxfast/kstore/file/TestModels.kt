@@ -18,5 +18,4 @@ data class Cat(
 internal val MYLO = Cat(name = "Mylo", age = 1)
 internal val OREO = Cat(name = "Oreo", age = 1)
 
-const val FILE = "test.json"
-const val FOLDER = "build/bin/tests"
+const val FILE_PATH = "test.json"

@@ -18,31 +18,26 @@ import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
 public inline fun <reified T : @Serializable Any> FileCodec(
-  filePath: String,
+  file: Path,
   json: Json = DefaultJson,
 ): FileCodec<T> = FileCodec(
-  filePath = filePath,
+  file = file,
   json = json,
   serializer = json.serializersModule.serializer(),
 )
 
 @OptIn(ExperimentalSerializationApi::class)
 public class FileCodec<T : @Serializable Any>(
-  filePath: String,
+  private val file: Path,
   private val json: Json,
   private val serializer: KSerializer<T>,
 ) : Codec<T> {
-  private val path: Path = filePath.toPath()
-
   override suspend fun decode(): T? =
-    try { json.decode(serializer, FILE_SYSTEM.source(path).buffer()) }
+    try { json.decode(serializer, FILE_SYSTEM.source(file).buffer()) }
     catch (e: FileNotFoundException) { null }
 
   override suspend fun encode(value: T?) {
-    val parentFolder: Path? = path.parent
-    if (parentFolder != null && !FILE_SYSTEM.exists(parentFolder))
-      FILE_SYSTEM.createDirectories(parentFolder, mustCreate = false)
-    if (value != null) FILE_SYSTEM.sink(path).buffer().use { json.encode(serializer, value, it) }
-    else FILE_SYSTEM.delete(path)
+    if (value != null) FILE_SYSTEM.sink(file).buffer().use { json.encode(serializer, value, it) }
+    else FILE_SYSTEM.delete(file)
   }
 }

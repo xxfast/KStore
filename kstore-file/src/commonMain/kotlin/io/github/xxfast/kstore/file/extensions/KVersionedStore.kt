@@ -33,14 +33,14 @@ import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
  * @return store that contains a value of type [T]
  */
 public inline fun <reified T : @Serializable Any> storeOf(
-  filePath: String,
+  file: Path,
   version: Int,
   default: T? = null,
   enableCache: Boolean = true,
   json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
   noinline migration: Migration<T> = DefaultMigration(default),
 ): KStore<T> {
-  val codec: Codec<T> = VersionedCodec(filePath, version, json, json.serializersModule.serializer(), migration)
+  val codec: Codec<T> = VersionedCodec(file, version, json, json.serializersModule.serializer(), migration)
   return KStore(default, enableCache, codec)
 }
 
@@ -51,24 +51,23 @@ public typealias Migration<T> = (version: Int?, JsonElement?) -> T?
 
 @OptIn(ExperimentalSerializationApi::class)
 public class VersionedCodec<T: @Serializable Any>(
-  filePath: String,
+  private val file: Path,
   private val version: Int = 0,
   private val json: Json,
   private val serializer: KSerializer<T>,
   private val migration: Migration<T>,
 ): Codec<T> {
-  private val dataPath: Path = filePath.toPath()
-  private val versionPath: Path = "$filePath.version".toPath() // TODO: Save to file metadata instead
+  private val versionPath: Path = "$${file.name}.version".toPath() // TODO: Save to file metadata instead
 
   override suspend fun decode(): T? =
     try {
-      json.decode(serializer, FILE_SYSTEM.source(dataPath).buffer())
+      json.decode(serializer, FILE_SYSTEM.source(file).buffer())
     } catch (e: SerializationException) {
       val previousVersion: Int =
         if (FILE_SYSTEM.exists(versionPath)) json.decode(Int.serializer(), FILE_SYSTEM.source(versionPath).buffer())
         else 0
 
-      val data: JsonElement = json.decode(FILE_SYSTEM.source(dataPath).buffer())
+      val data: JsonElement = json.decode(FILE_SYSTEM.source(file).buffer())
       migration(previousVersion, data)
     } catch (e: FileNotFoundException) {
       null
@@ -77,10 +76,10 @@ public class VersionedCodec<T: @Serializable Any>(
   override suspend fun encode(value: T?) {
     if (value != null) {
       FILE_SYSTEM.sink(versionPath).buffer().use { json.encode(Int.serializer(), version, it) }
-      FILE_SYSTEM.sink(dataPath).buffer().use { json.encode(serializer, value, it) }
+      FILE_SYSTEM.sink(file).buffer().use { json.encode(serializer, value, it) }
     } else {
       FILE_SYSTEM.delete(versionPath)
-      FILE_SYSTEM.delete(dataPath)
+      FILE_SYSTEM.delete(file)
     }
   }
 }

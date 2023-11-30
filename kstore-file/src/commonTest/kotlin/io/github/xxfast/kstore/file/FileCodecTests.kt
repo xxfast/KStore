@@ -8,27 +8,24 @@ import kotlinx.serialization.SerializationException
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
-import kotlin.test.AfterTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.*
 
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as decode
 
 class FileCodecTests {
-  private val codec: FileCodec<Cat> = FileCodec(filePath = FILE)
+  private val codec: FileCodec<Cat> = FileCodec(file = FILE_PATH.toPath())
 
   @OptIn(ExperimentalSerializationApi::class)
   private var stored: Cat?
-    get() = FILE_SYSTEM.source(FILE.toPath()).buffer().use { DefaultJson.decode(it) }
+    get() = FILE_SYSTEM.source(FILE_PATH.toPath()).buffer().use { DefaultJson.decode(it) }
     set(value) {
-      FILE_SYSTEM.sink(FILE.toPath()).buffer().use { DefaultJson.decode(value, it) }
+      FILE_SYSTEM.sink(FILE_PATH.toPath()).buffer().use { DefaultJson.decode(value, it) }
     }
 
   @AfterTest
   fun cleanUp() {
-    FILE_SYSTEM.delete(FILE.toPath())
+    FILE_SYSTEM.delete(FILE_PATH.toPath())
   }
 
   @Test
@@ -48,17 +45,8 @@ class FileCodecTests {
   }
 
   @Test
-  fun testEncodeDecodeFromDirectory() = runTest {
-    val dirCodec: FileCodec<Cat> = FileCodec(filePath = "$FOLDER/$FILE")
-    dirCodec.encode(MYLO)
-    val expect: Pet = MYLO
-    val actual: Pet? = dirCodec.decode()
-    assertEquals(expect, actual)
-  }
-
-  @Test
   fun testDecodeMalformedFile() = runTest {
-    FILE_SYSTEM.sink(FILE.toPath()).buffer().use { it.writeUtf8("💩") }
+    FILE_SYSTEM.sink(FILE_PATH.toPath()).buffer().use { it.writeUtf8("💩") }
     assertFailsWith<SerializationException> { codec.decode() }
   }
 }
