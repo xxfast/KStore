@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE instance-profile
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
+
+<instance-profile id="kstore"
+                 name="KStore"
+                 start-page="installation.md">
+
+    <toc-element topic="installation.md"/>
+    <toc-element topic="usage.md">
+    </toc-element>
+    <toc-element topic="using-platform-paths.md"/>
+    <toc-element topic="using-versioning.md"/>
+    <toc-element topic="usage-list-store.md"/>
+</instance-profile>

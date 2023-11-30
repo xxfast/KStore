@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<buildprofiles xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <variables></variables>
+    <build-profile instance="kstore">
+        <variables>
+            <header-logo>kstore.svg</header-logo>
+            <color-preset>soft</color-preset>
+            <primary-color>purple</primary-color>
+        </variables>
+    </build-profile>
+    <build-profile instance="k">
+        <variables>
+            <noindex-content>true</noindex-content>
+        </variables>
+    </build-profile>
+</buildprofiles>
