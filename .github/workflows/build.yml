@@ -167,8 +167,8 @@ jobs:
 
       - name: Move dokka api-doc to docs/api
         run: |
-          sudo mkdir -p ${{ github.workspace }}/build/docs/api
-          mv ${{ github.workspace }}/build/dokka/htmlMultiModule ${{ github.workspace }}/build/docs/api
+          sudo mkdir -p build/docs/api
+          sudo mv build/dokka/htmlMultiModule build/docs/api
 
       - name: Upload pages
         uses: actions/upload-pages-artifact@v1
