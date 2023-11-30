@@ -167,7 +167,7 @@ jobs:
 
       - name: Move dokka api-doc to docs/api
         run: |
-          mkdir build/docs/api
+          mkdir -p build/docs/api
           mv build/dokka/htmlMultiModule build/docs/api
 
       - name: Upload pages
