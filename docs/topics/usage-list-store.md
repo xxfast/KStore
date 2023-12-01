@@ -1,6 +1,6 @@
 # Using List Store
 > This is experimental API and may be removed in future releases
-{style="warning"}
+{style="note"}
 
 KStore provides you with some convenient extensions to manage stores that contain lists.
 
