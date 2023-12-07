@@ -28,7 +28,11 @@ public class KStore<T : @Serializable Any>(
   /** Observe store for updates */
   public val updates: Flow<T?>
     get() = this.cache
-      .onStart { read(fromCache = false) } // updates will always start with a fresh read
+      .onStart {
+        lock.withLock {
+          read(fromCache = false)
+        }
+      } // updates will always start with a fresh read
 
   private suspend fun write(value: T?): Unit = withContext(StoreDispatcher) {
     codec.encode(value)
