@@ -35,7 +35,7 @@ Inspired by [RxStore](https://github.com/Gridstone/RxStore)
 @Serializable data class Pet(val name: String, val age: Int) 
 
 // Create a store
-val store: KStore<Pet> = storeOf(filePath = "path/to/my_cats.json")
+val store: KStore<Pet> = storeOf(file = "path/to/my_cats.json".toPath())
 
 // Get, set, update or delete values 
 val mylo: Pet? = store.get()
