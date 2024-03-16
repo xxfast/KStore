@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
@@ -47,6 +50,12 @@ kotlin {
   }
 
   js(IR) {
+    browser()
+    nodejs()
+  }
+
+  @OptIn(ExperimentalWasmDsl::class)
+  wasmJs {
     browser()
     nodejs()
   }
@@ -116,6 +125,9 @@ kotlin {
     val jsMain by getting
     val jsTest by getting
 
+    val wasmJsMain by getting
+    val wasmJsTest by getting
+
     val appleMain by creating {
       dependsOn(commonMain)
     }
@@ -132,4 +144,14 @@ kotlin {
     val windowsMain by getting
     val windowsTest by getting
   }
+}
+
+// TODO: https://youtrack.jetbrains.com/issue/KT-63014/Running-tests-with-wasmJs-in-1.9.20-requires-Chrome-Canary#focus=Comments-27-8321383.0-0
+project.the<NodeJsRootExtension>().apply {
+  nodeVersion = "21.0.0-v8-canary202309143a48826a08"
+  nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask>().configureEach {
+  args.add("--ignore-engines")
 }

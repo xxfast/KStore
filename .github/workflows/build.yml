@@ -61,6 +61,7 @@ jobs:
           { target: windows, os: windows-latest, tasks: windowsTest, continueOnError: true }, # https://github.com/square/okio/issues/951
           { target: linux, os: ubuntu-latest, tasks: linuxTest, continueOnError: false },
           { target: js, os: ubuntu-latest, tasks: jsTest, continueOnError: false },
+          { target: wasm, os: ubuntu-latest, tasks: wasmJsTest, continueOnError: false },
           { target: desktop, os: ubuntu-latest, tasks: desktopTest, continueOnError: false },
         ]
     runs-on: ${{ matrix.config.os }}
