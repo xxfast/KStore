@@ -2,10 +2,8 @@ package io.github.xxfast.kstore.storage
 
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
-import kotlinx.browser.localStorage
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.w3c.dom.Storage
 
 /**
  * Creates a store with [StorageCodec]

@@ -1,13 +1,9 @@
 package io.github.xxfast.kstore.storage
 
 import io.github.xxfast.kstore.DefaultJson
-import kotlinx.browser.localStorage
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import org.w3c.dom.get
-import org.w3c.dom.set
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,12 +16,12 @@ class StorageCodecTests {
     get() = localStorage[KEY]?.let { DefaultJson.decodeFromString(it) }
     set(value) {
       if(value != null) { localStorage[KEY] = DefaultJson.encodeToString(value) }
-      else localStorage.clear()
+      else localStorage.delete()
     }
 
   @AfterTest
   fun cleanUp() {
-    localStorage.clear()
+    localStorage.delete()
   }
 
   @Test
