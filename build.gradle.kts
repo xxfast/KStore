@@ -108,5 +108,3 @@ allprojects {
 koverMerged {
   enable()
 }
-
-
