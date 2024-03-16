@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
@@ -47,6 +49,12 @@ kotlin {
   }
 
   js(IR) {
+    browser()
+    nodejs()
+  }
+
+  @OptIn(ExperimentalWasmDsl::class)
+  wasmJs {
     browser()
     nodejs()
   }
@@ -115,6 +123,9 @@ kotlin {
 
     val jsMain by getting
     val jsTest by getting
+
+    val wasmJsMain by getting
+    val wasmJsTest by getting
 
     val appleMain by creating {
       dependsOn(commonMain)
