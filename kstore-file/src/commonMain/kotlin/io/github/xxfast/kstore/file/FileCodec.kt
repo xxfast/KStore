@@ -14,7 +14,6 @@ import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
-
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
@@ -36,16 +35,31 @@ public class FileCodec<T : @Serializable Any>(
   private val json: Json,
   private val serializer: KSerializer<T>,
 ) : Codec<T> {
+  /**
+   * Decodes the file to a value.
+   * If the file does not exist, null is returned.
+   * @return optional value that is decoded
+   */
   override suspend fun decode(): T? =
     try { json.decode(serializer, FILE_SYSTEM.source(file).buffer()) }
     catch (e: FileNotFoundException) { null }
 
+  /**
+   * Encodes the given value to the file.
+   * If the value is null, the file is deleted.
+   * If the encoding fails, the temp file is deleted.
+   * If the encoding succeeds, the temp file is atomically moved to the target file - completing the transaction.
+   * @param value optional value to encode
+   */
   override suspend fun encode(value: T?) {
     try {
       if (value != null) FILE_SYSTEM.sink(tempFile).buffer().use { json.encode(serializer, value, it) }
       else FILE_SYSTEM.delete(tempFile)
-    } finally {
-      FILE_SYSTEM.atomicMove(source = tempFile, target = file)
+    } catch (e: Throwable) {
+      FILE_SYSTEM.delete(tempFile)
+      throw e
     }
+
+    FILE_SYSTEM.atomicMove(source = tempFile, target = file)
   }
 }

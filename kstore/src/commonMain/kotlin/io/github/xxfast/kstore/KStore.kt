@@ -21,7 +21,7 @@ public class KStore<T : @Serializable Any>(
   private val default: T? = null,
   private val enableCache: Boolean = true,
   private val codec: Codec<T>,
-) {
+) : AutoCloseable {
   private val lock: Mutex = Mutex()
   internal val cache: MutableStateFlow<T?> = MutableStateFlow(default)
 
@@ -87,5 +87,9 @@ public class KStore<T : @Serializable Any>(
   public suspend fun reset() {
     set(default)
     cache.emit(default)
+  }
+
+  override fun close() {
+    lock.unlock()
   }
 }
