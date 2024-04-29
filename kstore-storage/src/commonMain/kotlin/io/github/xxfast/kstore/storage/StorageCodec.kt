@@ -2,14 +2,10 @@ package io.github.xxfast.kstore.storage
 
 import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
-import kotlinx.browser.localStorage
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import org.w3c.dom.Storage
-import org.w3c.dom.get
-import org.w3c.dom.set
 
 public inline fun <reified T : @Serializable Any> StorageCodec(
   key: String,
@@ -30,7 +26,7 @@ public class StorageCodec<T : @Serializable Any>(
 ) : Codec<T> {
   override suspend fun encode(value: T?) {
     if (value != null) storage[key] = json.encodeToString(serializer, value)
-    else storage.removeItem(key)
+    else storage.remove(key)
   }
 
   override suspend fun decode(): T? = storage[key]

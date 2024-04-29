@@ -4,10 +4,10 @@ androidx-test-junit = "1.1.5"
 junit = "4.13.2"
 junit-jupiter="5.9.3"
 kotlin = "1.9.22"
-kotlinx-coroutines = "1.7.3"
+kotlinx-coroutines = "1.8.0"
 kotlinx-serialization = "1.6.2"
 okio = "3.9.0"
-turbine = "1.0.0"
+turbine = "1.1.0"
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
