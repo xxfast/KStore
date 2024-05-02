@@ -24,10 +24,11 @@ import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
  * Creates a store with a versioned encoder and decoder
  * Note: An additional file will be written to manage metadata on the same path with `.version` suffix
  *
- * @param filePath path to the file that is managed by this store
+ * @param file path to the file that is managed by this store
  * @param default returns this value if the file is not found. defaults to null
  * @param enableCache maintain a cache. If set to false, it always reads from disk
  * @param json Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
+ * @param versionPath path to the file that contains the current version of the store
  * @param migration Migration strategy to use. Defaults
  *
  * @return store that contains a value of type [T]
@@ -38,9 +39,10 @@ public inline fun <reified T : @Serializable Any> storeOf(
   default: T? = null,
   enableCache: Boolean = true,
   json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
+  versionPath: Path = "$file.version".toPath(), // TODO: Save to file metadata instead
   noinline migration: Migration<T> = DefaultMigration(default),
 ): KStore<T> {
-  val codec: Codec<T> = VersionedCodec(file, version, json, json.serializersModule.serializer(), migration)
+  val codec: Codec<T> = VersionedCodec(file, version, json, json.serializersModule.serializer(), migration, versionPath)
   return KStore(default, enableCache, codec)
 }
 
@@ -56,8 +58,8 @@ public class VersionedCodec<T: @Serializable Any>(
   private val json: Json,
   private val serializer: KSerializer<T>,
   private val migration: Migration<T>,
+  private val versionPath: Path = "$file.version".toPath(), // TODO: Save to file metadata instead
 ): Codec<T> {
-  private val versionPath: Path = "$${file.name}.version".toPath() // TODO: Save to file metadata instead
 
   override suspend fun decode(): T? =
     try {
