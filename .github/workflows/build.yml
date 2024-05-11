@@ -83,7 +83,10 @@ jobs:
         run: ./gradlew ${{ matrix.config.tasks }}
 
   release:
-    name: Release to Sonatype
+    name: Release ${{ matrix.module }} to Sonatype
+    strategy:
+      matrix:
+        module: [kstore, kstore-file, kstore-storage]
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: macos-latest
     needs:
@@ -115,7 +118,7 @@ jobs:
           GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
 
       - name: Release to sonatype
-        run: ./gradlew publishAllPublicationsToMavenRepository
+        run: ./gradlew :${{ matrix.module }}:publishAllPublicationsToMavenRepository
 
 
   documentation:
