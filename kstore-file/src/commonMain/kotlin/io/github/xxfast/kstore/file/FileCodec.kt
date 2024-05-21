@@ -14,14 +14,17 @@ import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
+
 import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
 import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
 public inline fun <reified T : @Serializable Any> FileCodec(
   file: Path,
+  tempFile: Path = "${file.name}.temp".toPath(),
   json: Json = DefaultJson,
 ): FileCodec<T> = FileCodec(
   file = file,
+  tempFile = tempFile,
   json = json,
   serializer = json.serializersModule.serializer(),
 )
@@ -29,6 +32,7 @@ public inline fun <reified T : @Serializable Any> FileCodec(
 @OptIn(ExperimentalSerializationApi::class)
 public class FileCodec<T : @Serializable Any>(
   private val file: Path,
+  private val tempFile: Path,
   private val json: Json,
   private val serializer: KSerializer<T>,
 ) : Codec<T> {
@@ -37,7 +41,11 @@ public class FileCodec<T : @Serializable Any>(
     catch (e: FileNotFoundException) { null }
 
   override suspend fun encode(value: T?) {
-    if (value != null) FILE_SYSTEM.sink(file).buffer().use { json.encode(serializer, value, it) }
-    else FILE_SYSTEM.delete(file)
+    try {
+      if (value != null) FILE_SYSTEM.sink(tempFile).buffer().use { json.encode(serializer, value, it) }
+      else FILE_SYSTEM.delete(tempFile)
+    } finally {
+      FILE_SYSTEM.atomicMove(source = tempFile, target = file)
+    }
   }
 }

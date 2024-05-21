@@ -24,5 +24,8 @@ public inline fun <reified T : @Serializable Any> storeOf(
 ): KStore<T> = KStore(
   default = default,
   enableCache = enableCache,
-  codec = FileCodec(file, json)
+  codec = FileCodec(
+    file = file,
+    json = json
+  )
 )
