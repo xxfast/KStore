@@ -56,11 +56,14 @@ Depending on your target platforms, you will need to add platform configurations
 ## At a glance
 
 ```kotlin
+import kotlin.io.path.Path
+import kotlinx.serialization.Serializable
+
 // Take any serializable model 
 @Serializable data class Pet(val name: String, val age: Int) 
 
 // Create a store
-val store: KStore<Pet> = storeOf(file = "path/to/my_cats.json".toPath())
+val store: KStore<Pet> = storeOf(file = Path("path/to/my_cats.json"))
 
 // Get, set, update or delete values 
 val mylo: Pet? = store.get()
