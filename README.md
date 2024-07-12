@@ -4,7 +4,7 @@
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
 
 [![Kotlin Alpha](https://kotl.in/badges/alpha.svg)](https://kotlinlang.org/docs/components-stability.html)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.21-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.0Beta2-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
@@ -19,7 +19,7 @@
 ![badge-jsBrowser](https://img.shields.io/badge/platform-jsBrowser-F8DB5D.svg?style=flat)
 ![badge-wasmJsBrowser](https://img.shields.io/badge/platform-wasmJsBrowser-F8DB5D.svg?style=flat)
 
-A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio.
+A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialization and kotlinx.io.
 Inspired by [RxStore](https://github.com/Gridstone/RxStore)
 
 ## Features

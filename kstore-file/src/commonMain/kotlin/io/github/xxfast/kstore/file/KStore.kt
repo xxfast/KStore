@@ -2,9 +2,9 @@ package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
+import kotlinx.io.files.Path
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import okio.Path
 
 /**
  * Creates a store with [FileCodec]

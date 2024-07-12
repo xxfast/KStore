@@ -2,11 +2,9 @@ package io.github.xxfast.kstore.file.extensions
 
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.file.storeOf
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.io.files.Path
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import okio.Path
 
 /**
  * Creates a store that contains a list
