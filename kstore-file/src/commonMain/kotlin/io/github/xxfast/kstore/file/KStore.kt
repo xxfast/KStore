@@ -2,9 +2,11 @@ package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
+import io.github.xxfast.kstore.file.format.KStoreFormat
+import io.github.xxfast.kstore.file.format.KStoreFormatJson
 import kotlinx.io.files.Path
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
 /**
  * Creates a store with [FileCodec]
@@ -12,7 +14,7 @@ import kotlinx.serialization.json.Json
  * @param file path to the file that is managed by this store
  * @param default returns this value if the file is not found. defaults to null
  * @param enableCache maintain a cache. If set to false, it always reads from disk
- * @param json Serializer to use. defaults to [DefaultJson]
+ * @param format Serializer to use. defaults to [KStoreFormatJson]
  *
  * @return store that contains a value of type [T]
  */
@@ -20,9 +22,9 @@ public inline fun <reified T : @Serializable Any> storeOf(
   file: Path,
   default: T? = null,
   enableCache: Boolean = true,
-  json: Json = DefaultJson,
-): KStore<T> = KStore(
+  format: KStoreFormat<T> = KStoreFormatJson(DefaultJson, DefaultJson.serializersModule.serializer()),
+  ): KStore<T> = KStore(
   default = default,
   enableCache = enableCache,
-  codec = FileCodec(file, json)
+  codec = FileCodec(file, format)
 )

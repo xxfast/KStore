@@ -90,7 +90,6 @@ kotlin {
           implementation(project(":kstore"))
           api(libs.kotlinx.io)
           implementation(libs.kotlinx.coroutines)
-          implementation(libs.kotlinx.serialization.json)
           implementation(libs.kotlinx.serialization.json.io)
         }
       }
