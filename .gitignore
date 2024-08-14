@@ -4,7 +4,7 @@
 /build/classes/kotlin/jvm/main/
 /build/classes/kotlin/jvm/test/
 local.properties
-/.kotlin
+/.kotlin/
 
 # Mac
 .DS_Store
