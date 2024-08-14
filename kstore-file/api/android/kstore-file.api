@@ -1,5 +1,5 @@
 public final class io/github/xxfast/kstore/file/FileCodec : io/github/xxfast/kstore/Codec {
-	public fun <init> (Lkotlinx/io/files/Path;Lio/github/xxfast/kstore/file/format/KStoreFormat;Lkotlinx/serialization/KSerializer;)V
+	public fun <init> (Lkotlinx/io/files/Path;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
 	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -13,18 +13,5 @@ public final class io/github/xxfast/kstore/file/extensions/VersionedCodec : io/g
 	public synthetic fun <init> (Lkotlinx/io/files/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lkotlinx/io/files/Path;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract class io/github/xxfast/kstore/file/format/KStoreFormat {
-	public fun <init> (Lkotlinx/serialization/KSerializer;)V
-	public abstract fun decodeFromSource (Lkotlinx/serialization/DeserializationStrategy;Lkotlinx/io/Source;)Ljava/lang/Object;
-	public abstract fun encodeToSink (Lkotlinx/serialization/SerializationStrategy;Ljava/lang/Object;Lkotlinx/io/Sink;)V
-	public final fun getSerializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class io/github/xxfast/kstore/file/format/KStoreFormatJson : io/github/xxfast/kstore/file/format/KStoreFormat {
-	public fun <init> (Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
-	public fun decodeFromSource (Lkotlinx/serialization/DeserializationStrategy;Lkotlinx/io/Source;)Ljava/lang/Object;
-	public fun encodeToSink (Lkotlinx/serialization/SerializationStrategy;Ljava/lang/Object;Lkotlinx/io/Sink;)V
 }
 
