@@ -5,7 +5,6 @@ import io.github.xxfast.kstore.file.storeOf
 import kotlinx.io.files.Path
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 
 /**
  * Creates a store that contains a list

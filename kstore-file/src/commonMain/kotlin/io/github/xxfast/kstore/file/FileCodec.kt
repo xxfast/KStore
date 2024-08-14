@@ -15,6 +15,12 @@ import kotlinx.serialization.json.io.decodeFromSource
 import kotlinx.serialization.json.io.encodeToSink
 import kotlinx.serialization.serializer
 
+/**
+ * Creates a store with [FileCodec] with json serializer
+ * @param file path to the file that is managed by this store
+ * @param json JSON Serializer to use. defaults to [DefaultJson]
+ * @return store that contains a value of type [T]
+ */
 public inline fun <reified T : @Serializable Any> FileCodec(
   file: Path,
   json: Json = DefaultJson,

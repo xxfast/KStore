@@ -1,5 +1,6 @@
 package io.github.xxfast.kstore.file
 
+import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
 import kotlinx.io.files.Path
@@ -21,8 +22,28 @@ public inline fun <reified T : @Serializable Any> storeOf(
   default: T? = null,
   enableCache: Boolean = true,
   json: Json = DefaultJson,
+): KStore<T> = storeOf(
+  codec = FileCodec(file, json),
+  default = default,
+  enableCache = enableCache,
+)
+
+/**
+ * Creates a store with a given codec
+ *
+ * @param default returns this value if the file is not found. defaults to null
+ * @param enableCache maintain a cache. If set to false, it always reads from disk
+ * @param codec codec to be used.
+ *
+ * @return store that contains a value of type [T]
+ */
+public inline fun <reified T : @Serializable Any> storeOf(
+  codec: Codec<T>,
+  default: T? = null,
+  enableCache: Boolean = true,
 ): KStore<T> = KStore(
   default = default,
   enableCache = enableCache,
-  codec = FileCodec(file, json)
+  codec = codec
 )
+
