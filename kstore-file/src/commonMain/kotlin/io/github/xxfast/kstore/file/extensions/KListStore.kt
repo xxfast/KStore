@@ -1,7 +1,6 @@
 package io.github.xxfast.kstore.file.extensions
 
 import io.github.xxfast.kstore.KStore
-import io.github.xxfast.kstore.file.format.KStoreFormatJson
 import io.github.xxfast.kstore.file.storeOf
 import kotlinx.io.files.Path
 import kotlinx.serialization.Serializable
@@ -23,4 +22,4 @@ public inline fun <reified T : @Serializable Any> listStoreOf(
   default: List<T> = emptyList(),
   enableCache: Boolean = true,
   json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
-): KStore<List<T>> = storeOf(file, default, enableCache, KStoreFormatJson(json, json.serializersModule.serializer()))
+): KStore<List<T>> = storeOf(file, default, enableCache, json)

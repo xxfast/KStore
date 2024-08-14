@@ -1,7 +1,6 @@
 package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.DefaultJson
-import io.github.xxfast.kstore.file.format.KStoreFormatJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
@@ -22,7 +21,7 @@ class FileCodecTests {
 
   private val codec: FileCodec<Cat> = FileCodec(
     file = file,
-    format = KStoreFormatJson(DefaultJson, Cat.serializer()),
+    json = DefaultJson,
   )
 
   @OptIn(ExperimentalSerializationApi::class)
