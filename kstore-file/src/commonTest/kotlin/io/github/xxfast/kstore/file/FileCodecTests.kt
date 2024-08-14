@@ -1,31 +1,40 @@
 package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.DefaultJson
-import io.github.xxfast.kstore.file.utils.FILE_SYSTEM
+import io.github.xxfast.kstore.file.format.KStoreFormatJson
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.writeString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.use
-import kotlin.test.*
+import kotlinx.serialization.json.io.decodeFromSource
+import kotlinx.serialization.json.io.encodeToSink
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
-import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
-import kotlinx.serialization.json.okio.encodeToBufferedSink as decode
 
 class FileCodecTests {
-  private val codec: FileCodec<Cat> = FileCodec(file = FILE_PATH.toPath())
+  private val file = Path(FILE_PATH)
+
+  private val codec: FileCodec<Cat> = FileCodec(
+    file = file,
+    format = KStoreFormatJson(DefaultJson, Cat.serializer()),
+  )
 
   @OptIn(ExperimentalSerializationApi::class)
   private var stored: Cat?
-    get() = FILE_SYSTEM.source(FILE_PATH.toPath()).buffer().use { DefaultJson.decode(it) }
+    get() = SystemFileSystem.source(file).buffered().use { DefaultJson.decodeFromSource(it) }
     set(value) {
-      FILE_SYSTEM.sink(FILE_PATH.toPath()).buffer().use { DefaultJson.decode(value, it) }
+      SystemFileSystem.sink(file).buffered().use { DefaultJson.encodeToSink(value, it) }
     }
 
   @AfterTest
   fun cleanUp() {
-    FILE_SYSTEM.delete(FILE_PATH.toPath())
+    SystemFileSystem.delete(Path(FILE_PATH))
   }
 
   @Test
@@ -46,7 +55,7 @@ class FileCodecTests {
 
   @Test
   fun testDecodeMalformedFile() = runTest {
-    FILE_SYSTEM.sink(FILE_PATH.toPath()).buffer().use { it.writeUtf8("💩") }
+    SystemFileSystem.sink(file).buffered().use { it.writeString("💩") }
     assertFailsWith<SerializationException> { codec.decode() }
   }
 }

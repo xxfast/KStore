@@ -80,8 +80,8 @@ public class VersionedCodec<T : @Serializable Any>(
       SystemFileSystem.sink(versionPath).buffered().use { json.encode(Int.serializer(), version, it) }
       SystemFileSystem.sink(file).buffered().use { json.encode(serializer, value, it) }
     } else {
-      SystemFileSystem.delete(versionPath)
-      SystemFileSystem.delete(file)
+      SystemFileSystem.delete(versionPath, mustExist = false)
+      SystemFileSystem.delete(file, mustExist = false)
     }
   }
 }

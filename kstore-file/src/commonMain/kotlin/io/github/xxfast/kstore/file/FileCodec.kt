@@ -32,7 +32,7 @@ public class FileCodec<T : @Serializable Any>(
     }
 
   override suspend fun encode(value: T?) {
-    if (value != null) format.encodeToSink(serializer, value, SystemFileSystem.sink(file).buffered())
+    if (value != null) SystemFileSystem.sink(file).buffered().use { format.encodeToSink(serializer, value, it) }
     else SystemFileSystem.delete(file)
   }
 }
