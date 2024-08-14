@@ -1,7 +1,9 @@
 package io.github.xxfast.kstore.file.extensions
 
 import io.github.xxfast.kstore.Codec
+import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
+import io.github.xxfast.kstore.file.storeOf
 import kotlinx.io.buffered
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
@@ -35,13 +37,14 @@ public inline fun <reified T : @Serializable Any> storeOf(
   version: Int,
   default: T? = null,
   enableCache: Boolean = true,
-  json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
+  json: Json = DefaultJson,
   versionPath: Path = Path("$file.version"), // TODO: Save to file metadata instead
   noinline migration: Migration<T> = DefaultMigration(default),
-): KStore<T> {
-  val codec: Codec<T> = VersionedCodec(file, version, json, json.serializersModule.serializer(), migration, versionPath)
-  return KStore(default, enableCache, codec)
-}
+): KStore<T> = storeOf(
+  codec = VersionedCodec(file, version, json, json.serializersModule.serializer(), migration, versionPath),
+  default = default,
+  enableCache = enableCache,
+)
 
 @Suppress("FunctionName") // Fake constructor
 public fun <T> DefaultMigration(default: T?): Migration<T> = { _, _ -> default }
