@@ -1,7 +1,7 @@
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.13.2"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.15.1"
 }
 
 android {
@@ -88,10 +88,9 @@ kotlin {
       val commonMain by getting {
         dependencies {
           implementation(project(":kstore"))
-          api(libs.okio)
+          api(libs.kotlinx.io)
           implementation(libs.kotlinx.coroutines)
-          implementation(libs.kotlinx.serialization.json)
-          implementation(libs.kotlinx.serialization.json.okio)
+          implementation(libs.kotlinx.serialization.json.io)
         }
       }
 
@@ -112,11 +111,8 @@ kotlin {
       }
       val desktopTest by getting
 
-      val jsMain by getting {
-        dependencies {
-          implementation(libs.okio.nodefilesystem)
-        }
-      }
+      val jsMain by getting
+
       val jsTest by getting
 
       val appleMain by creating {

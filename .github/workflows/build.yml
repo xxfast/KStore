@@ -37,15 +37,14 @@ jobs:
         run: ./gradlew apiCheck
 
       - name: Generate kover coverage report
-        run: ./gradlew koverMergedXmlReport
+        run: ./gradlew koverXmlReport
 
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
         id: kover
         uses: mi-kas/kover-report@v1
-        continue-on-error: true # https://github.com/mi-kas/kover-report/issues/111
         with:
-          path: ${{ github.workspace }}/build/reports/kover/merged/xml/report.xml
+          path: ${{ github.workspace }}/kstore/build/reports/kover/report.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Code Coverage
           update-comment: true

@@ -7,7 +7,7 @@ KStore provides you with some convenient extensions to manage stores that contai
 ## Create a list store
 `listStoreOf` is the same as `storeOf`, but defaults to empty list instead of `null`
 ```kotlin
-val listStore: KStore<List<Pet>> = listStoreOf("path/to/file") 
+val listStore: KStore<List<Pet>> = listStoreOf(file = "path/to/file") 
 ```
 
 ## Get values

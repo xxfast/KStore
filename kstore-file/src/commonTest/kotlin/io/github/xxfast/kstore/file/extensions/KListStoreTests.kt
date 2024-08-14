@@ -3,6 +3,7 @@
 package io.github.xxfast.kstore.file.extensions
 
 import app.cash.turbine.test
+import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.extensions.get
 import io.github.xxfast.kstore.extensions.getOrEmpty
@@ -14,27 +15,23 @@ import io.github.xxfast.kstore.extensions.updatesOrEmpty
 import io.github.xxfast.kstore.file.Cat
 import io.github.xxfast.kstore.file.MYLO
 import io.github.xxfast.kstore.file.OREO
-import io.github.xxfast.kstore.file.utils.FILE_SYSTEM
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.okio.encodeToBufferedSink
-import okio.Path
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.use
+import kotlinx.serialization.json.io.encodeToSink
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class KListStoreTests {
-  private val file: Path = "test_lists.json".toPath()
+  private val file: Path = Path("test_lists.json")
   private val store: KStore<List<Cat>> = listStoreOf(file = file)
 
   @AfterTest
   fun setup() {
-    FILE_SYSTEM.delete(file)
+    SystemFileSystem.delete(file, mustExist = false)
   }
 
   @Test
@@ -62,7 +59,7 @@ class KListStoreTests {
 
   @Test
   fun testReadPreviouslyStoredList() = runTest {
-    FILE_SYSTEM.sink(file).buffer().use { Json.encodeToBufferedSink(listOf(OREO) , it) }
+    SystemFileSystem.sink(file).buffered().use { DefaultJson.encodeToSink(listOf(OREO) , it) }
     // Mylo will never be sent 😿 because there is already a stored value
     val newStore: KStore<List<Cat>> = listStoreOf(file = file, default = listOf(MYLO))
     val expect: List<Cat> = listOf(OREO)

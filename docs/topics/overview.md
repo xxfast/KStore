@@ -4,7 +4,7 @@
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
 
 [![Kotlin Alpha](https://kotl.in/badges/alpha.svg)](https://kotlinlang.org/docs/components-stability.html)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.21-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.10-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
@@ -35,7 +35,7 @@ Inspired by [RxStore](https://github.com/Gridstone/RxStore)
 @Serializable data class Pet(val name: String, val age: Int) 
 
 // Create a store
-val store: KStore<Pet> = storeOf(filePath = "path/to/my_cats.json")
+val store: KStore<Pet> = storeOf(file = Path("path/to/my_cats.json"))
 
 // Get, set, update or delete values 
 val mylo: Pet? = store.get()

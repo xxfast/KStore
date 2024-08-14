@@ -154,7 +154,6 @@ kotlin {
 // Node.js Canary is set to 21.0.0-v8-canary20231019bd785be450
 // as that is the last version to ship Windows binaries too.
 //
-
 rootProject.extensions.configure<NodeJsRootExtension> {
   nodeVersion = "21.0.0-v8-canary20231019bd785be450"
   nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
@@ -166,4 +165,9 @@ rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
   if (!args.contains(flag)) {
     args.add(flag)
   }
+}
+
+dependencies {
+  kover(project(":kstore-file"))
+  kover(project(":kstore-storage"))
 }

@@ -5,7 +5,7 @@ Initialise your stores and keep a reference to it in your app (_preferably_ usin
 
 ### KStore File
 ```kotlin
-val store: KStore<Pet> = storeOf(file = "$appDir/my_cats.json".toPath())
+val store: KStore<Pet> = storeOf(file = Path("$appDir/my_cats.json"))
 ```
 
 > **NOTE** - Setting up the `appDir` is covered [here](using-platform-paths.md)
@@ -16,15 +16,19 @@ val store: KStore<Pet> = storeOf(file = "$appDir/my_cats.json".toPath())
 ```
 
 ### Other configuration options
-Everything you want is in the factory method
+Everything you want is in factory methods
+
 ```kotlin
 val store: KStore<Pet> = storeOf(
-  // For kstore-file
-  file = "$appDir/$fileName.json".toPath(),
+  // For kstore-file with json
+  file = Path("$appDir/$fileName.json"),
 
-  // For kstore-storage
+  // Or for kstore-storage
   key = "$keyName",
   storage = localStorage, // optional
+  
+  // Or your own custom codec 
+  codec = YourCustomCodec<Pet>(), // optional
 
   // Returns this value if the file is not found. Defaults to null
   default = null, // optional
@@ -36,7 +40,7 @@ val store: KStore<Pet> = storeOf(
   version = 0, // optional
   migration = { version, jsonElement -> default }, // optional
 
-  // Serializer to use. Defaults serializer ignores unknown keys and encodes the defaults
+  // For kstore-file, the serializer to use. 
   serializer = Json {
     ignoreUnknownKeys = true
     encodeDefaults = true
