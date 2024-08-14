@@ -37,7 +37,7 @@ jobs:
         run: ./gradlew apiCheck
 
       - name: Generate kover coverage report
-        run: ./gradlew koverMergedXmlReport
+        run: ./gradlew koverXmlReport
 
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
