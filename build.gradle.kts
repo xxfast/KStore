@@ -104,7 +104,3 @@ allprojects {
     dependsOn(project.tasks.withType(Sign::class.java))
   }
 }
-
-//koverMerged {
-//  enable()
-//}

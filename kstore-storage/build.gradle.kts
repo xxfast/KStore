@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 
@@ -14,7 +13,6 @@ kotlin {
     browser()
   }
 
-  @OptIn(ExperimentalWasmDsl::class)
   wasmJs {
     binaries.executable()
     browser()
