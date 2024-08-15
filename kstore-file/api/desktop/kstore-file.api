@@ -1,5 +1,5 @@
 public final class io/github/xxfast/kstore/file/FileCodec : io/github/xxfast/kstore/Codec {
-	public fun <init> (Lokio/Path;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
+	public fun <init> (Lkotlinx/io/files/Path;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
 	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -9,13 +9,9 @@ public final class io/github/xxfast/kstore/file/extensions/KVersionedStoreKt {
 }
 
 public final class io/github/xxfast/kstore/file/extensions/VersionedCodec : io/github/xxfast/kstore/Codec {
-	public fun <init> (Lokio/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lokio/Path;)V
-	public synthetic fun <init> (Lokio/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lokio/Path;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlinx/io/files/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lkotlinx/io/files/Path;)V
+	public synthetic fun <init> (Lkotlinx/io/files/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lkotlinx/io/files/Path;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/github/xxfast/kstore/file/utils/FileSystemKt {
-	public static final fun getFILE_SYSTEM ()Lokio/FileSystem;
 }
 

@@ -2,15 +2,14 @@ package io.github.xxfast.kstore.file.extensions
 
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.file.storeOf
-import io.github.xxfast.kstore.file.utils.FILE_SYSTEM
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
-import okio.Path
-import okio.Path.Companion.toPath
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,7 +25,7 @@ val MYLO_V2 = CatV2(name = "mylo", lives = 7, age = 2, kawaiiness = 12L)
 val MYLO_V3 = CatV3(name = "mylo", lives = 7, age = 2, isCute = true)
 
 class KVersionedStoreTests {
-  private val file: Path = "test_migration.json".toPath()
+  private val file: Path = Path("test_migration.json")
 
   private val storeV0: KStore<CatV0> = storeOf(file = file)
 
@@ -76,8 +75,8 @@ class KVersionedStoreTests {
 
   @AfterTest
   fun cleanup() {
-    FILE_SYSTEM.delete(file)
-    FILE_SYSTEM.delete("${file.name}.version".toPath())
+    SystemFileSystem.delete(file, mustExist = false)
+    SystemFileSystem.delete(Path("${file.name}.version"), mustExist = false)
   }
 
   @Test

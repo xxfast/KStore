@@ -1,8 +1,13 @@
 package io.github.xxfast.kstore.file.extensions
 
-import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.Codec
-import io.github.xxfast.kstore.file.utils.FILE_SYSTEM
+import io.github.xxfast.kstore.DefaultJson
+import io.github.xxfast.kstore.KStore
+import io.github.xxfast.kstore.file.storeOf
+import kotlinx.io.buffered
+import kotlinx.io.files.FileNotFoundException
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -11,14 +16,8 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.serializer
-import okio.FileNotFoundException
-import okio.Path
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.use
-
-import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
-import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
+import kotlinx.serialization.json.io.decodeFromSource as decode
+import kotlinx.serialization.json.io.encodeToSink as encode
 
 /**
  * Creates a store with a versioned encoder and decoder
@@ -38,13 +37,14 @@ public inline fun <reified T : @Serializable Any> storeOf(
   version: Int,
   default: T? = null,
   enableCache: Boolean = true,
-  json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
-  versionPath: Path = "$file.version".toPath(), // TODO: Save to file metadata instead
+  json: Json = DefaultJson,
+  versionPath: Path = Path("$file.version"), // TODO: Save to file metadata instead
   noinline migration: Migration<T> = DefaultMigration(default),
-): KStore<T> {
-  val codec: Codec<T> = VersionedCodec(file, version, json, json.serializersModule.serializer(), migration, versionPath)
-  return KStore(default, enableCache, codec)
-}
+): KStore<T> = storeOf(
+  codec = VersionedCodec(file, version, json, json.serializersModule.serializer(), migration, versionPath),
+  default = default,
+  enableCache = enableCache,
+)
 
 @Suppress("FunctionName") // Fake constructor
 public fun <T> DefaultMigration(default: T?): Migration<T> = { _, _ -> default }
@@ -52,24 +52,27 @@ public fun <T> DefaultMigration(default: T?): Migration<T> = { _, _ -> default }
 public typealias Migration<T> = (version: Int?, JsonElement?) -> T?
 
 @OptIn(ExperimentalSerializationApi::class)
-public class VersionedCodec<T: @Serializable Any>(
+public class VersionedCodec<T : @Serializable Any>(
   private val file: Path,
   private val version: Int = 0,
   private val json: Json,
   private val serializer: KSerializer<T>,
   private val migration: Migration<T>,
-  private val versionPath: Path = "$file.version".toPath(), // TODO: Save to file metadata instead
-): Codec<T> {
+  private val versionPath: Path = Path("$file.version"), // TODO: Save to file metadata instead
+) : Codec<T> {
 
   override suspend fun decode(): T? =
     try {
-      json.decode(serializer, FILE_SYSTEM.source(file).buffer())
+      json.decode(serializer, SystemFileSystem.source(file).buffered())
     } catch (e: SerializationException) {
       val previousVersion: Int =
-        if (FILE_SYSTEM.exists(versionPath)) json.decode(Int.serializer(), FILE_SYSTEM.source(versionPath).buffer())
+        if (SystemFileSystem.exists(versionPath)) json.decode(
+          Int.serializer(),
+          SystemFileSystem.source(versionPath).buffered()
+        )
         else 0
 
-      val data: JsonElement = json.decode(FILE_SYSTEM.source(file).buffer())
+      val data: JsonElement = json.decode(SystemFileSystem.source(file).buffered())
       migration(previousVersion, data)
     } catch (e: FileNotFoundException) {
       null
@@ -77,11 +80,11 @@ public class VersionedCodec<T: @Serializable Any>(
 
   override suspend fun encode(value: T?) {
     if (value != null) {
-      FILE_SYSTEM.sink(versionPath).buffer().use { json.encode(Int.serializer(), version, it) }
-      FILE_SYSTEM.sink(file).buffer().use { json.encode(serializer, value, it) }
+      SystemFileSystem.sink(versionPath).buffered().use { json.encode(Int.serializer(), version, it) }
+      SystemFileSystem.sink(file).buffered().use { json.encode(serializer, value, it) }
     } else {
-      FILE_SYSTEM.delete(versionPath)
-      FILE_SYSTEM.delete(file)
+      SystemFileSystem.delete(versionPath, mustExist = false)
+      SystemFileSystem.delete(file, mustExist = false)
     }
   }
 }
