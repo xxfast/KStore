@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class KStoreTests {
-  private val store: KStore<Cat> = KStore(codec = TestCodec())
+  private val store: KStore<Cat> = storeOf(codec = TestCodec())
 
   @AfterTest
   fun cleanup() {
