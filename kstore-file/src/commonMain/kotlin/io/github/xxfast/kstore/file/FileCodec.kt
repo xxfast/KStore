@@ -3,23 +3,28 @@ package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
-import io.github.xxfast.kstore.file.utils.FILE_SYSTEM
+import kotlinx.io.buffered
+import kotlinx.io.files.FileNotFoundException
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import okio.FileNotFoundException
-import okio.Path
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.use
-import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
-import kotlinx.serialization.json.okio.encodeToBufferedSink as encode
 
+import kotlinx.serialization.json.io.decodeFromSource as decode
+import kotlinx.serialization.json.io.encodeToSink as encode
+
+/**
+ * Creates a store with [FileCodec] with json serializer
+ * @param file path to the file that is managed by this store
+ * @param json JSON Serializer to use. defaults to [DefaultJson]
+ * @return store that contains a value of type [T]
+ */
 public inline fun <reified T : @Serializable Any> FileCodec(
   file: Path,
-  tempFile: Path = "${file.name}.temp".toPath(),
+  tempFile: Path = Path("${file.name}.temp"),
   json: Json = DefaultJson,
 ): FileCodec<T> = FileCodec(
   file = file,
@@ -28,7 +33,6 @@ public inline fun <reified T : @Serializable Any> FileCodec(
   serializer = json.serializersModule.serializer(),
 )
 
-@OptIn(ExperimentalSerializationApi::class)
 public class FileCodec<T : @Serializable Any>(
   private val file: Path,
   private val tempFile: Path,
@@ -40,9 +44,13 @@ public class FileCodec<T : @Serializable Any>(
    * If the file does not exist, null is returned.
    * @return optional value that is decoded
    */
+  @OptIn(ExperimentalSerializationApi::class)
   override suspend fun decode(): T? =
-    try { json.decode(serializer, FILE_SYSTEM.source(file).buffer()) }
-    catch (e: FileNotFoundException) { null }
+    try {
+      SystemFileSystem.source(file).buffered().use { json.decode(serializer, it) }
+    } catch (e: FileNotFoundException) {
+      null
+    }
 
   /**
    * Encodes the given value to the file.
@@ -51,15 +59,16 @@ public class FileCodec<T : @Serializable Any>(
    * If the encoding succeeds, the temp file is atomically moved to the target file - completing the transaction.
    * @param value optional value to encode
    */
+  @OptIn(ExperimentalSerializationApi::class)
   override suspend fun encode(value: T?) {
     try {
-      if (value != null) FILE_SYSTEM.sink(tempFile).buffer().use { json.encode(serializer, value, it) }
-      else FILE_SYSTEM.delete(tempFile)
+      if (value != null) SystemFileSystem.sink(tempFile).buffered().use { json.encode(serializer, value, it) }
+      else SystemFileSystem.delete(tempFile)
     } catch (e: Throwable) {
-      FILE_SYSTEM.delete(tempFile)
+      SystemFileSystem.delete(tempFile)
       throw e
     }
 
-    FILE_SYSTEM.atomicMove(source = tempFile, target = file)
+    SystemFileSystem.atomicMove(source = tempFile, destination = file)
   }
 }

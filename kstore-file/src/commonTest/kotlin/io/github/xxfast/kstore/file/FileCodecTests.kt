@@ -1,34 +1,39 @@
 package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.DefaultJson
-import io.github.xxfast.kstore.file.utils.FILE_SYSTEM
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.writeString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.use
+import kotlinx.serialization.json.io.decodeFromSource
+import kotlinx.serialization.json.io.encodeToSink
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
-import kotlinx.serialization.json.okio.decodeFromBufferedSource as decode
-import kotlinx.serialization.json.okio.encodeToBufferedSink as decode
+
 
 class FileCodecTests {
-  private val codec: FileCodec<List<Pet>> = FileCodec(file = FILE_PATH.toPath())
+  private val codec: FileCodec<List<Pet>> = FileCodec(file = Path(FILE_PATH))
 
   @OptIn(ExperimentalSerializationApi::class)
   private var stored: List<Pet>?
-    get() = FILE_SYSTEM.source(FILE_PATH.toPath()).buffer().use { DefaultJson.decode(it) }
+    get() = SystemFileSystem.source(Path(FILE_PATH))
+      .buffered()
+      .use { DefaultJson.decodeFromSource(it) }
+
     set(value) {
-      FILE_SYSTEM.sink(FILE_PATH.toPath()).buffer().use { DefaultJson.decode(value, it) }
+      SystemFileSystem.sink(Path(FILE_PATH))
+        .buffered()
+        .use { DefaultJson.encodeToSink(value, it) }
     }
 
   @AfterTest
   fun cleanUp() {
-    FILE_SYSTEM.delete(FILE_PATH.toPath())
+    SystemFileSystem.delete(Path(FILE_PATH))
   }
 
   @Test
@@ -61,7 +66,7 @@ class FileCodecTests {
 
   @Test
   fun testDecodeMalformedFile() = runTest {
-    FILE_SYSTEM.sink(FILE_PATH.toPath()).buffer().use { it.writeUtf8("💩") }
+    SystemFileSystem.sink(Path(FILE_PATH)).buffered().use { it.writeString("💩") }
     assertFailsWith<SerializationException> { codec.decode() }
   }
 }

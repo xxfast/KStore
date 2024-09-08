@@ -1,8 +1,8 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
-  id("org.jetbrains.kotlinx.kover") version "0.6.1"
-  id("org.jetbrains.dokka") version "1.9.10"
+  id("org.jetbrains.kotlinx.kover") version "0.8.2"
+  id("org.jetbrains.dokka") version "1.9.20"
 }
 
 buildscript {
@@ -26,7 +26,7 @@ allprojects {
   }
 
   group = "io.github.xxfast"
-  version = "0.7.2"
+  version = "0.9.0-SNAPSHOT"
 
   apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
   apply(plugin = "org.jetbrains.kotlinx.kover")
@@ -104,9 +104,3 @@ allprojects {
     dependsOn(project.tasks.withType(Sign::class.java))
   }
 }
-
-koverMerged {
-  enable()
-}
-
-

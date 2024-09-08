@@ -37,15 +37,14 @@ jobs:
         run: ./gradlew apiCheck
 
       - name: Generate kover coverage report
-        run: ./gradlew koverMergedXmlReport
+        run: ./gradlew koverXmlReport
 
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
         id: kover
         uses: mi-kas/kover-report@v1
-        continue-on-error: true # https://github.com/mi-kas/kover-report/issues/111
         with:
-          path: ${{ github.workspace }}/build/reports/kover/merged/xml/report.xml
+          path: ${{ github.workspace }}/kstore/build/reports/kover/report.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Code Coverage
           update-comment: true
@@ -61,6 +60,7 @@ jobs:
           { target: windows, os: windows-latest, tasks: windowsTest, continueOnError: true }, # https://github.com/square/okio/issues/951
           { target: linux, os: ubuntu-latest, tasks: linuxTest, continueOnError: false },
           { target: js, os: ubuntu-latest, tasks: jsTest, continueOnError: false },
+          { target: wasm, os: ubuntu-latest, tasks: wasmJsTest, continueOnError: false },
           { target: desktop, os: ubuntu-latest, tasks: desktopTest, continueOnError: false },
         ]
     runs-on: ${{ matrix.config.os }}
@@ -82,7 +82,10 @@ jobs:
         run: ./gradlew ${{ matrix.config.tasks }}
 
   release:
-    name: Release to Sonatype
+    name: Release ${{ matrix.module }} to Sonatype
+    strategy:
+      matrix:
+        module: [kstore, kstore-file, kstore-storage]
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: macos-latest
     needs:
@@ -114,7 +117,7 @@ jobs:
           GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
 
       - name: Release to sonatype
-        run: ./gradlew publishAllPublicationsToMavenRepository
+        run: ./gradlew :${{ matrix.module }}:publishAllPublicationsToMavenRepository
 
 
   documentation:
