@@ -3,7 +3,7 @@ package io.github.xxfast.kstore.file.extensions
 import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
-import io.github.xxfast.kstore.file.storeOf
+import io.github.xxfast.kstore.storeOf
 import kotlinx.io.buffered
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
