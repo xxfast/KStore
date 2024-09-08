@@ -108,6 +108,6 @@ public class KStore<T : @Serializable Any>(
   }
 
   override fun close() {
-    lock.unlock()
+    if (lock.isLocked) lock.unlock()
   }
 }

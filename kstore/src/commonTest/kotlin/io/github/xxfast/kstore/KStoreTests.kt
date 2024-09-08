@@ -185,4 +185,13 @@ class KStoreTests {
     val expect: Pet = MYLO.copy(age = MYLO.age + 1)
     assertEquals(actual, expect)
   }
+
+  @Test
+  fun testClose() = runTest {
+    store.close()
+    store.set(MYLO)
+    val expect: Pet = MYLO
+    val actual: Pet? = store.get()
+    assertEquals(expect, actual)
+  }
 }
