@@ -20,6 +20,7 @@
 ![badge-wasmJsBrowser](https://img.shields.io/badge/platform-wasmJsBrowser-F8DB5D.svg?style=flat)
 
 A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialization and kotlinx.io.
+
 Inspired by [RxStore](https://github.com/Gridstone/RxStore)
 
 ## Features

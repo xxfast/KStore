@@ -62,7 +62,7 @@ allprojects {
 
         pom {
           name.set("KStore")
-          description.set("A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio")
+          description.set("A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialization and okio")
           licenses {
             license {
               name.set("Apache-2.0")
