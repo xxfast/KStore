@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class KStoreTests {
-  private val store: KStore<Cat> = KStore(codec = TestCodec())
+  private val store: KStore<Cat> = storeOf(codec = TestCodec())
 
   @AfterTest
   fun cleanup() {
@@ -184,5 +184,14 @@ class KStoreTests {
     val actual: Pet? = store.get()
     val expect: Pet = MYLO.copy(age = MYLO.age + 1)
     assertEquals(actual, expect)
+  }
+
+  @Test
+  fun testClose() = runTest {
+    store.close()
+    store.set(MYLO)
+    val expect: Pet = MYLO
+    val actual: Pet? = store.get()
+    assertEquals(expect, actual)
   }
 }

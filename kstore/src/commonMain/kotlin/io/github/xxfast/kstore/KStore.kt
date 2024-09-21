@@ -9,6 +9,24 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
+/**
+ * Creates a store with a given codec
+ *
+ * @param default returns this value if the file is not found. defaults to null
+ * @param enableCache maintain a cache. If set to false, it always reads from disk
+ * @param codec codec to be used.
+ *
+ * @return store that contains a value of type [T]
+ */
+public inline fun <reified T : @Serializable Any> storeOf(
+  codec: Codec<T>,
+  default: T? = null,
+  enableCache: Boolean = true,
+): KStore<T> = KStore(
+  default = default,
+  enableCache = enableCache,
+  codec = codec
+)
 
 /**
  * Creates a store with a custom encoder and a decoder
@@ -21,7 +39,7 @@ public class KStore<T : @Serializable Any>(
   private val default: T? = null,
   private val enableCache: Boolean = true,
   private val codec: Codec<T>,
-) {
+) : AutoCloseable {
   private val lock: Mutex = Mutex()
   internal val cache: MutableStateFlow<T?> = MutableStateFlow(default)
 
@@ -87,5 +105,9 @@ public class KStore<T : @Serializable Any>(
   public suspend fun reset() {
     set(default)
     cache.emit(default)
+  }
+
+  override fun close() {
+    if (lock.isLocked) lock.unlock()
   }
 }

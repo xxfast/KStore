@@ -15,19 +15,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class FileCodecTests {
-  private val file = Path(FILE_PATH)
 
-  private val codec: FileCodec<Cat> = FileCodec(
-    file = file,
-    json = DefaultJson,
-  )
+class FileCodecTests {
+  private val codec: FileCodec<List<Pet>> = FileCodec(file = Path(FILE_PATH))
 
   @OptIn(ExperimentalSerializationApi::class)
-  private var stored: Cat?
-    get() = SystemFileSystem.source(file).buffered().use { DefaultJson.decodeFromSource(it) }
+  private var stored: List<Pet>?
+    get() = SystemFileSystem.source(Path(FILE_PATH))
+      .buffered()
+      .use { DefaultJson.decodeFromSource(it) }
+
     set(value) {
-      SystemFileSystem.sink(file).buffered().use { DefaultJson.encodeToSink(value, it) }
+      SystemFileSystem.sink(Path(FILE_PATH))
+        .buffered()
+        .use { DefaultJson.encodeToSink(value, it) }
     }
 
   @AfterTest
@@ -37,23 +38,35 @@ class FileCodecTests {
 
   @Test
   fun testEncode() = runTest {
-    codec.encode(MYLO)
-    val expect: Cat = MYLO
-    val actual: Cat? = stored
+    codec.encode(listOf(MYLO))
+    val expect: List<Pet> = listOf(MYLO)
+    val actual: List<Pet>? = stored
     assertEquals(expect, actual)
   }
 
   @Test
   fun testDecode() = runTest {
-    stored = OREO
-    val expect: Cat = OREO
-    val actual: Cat? = codec.decode()
+    stored = listOf(OREO)
+    val expect: List<Pet> = listOf(OREO)
+    val actual: List<Pet>? = codec.decode()
     assertEquals(expect, actual)
   }
 
   @Test
+  fun testTransactionalEncode() = runTest {
+    codec.encode(listOf(MYLO))
+
+    // Encoder will fail half way through
+    assertFailsWith<NotImplementedError> { codec.encode(listOf(MYLO, KAT)) }
+
+    // The original file should not be touched
+    val actual: List<Pet>? = codec.decode()
+    assertEquals(listOf(MYLO), actual)
+  }
+
+  @Test
   fun testDecodeMalformedFile() = runTest {
-    SystemFileSystem.sink(file).buffered().use { it.writeString("💩") }
+    SystemFileSystem.sink(Path(FILE_PATH)).buffered().use { it.writeString("💩") }
     assertFailsWith<SerializationException> { codec.decode() }
   }
 }
