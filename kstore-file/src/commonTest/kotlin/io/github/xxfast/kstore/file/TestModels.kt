@@ -43,5 +43,3 @@ data class RobotCat(
 internal val MYLO = Cat(name = "Mylo", age = 1)
 internal val OREO = Cat(name = "Oreo", age = 1)
 internal val KAT = RobotCat(name = "Kat", age = 12, id = Id(123L))
-
-const val FILE_PATH = "test.json"
