@@ -24,7 +24,7 @@ import kotlinx.serialization.json.io.encodeToSink as encode
  */
 public inline fun <reified T : @Serializable Any> FileCodec(
   file: Path,
-  tempFile: Path = Path("${file.name}.temp"),
+  tempFile: Path = Path("$file.temp"),
   json: Json = DefaultJson,
 ): FileCodec<T> = FileCodec(
   file = file,
