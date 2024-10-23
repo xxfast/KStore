@@ -23,6 +23,12 @@ android {
     abortOnError = false
   }
 
+  testOptions {
+    unitTests {
+      isReturnDefaultValues = true
+    }
+  }
+
   namespace = "io.github.xxfast.kstore.file"
 }
 
@@ -102,13 +108,27 @@ kotlin {
         }
       }
 
-      val androidMain by getting
-      val androidUnitTest by getting
+      val androidMain by getting {
+        dependencies {
+          implementation(libs.androidx.startup)
+        }
+      }
+
+      val androidUnitTest by getting {
+        dependencies {
+          implementation(libs.androidx.startup)
+          implementation(libs.mockk)
+          implementation(libs.mockk.android)
+          implementation(libs.mockk.agent)
+        }
+      }
 
       val desktopMain by getting {
         dependencies {
+          implementation(libs.harawata.appdirs)
         }
       }
+
       val desktopTest by getting
 
       val jsMain by getting

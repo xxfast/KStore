@@ -1,3 +1,16 @@
+public final class io/github/xxfast/kstore/file/DesktopDirectoryProviderKt {
+	public static final fun getDefaultDirectories ()Lio/github/xxfast/kstore/file/DirectoryProvider;
+}
+
+public abstract interface class io/github/xxfast/kstore/file/DirectoryProvider {
+	public abstract fun getCaches ()Lkotlinx/io/files/Path;
+	public abstract fun getFiles ()Lkotlinx/io/files/Path;
+}
+
+public final class io/github/xxfast/kstore/file/DirectoryProviderKt {
+	public static final fun DirectoryProvider (Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;)Lio/github/xxfast/kstore/file/DirectoryProvider;
+}
+
 public final class io/github/xxfast/kstore/file/FileCodec : io/github/xxfast/kstore/Codec {
 	public fun <init> (Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
 	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
