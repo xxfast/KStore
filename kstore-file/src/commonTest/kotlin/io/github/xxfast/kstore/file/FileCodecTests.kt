@@ -1,7 +1,6 @@
 package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.DefaultJson
-import io.github.xxfast.kstore.utils.ExperimentalKStoreApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
@@ -16,9 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-const val FILE_PATH ="test.json"
 
-@OptIn(ExperimentalKStoreApi::class)
 class FileCodecTests {
   private val codec: FileCodec<List<Pet>> = FileCodec(file = Path(FILE_PATH))
 
