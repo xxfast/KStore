@@ -11,3 +11,12 @@ public interface DirectoryProvider {
   public val files: Path
   public val caches: Path
 }
+
+@ExperimentalKStoreApi
+public fun DirectoryProvider(
+  files: Path,
+  caches: Path
+): DirectoryProvider = object : DirectoryProvider {
+  override val files: Path get() = files
+  override val caches: Path get() = caches
+}
