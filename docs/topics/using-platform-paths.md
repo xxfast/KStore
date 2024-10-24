@@ -35,16 +35,28 @@ This depends on where you want to save your files, but generally you should save
 Recommending to use [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
 
 ```kotlin
+import java.nio.file.FileSystem
+
 const val PACKAGE_NAME = "io.github.xxfast.kstore"
 const val VERSION = "1.0"
 const val ORGANISATION = "xxfast"
 
-files = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
-cache = AppDirsFactory.getInstance().getUserCacheDir(PACKAGE_NAME, VERSION, ORGANISATION)
+val filesDir = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
+val cacheDir = AppDirsFactory.getInstance().getUserCacheDir(PACKAGE_NAME, VERSION, ORGANISATION)
 ```
 
 > Make sure to create those directories if they don't already exist. The store won't create them for you
 > { style="note" }
+
+```kotlin
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+
+with(SystemFileSystem) { if(!exists(files)) createDirectories(files) }
+
+files = Path(filesDir)
+cache = Path(cacheDir)
+```
 
 ### On iOS & other Apple platforms
 This depends on where you want to place your files. For most common use-cases, you will want either `NSDocumentDirectory` or `NSCachesDirectory`
