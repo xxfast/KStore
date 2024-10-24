@@ -1,54 +1,77 @@
 # Using Platform Specific Paths
 
-Getting a path to a file is different for each platform, and you will need to define how this works for each platform
+## Defining Your Own Directories
+
+KStore does not provide a way to create directories for you. You will need to provide the directories where you want to save your files.
+```kotlin
+var files: Path
+var cache: Path
+```
 
 ```kotlin
-var storageDir: String
+val files: KStore<Pet> = storeOf(file = Path("$files/my_cats.json"))
+val caches: KStore<Pet> = storeOf(file = Path("$cache/my_cats.json"))
 ```
-> For this example, we are keeping this as a top level variable. 
+> For this example, we are keeping this as a top level variable. But do use your favorite DI framework instead
 > { style="note" }
 
-## On Android
+### On Android
 Getting a path on android involves invoking from `filesDir`/`cacheDir` from a `Context`.
 ```kotlin
+import kotlin.io.path.Path
+
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    // for documents directory
-    storageDir = filesDir.path
-
-    // or caches directory
-    storageDir = cacheDir.path
+    files = Path(context.filesDir)
+    cache = Path(context.cacheDir)
   }
 }
 ```
 
-## On Desktop (JVM)
+### On Desktop (JVM)
 
 This depends on where you want to save your files, but generally you should save your files in a user data directory.
 Recommending to use [harawata's appdirs](https://github.com/harawata/appdirs) to get the platform specific app dir
 
 ```kotlin
-storageDir = AppDirsFactory.getInstance()
-  .getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
+const val PACKAGE_NAME = "io.github.xxfast.kstore"
+const val VERSION = "1.0"
+const val ORGANISATION = "xxfast"
+
+files = AppDirsFactory.getInstance().getUserDataDir(PACKAGE_NAME, VERSION, ORGANISATION)
+cache = AppDirsFactory.getInstance().getUserCacheDir(PACKAGE_NAME, VERSION, ORGANISATION)
 ```
 
-## On iOS & other Apple platforms
+> Make sure to create those directories if they don't already exist. The store won't create them for you
+> { style="note" }
+
+### On iOS & other Apple platforms
 This depends on where you want to place your files. For most common use-cases, you will want either `NSDocumentDirectory` or `NSCachesDirectory`
 
 KStore provides you a convenience extensions to resolve these for you
 
 ```kotlin
-// for documents directory
-storageDir = NSFileManager.defaultManager.DocumentDirectory?.relativePath
+val fileManager:NSFileManager = NSFileManager.defaultManager
+val documentsUrl: NSURL = fileManager.URLForDirectory(
+  directory = NSDocumentDirectory,
+  appropriateForURL = null,
+  create = false,
+  inDomain = NSUserDomainMask,
+  error = null
+)!!
 
-// or caches directory
-storageDir = NSFileManager.defaultManager.CachesDirectory?.relativePath
+val cachesUrl:NSURL = fileManager.URLForDirectory(
+  directory = NSCachesDirectory,
+  appropriateForURL = null,
+  create = false,
+  inDomain = NSUserDomainMask,
+  error = null
+)!!
+
+files = Path(documentsUrl.path)
+caches = Path(cachesUrl.path)
 ```
-
-> This is experimental API and may be removed in future releases
-> {style="note"}
 
 > `NSHomeDirectory()` _(though it works on the simulator)_ is **not** suitable for physical devices as the security policies on physical devices does not permit read/writes to this directory
 > {style="warning"}
