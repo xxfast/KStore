@@ -45,6 +45,14 @@ class FileCodecTests {
   }
 
   @Test
+  fun testEncodeWithNullValue() = runTest {
+    codec.encode(null)
+    val expect: List<Pet>? = null
+    val actual: List<Pet>? = stored
+    assertEquals(expect, actual)
+  }
+
+  @Test
   fun testDecode() = runTest {
     stored = listOf(OREO)
     val expect: List<Pet> = listOf(OREO)
