@@ -61,11 +61,15 @@ public class FileCodec<T : @Serializable Any>(
    */
   @OptIn(ExperimentalSerializationApi::class)
   override suspend fun encode(value: T?) {
+    if (value == null) {
+      SystemFileSystem.delete(file, mustExist = false)
+      return
+    }
+
     try {
-      if (value != null) SystemFileSystem.sink(tempFile).buffered().use { json.encode(serializer, value, it) }
-      else SystemFileSystem.delete(tempFile)
+      SystemFileSystem.sink(tempFile).buffered().use { json.encode(serializer, value, it) }
     } catch (e: Throwable) {
-      SystemFileSystem.delete(tempFile)
+      SystemFileSystem.delete(tempFile, mustExist = false)
       throw e
     }
 

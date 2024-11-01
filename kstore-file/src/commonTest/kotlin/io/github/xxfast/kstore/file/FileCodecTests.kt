@@ -21,9 +21,12 @@ class FileCodecTests {
 
   @OptIn(ExperimentalSerializationApi::class)
   private var stored: List<Pet>?
-    get() = SystemFileSystem.source(Path(FILE_PATH))
-      .buffered()
-      .use { DefaultJson.decodeFromSource(it) }
+    get() = if (!SystemFileSystem.exists(Path(FILE_PATH))) null
+    else {
+      SystemFileSystem.source(Path(FILE_PATH))
+        .buffered()
+        .use { DefaultJson.decodeFromSource(it) }
+    }
 
     set(value) {
       SystemFileSystem.sink(Path(FILE_PATH))
@@ -33,13 +36,21 @@ class FileCodecTests {
 
   @AfterTest
   fun cleanUp() {
-    SystemFileSystem.delete(Path(FILE_PATH))
+    SystemFileSystem.delete(Path(FILE_PATH), false)
   }
 
   @Test
   fun testEncode() = runTest {
     codec.encode(listOf(MYLO))
     val expect: List<Pet> = listOf(MYLO)
+    val actual: List<Pet>? = stored
+    assertEquals(expect, actual)
+  }
+
+  @Test
+  fun testEncodeWithNullValue() = runTest {
+    codec.encode(null)
+    val expect: List<Pet>? = null
     val actual: List<Pet>? = stored
     assertEquals(expect, actual)
   }
