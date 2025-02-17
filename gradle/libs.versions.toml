@@ -1,5 +1,5 @@
 [versions]
-agp = "8.0.2"
+agp = "8.8.1"
 androidx-test-junit = "1.2.1"
 junit = "4.13.2"
 junit-jupiter="5.10.1"
