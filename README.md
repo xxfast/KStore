@@ -51,7 +51,7 @@ kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" 
 kstore-storage = { module = "io.github.xxfast:kstore-storage", version.ref = "kstore" }
 
 # for testing
-kstore-testing = { module = "io.github.xxfast:kstore-testing", version.ref = "kstore" }
+kstore-test = { module = "io.github.xxfast:kstore-test", version.ref = "kstore" }
 ```
 
 Depending on your target platforms, you will need to add platform configurations [here](https://xxfast.github.io/KStore/installation.html)

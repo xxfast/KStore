@@ -1,4 +1,4 @@
-package io.github.xxfast.kstore.testing
+package io.github.xxfast.kstore.test
 
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore

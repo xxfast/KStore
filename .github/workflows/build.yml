@@ -86,7 +86,7 @@ jobs:
     name: Release ${{ matrix.module }} to Sonatype
     strategy:
       matrix:
-        module: [kstore, kstore-file, kstore-storage, kstore-testing]
+        module: [kstore, kstore-file, kstore-storage, kstore-test]
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: macos-latest
     needs:

@@ -19,7 +19,7 @@ kstore = "x.x.x"
 kstore = { module = "io.github.xxfast:kstore", version.ref = "kstore" }
 kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" }
 kstore-storage = { module = "io.github.xxfast:kstore-storage", version.ref = "kstore" }
-kstore-testing = { module = "io.github.xxfast:kstore-testing", version.ref = "kstore" }
+kstore-test = { module = "io.github.xxfast:kstore-test", version.ref = "kstore" }
 ```
 
 ### Targeting Android, iOS and/or Desktop 

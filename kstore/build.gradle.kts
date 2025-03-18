@@ -170,5 +170,5 @@ rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
 dependencies {
   kover(project(":kstore-file"))
   kover(project(":kstore-storage"))
-  kover(project(":kstore-testing"))
+  kover(project(":kstore-test"))
 }
