@@ -143,7 +143,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Setup Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v5
 
       - name: Generate api docs with dokka
         run: ./gradlew dokkaHtmlMultiModule
@@ -180,4 +180,4 @@ jobs:
 
       - name: Release to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
