@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.13.2"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
 }
 
 android {

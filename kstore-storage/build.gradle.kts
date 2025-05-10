@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 
 plugins {
   kotlin("multiplatform")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.15.1"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
 }
 
 kotlin {
