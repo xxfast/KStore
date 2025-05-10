@@ -26,6 +26,12 @@ kotlin {
       }
     }
 
+    val wasmJsMain by getting {
+      dependencies {
+        implementation(libs.kotlinx.browser)
+      }
+    }
+
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
