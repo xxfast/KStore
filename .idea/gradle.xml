@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/kstore" />
             <option value="$PROJECT_DIR$/kstore-file" />
             <option value="$PROJECT_DIR$/kstore-storage" />
+            <option value="$PROJECT_DIR$/kstore-testing" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />
