@@ -5,10 +5,10 @@ plugins {
 }
 
 android {
-  compileSdk = 33
+  compileSdk = 36
+
   defaultConfig {
     minSdk = 21
-    targetSdk = 33
   }
 
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
