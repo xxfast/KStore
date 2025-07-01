@@ -31,4 +31,8 @@ public class StorageCodec<T : @Serializable Any>(
 
   override suspend fun decode(): T? = storage[key]
     ?.let { format.decodeFromString(serializer, it) }
+
+  override fun id(): Any {
+    return storage.toString() + serializer.descriptor.serialName
+  }
 }
