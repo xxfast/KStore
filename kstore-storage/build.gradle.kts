@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 
@@ -13,26 +14,27 @@ kotlin {
     browser()
   }
 
+  @OptIn(ExperimentalWasmDsl::class)
   wasmJs {
     binaries.executable()
     browser()
   }
 
   sourceSets {
-    val commonMain by getting {
+    commonMain {
       dependencies {
         implementation(project(":kstore"))
         implementation(libs.kotlinx.serialization.json)
       }
     }
 
-    val wasmJsMain by getting {
+    wasmJsMain {
       dependencies {
         implementation(libs.kotlinx.browser)
       }
     }
 
-    val commonTest by getting {
+    commonTest {
       dependencies {
         implementation(kotlin("test"))
         implementation(libs.kotlinx.coroutines.test)

@@ -26,7 +26,7 @@ allprojects {
   }
 
   group = "io.github.xxfast"
-  version = "1.0.0"
+  version = "2.0.0"
 
   apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
   apply(plugin = "org.jetbrains.kotlinx.kover")
@@ -53,7 +53,7 @@ allprojects {
     val javadocJar = tasks.register<Jar>("javadocJar") {
       dependsOn(tasks.dokkaHtml)
       archiveClassifier.set("javadoc")
-      from("$buildDir/dokka")
+      from("${layout.buildDirectory}/dokka")
     }
 
     publications {
