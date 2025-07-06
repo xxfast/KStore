@@ -1,4 +1,5 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
   id("org.jetbrains.kotlinx.kover") version "0.8.2"
@@ -35,8 +36,13 @@ allprojects {
   apply(plugin = "com.vanniktech.maven.publish")
   apply(plugin = "org.jetbrains.dokka")
 
+  val isSnapshot: Boolean = version.toString().endsWith("SNAPSHOT")
+  val host: SonatypeHost =
+    if (isSnapshot) SonatypeHost("https://central.sonatype.com/repository/maven-snapshots/")
+    else SonatypeHost.CENTRAL_PORTAL
+
   extensions.configure<MavenPublishBaseExtension> {
-    publishToMavenCentral()
+    publishToMavenCentral(host)
     signAllPublications()
     coordinates(group.toString(), project.name, version.toString())
 
