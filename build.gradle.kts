@@ -20,6 +20,7 @@ buildscript {
   }
 }
 
+// TODO: Migrate away from allprojects
 allprojects {
   repositories {
     google()
