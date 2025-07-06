@@ -84,10 +84,8 @@ jobs:
 
   release:
     name: Release ${{ matrix.module }} to Sonatype
-    strategy:
-      matrix:
-        module: [kstore, kstore-file, kstore-storage]
-    if: ${{ github.event_name != 'pull_request' }}
+    # TODO: Remove after testing
+    # if: ${{ github.event_name != 'pull_request' }}
     runs-on: macos-latest
     needs:
       - build
@@ -104,22 +102,14 @@ jobs:
       - name: Setup gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Write secrets to local.properties
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          echo sonatypeUsername="${SONATYPE_USERNAME}" >> "local.properties"
-          echo sonatypePassword="${SONATYPE_PASSWORD}" >> "local.properties"
-          echo gpgKeyPassword="${GPG_KEY_PASSWORD}" >> "local.properties"
-          echo gpgKeySecret="${GPG_KEY_SECRET}" >> "local.properties"
-        env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          GPG_KEY_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
-          GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
-
       - name: Release to sonatype
-        run: ./gradlew :${{ matrix.module }}:publishAllPublicationsToMavenRepository
-
+        run: ./gradlew :publishAllPublicationsToMavenCentralRepository --no-parallel --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_SECRET }}
 
   documentation:
     name: Publish documentation
