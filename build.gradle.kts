@@ -1,4 +1,4 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
   id("org.jetbrains.kotlinx.kover") version "0.8.2"
@@ -16,6 +16,7 @@ buildscript {
     classpath(libs.agp)
     classpath(libs.kotlin)
     classpath(libs.kotlin.serialization)
+    classpath(libs.vanniktech.maven.publish)
   }
 }
 
@@ -32,45 +33,11 @@ allprojects {
   apply(plugin = "org.jetbrains.kotlinx.kover")
   apply(plugin = "com.vanniktech.maven.publish")
   apply(plugin = "org.jetbrains.dokka")
-  apply(plugin = "maven-publish")
 
   extensions.configure<MavenPublishBaseExtension> {
-    val javadocJar = tasks.register<Jar>("javadocJar") {
-      dependsOn(tasks.dokkaHtml)
-      archiveClassifier.set("javadoc")
-      from("$buildDir/dokka")
-    }
-
-    mavenPublishing {
-      artifacts.dokka(javadocJar)
-      val isSnapshot = version.toString().endsWith("SNAPSHOT")
-      publishToMavenCentral(
-        if (isSnapshot) {
-          SonatypeHost("https://central.sonatype.com/repository/maven-snapshots/")
-        } else {
-          SonatypeHost.CENTRAL_PORTAL
-        }
-      )
-      /**
-       *  IMPORTANT!!!
-       *  Review documentation Vanniktech documentation to properly pass credentials and sign for Central Sonatype
-       *  https://vanniktech.github.io/gradle-maven-publish-plugin/central/#secrets
-       *  If you need an example of implementation, try this:
-       *  ```
-       *       - name: Publish to MavenCentral
-       *         if: ${{ github.event_name != 'pull_request' }}
-       *         run: ./gradlew publishToMavenCentral --no-configuration-cache
-       *         env:
-       *           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-       *           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-       *           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
-       *           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
-       *           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
-       *  ```
-       */
-      signAllPublications()
-      coordinates(group.toString(), project.name, version.toString())
-    }
+    publishToMavenCentral()
+    signAllPublications()
+    coordinates(group.toString(), project.name, version.toString())
 
     pom {
       name = "Kstore"
