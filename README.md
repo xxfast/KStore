@@ -49,6 +49,9 @@ kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" 
 
 # for jsBrowser and wasmJsBrowser
 kstore-storage = { module = "io.github.xxfast:kstore-storage", version.ref = "kstore" }
+
+# for testing
+kstore-test = { module = "io.github.xxfast:kstore-test", version.ref = "kstore" }
 ```
 
 Depending on your target platforms, you will need to add platform configurations [here](https://xxfast.github.io/KStore/installation.html)
