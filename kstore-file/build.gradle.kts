@@ -1,14 +1,14 @@
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.15.1"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
 }
 
 android {
-  compileSdk = 33
+  compileSdk = 36
+
   defaultConfig {
     minSdk = 21
-    targetSdk = 33
   }
 
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -29,7 +29,7 @@ android {
 kotlin {
   explicitApi()
 
-  android {
+  androidTarget {
     compilations.all {
       kotlinOptions {
         jvmTarget = "1.8"

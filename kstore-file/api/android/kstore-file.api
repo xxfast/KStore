@@ -1,5 +1,5 @@
 public final class io/github/xxfast/kstore/file/FileCodec : io/github/xxfast/kstore/Codec {
-	public fun <init> (Lkotlinx/io/files/Path;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
+	public fun <init> (Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;Lkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;)V
 	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }

@@ -7,9 +7,10 @@ public final class io/github/xxfast/kstore/JsonKt {
 	public static final fun getDefaultJson ()Lkotlinx/serialization/json/Json;
 }
 
-public final class io/github/xxfast/kstore/KStore {
+public final class io/github/xxfast/kstore/KStore : java/lang/AutoCloseable {
 	public fun <init> (Ljava/lang/Object;ZLio/github/xxfast/kstore/Codec;)V
 	public synthetic fun <init> (Ljava/lang/Object;ZLio/github/xxfast/kstore/Codec;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close ()V
 	public final fun delete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getUpdates ()Lkotlinx/coroutines/flow/Flow;

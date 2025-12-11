@@ -70,5 +70,10 @@ sourceSets {
       implementation(libs.kstore.storage)
     }
   }
+
+  val wasmJsMain by getting {
+    dependencies {
+      implementation(libs.kstore.storage)
+    }
 }
 ```
