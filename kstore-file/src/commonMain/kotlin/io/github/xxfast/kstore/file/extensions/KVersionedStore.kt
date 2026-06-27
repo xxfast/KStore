@@ -59,32 +59,43 @@ public class VersionedCodec<T : @Serializable Any>(
   private val serializer: KSerializer<T>,
   private val migration: Migration<T>,
   private val versionPath: Path = Path("$file.version"), // TODO: Save to file metadata instead
+  private val tempPath: Path = Path("$file.temp"),
+  private val tempVersionPath: Path = Path("$versionPath.temp"),
 ) : Codec<T> {
 
   override suspend fun decode(): T? =
     try {
-      json.decode(serializer, SystemFileSystem.source(file).buffered())
+      SystemFileSystem.source(file).buffered().use { json.decode(serializer, it) }
     } catch (e: SerializationException) {
       val previousVersion: Int =
-        if (SystemFileSystem.exists(versionPath)) json.decode(
-          Int.serializer(),
-          SystemFileSystem.source(versionPath).buffered()
-        )
+        if (SystemFileSystem.exists(versionPath))
+          SystemFileSystem.source(versionPath).buffered().use { json.decode(Int.serializer(), it) }
         else 0
 
-      val data: JsonElement = json.decode(SystemFileSystem.source(file).buffered())
+      val data: JsonElement =
+        SystemFileSystem.source(file).buffered().use { json.decode(it) }
       migration(previousVersion, data)
     } catch (e: FileNotFoundException) {
       null
     }
 
   override suspend fun encode(value: T?) {
-    if (value != null) {
-      SystemFileSystem.sink(versionPath).buffered().use { json.encode(Int.serializer(), version, it) }
-      SystemFileSystem.sink(file).buffered().use { json.encode(serializer, value, it) }
-    } else {
+    if (value == null) {
       SystemFileSystem.delete(versionPath, mustExist = false)
       SystemFileSystem.delete(file, mustExist = false)
+      return
     }
+
+    try {
+      SystemFileSystem.sink(tempPath).buffered().use { json.encode(serializer, value, it) }
+      SystemFileSystem.sink(tempVersionPath).buffered().use { json.encode(Int.serializer(), version, it) }
+    } catch (e: Throwable) {
+      SystemFileSystem.delete(tempPath, mustExist = false)
+      SystemFileSystem.delete(tempVersionPath, mustExist = false)
+      throw e
+    }
+
+    SystemFileSystem.atomicMove(source = tempPath, destination = file)
+    SystemFileSystem.atomicMove(source = tempVersionPath, destination = versionPath)
   }
 }
