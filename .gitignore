@@ -8,3 +8,8 @@ local.properties
 
 # Mac
 .DS_Store
+
+# IntelliJ
+.idea/KStore.iml
+.idea/misc.xml
+.idea/gradle.xml
