@@ -2,38 +2,23 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   kotlin("multiplatform")
-  id("com.android.library")
+  id("com.android.kotlin.multiplatform.library")
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
-}
-
-android {
-  compileSdk = 36
-
-  defaultConfig {
-    minSdk = 21
-  }
-
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-  }
-
-  lint {
-    // TODO: Figure out why the linter is failing on CI
-    abortOnError = false
-  }
-
-  namespace = "io.github.xxfast.kstore.file"
 }
 
 kotlin {
   explicitApi()
+  applyDefaultHierarchyTemplate()
 
-  androidTarget {
-    compilations.all {
-      compilerOptions.configure {
-        jvmTarget.set(JvmTarget.JVM_1_8)
-      }
+  android {
+    namespace = "io.github.xxfast.kstore.file"
+    compileSdk = 36
+    minSdk = 21
+
+    withHostTestBuilder {}
+
+    compilerOptions {
+      jvmTarget.set(JvmTarget.JVM_1_8)
     }
   }
 
@@ -52,58 +37,22 @@ kotlin {
     nodejs()
   }
 
-  val macosX64 = macosX64()
-  val macosArm64 = macosArm64()
-  val iosArm64 = iosArm64()
-  val iosX64 = iosX64()
-  val iosSimulatorArm64 = iosSimulatorArm64()
-  val watchosArm32 = watchosArm32()
-  val watchosArm64 = watchosArm64()
-  val watchosX64 = watchosX64()
-  val watchosSimulatorArm64 = watchosSimulatorArm64()
-  val tvosArm64 = tvosArm64()
-  val tvosX64 = tvosX64()
-  val tvosSimulatorArm64 = tvosSimulatorArm64()
-  val appleTargets = listOf(
-    macosX64, macosArm64,
-    iosArm64, iosX64, iosSimulatorArm64,
-    watchosArm32, watchosArm64, watchosX64,
-    watchosSimulatorArm64,
-    tvosArm64, tvosX64, tvosSimulatorArm64,
-  )
-
-  appleTargets.forEach { target ->
-    with(target) {
-      binaries {
-        framework {
-          baseName = "KStore"
-        }
-      }
-    }
-  }
-
-  linuxX64()
-  mingwX64("windows")
+  macosArm64()
+  iosArm64(); iosSimulatorArm64()
+  linuxX64(); mingwX64("windows")
 
   sourceSets {
-    val commonMain by getting {
-      dependencies {
-        implementation(project(":kstore"))
-        api(libs.kotlinx.io)
-        implementation(libs.kotlinx.coroutines)
-        implementation(libs.kotlinx.serialization.json.io)
-      }
+    commonMain.dependencies {
+      implementation(project(":kstore"))
+      api(libs.kotlinx.io)
+      implementation(libs.kotlinx.coroutines)
+      implementation(libs.kotlinx.serialization.json.io)
     }
 
-    val commonTest by getting {
-      dependencies {
-        implementation(kotlin("test"))
-        implementation(libs.kotlinx.coroutines.test)
-        implementation(libs.turbine)
-      }
+    commonTest.dependencies {
+      implementation(kotlin("test"))
+      implementation(libs.kotlinx.coroutines.test)
+      implementation(libs.turbine)
     }
-
-    val androidMain by getting
-    val androidUnitTest by getting
   }
 }

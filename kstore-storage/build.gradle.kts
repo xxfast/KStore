@@ -20,24 +20,20 @@ kotlin {
   }
 
   sourceSets {
-    val commonMain by getting {
-      dependencies {
-        implementation(project(":kstore"))
-        implementation(libs.kotlinx.serialization.json)
-      }
+    commonMain.dependencies {
+      implementation(project(":kstore"))
+      implementation(libs.kotlinx.serialization.json)
     }
 
-    val wasmJsMain by getting {
+    named("wasmJsMain") {
       dependencies {
         implementation(libs.kotlinx.browser)
       }
     }
 
-    val commonTest by getting {
-      dependencies {
-        implementation(kotlin("test"))
-        implementation(libs.kotlinx.coroutines.test)
-      }
+    commonTest.dependencies {
+      implementation(kotlin("test"))
+      implementation(libs.kotlinx.coroutines.test)
     }
   }
 }

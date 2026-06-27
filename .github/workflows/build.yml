@@ -56,13 +56,12 @@ jobs:
     strategy:
       matrix:
         config: [
-          { target: android, os: ubuntu-latest, tasks: testDebugUnitTest, continueOnError: false },
-          { target: apple, os: macos-latest, tasks: iosX64Test iosSimulatorArm64Test macosX64Test macosArm64Test tvosX64Test tvosSimulatorArm64Test watchosX64Test watchosSimulatorArm64Test, continueOnError: false },
-          { target: windows, os: windows-latest, tasks: windowsTest, continueOnError: true }, # https://github.com/square/okio/issues/951
-          { target: linux, os: ubuntu-latest, tasks: linuxX64Test, continueOnError: false },
-          { target: js, os: ubuntu-latest, tasks: jsTest, continueOnError: false },
-          { target: wasm, os: ubuntu-latest, tasks: wasmJsTest, continueOnError: false },
-          { target: desktop, os: ubuntu-latest, tasks: desktopTest, continueOnError: false },
+          # A macOS host is the only one that can run Apple-target tests, and it runs JVM/JS/Wasm
+          # tests just as well — so everything except the native Linux/Windows tests runs here.
+          { target: macos, os: macos-latest, tasks: iosSimulatorArm64Test macosArm64Test testAndroidHostTest desktopTest jsTest wasmJsTest },
+          # Native Linux/Windows test binaries can only be executed on their own host.
+          { target: linux, os: ubuntu-latest, tasks: linuxX64Test },
+          { target: windows, os: windows-latest, tasks: windowsTest },
         ]
     runs-on: ${{ matrix.config.os }}
     name: Build ${{ matrix.config.target }}
@@ -79,7 +78,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Test ${{ matrix.config.target }} targets
-        continue-on-error: ${{ matrix.config.continueOnError }}
         run: ./gradlew ${{ matrix.config.tasks }}
 
   release:
