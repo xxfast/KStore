@@ -3,6 +3,7 @@ package io.github.xxfast.kstore.file
 import io.github.xxfast.kstore.DefaultJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.buffered
+import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.writeString
@@ -37,6 +38,7 @@ class FileCodecTests {
   @AfterTest
   fun cleanUp() {
     SystemFileSystem.delete(Path(FILE_PATH), false)
+    SystemFileSystem.delete(Path("$FILE_PATH.temp"), false)
   }
 
   @Test
@@ -79,5 +81,40 @@ class FileCodecTests {
   fun testDecodeMalformedFile() = runTest {
     SystemFileSystem.sink(Path(FILE_PATH)).buffered().use { it.writeString("💩") }
     assertFailsWith<SerializationException> { codec.decode() }
+  }
+
+  @Test
+  fun testMoveFallsBackToCopyWhenAtomicMoveUnsupported() = runTest {
+    val tempFile = Path("$FILE_PATH.temp")
+    SystemFileSystem.sink(tempFile).buffered().use { DefaultJson.encodeToSink<List<Pet>>(listOf(MYLO), it) }
+
+    // Simulate platforms (e.g. Android 7 and below) where atomicMove throws - see issue #137
+    moveOrCopy(
+      source = tempFile,
+      destination = Path(FILE_PATH),
+      atomicMove = { _, _ -> throw UnsupportedOperationException("Atomic move not supported") },
+    )
+
+    // The value is persisted via the copy-and-delete fallback ...
+    assertEquals(listOf(MYLO), stored)
+    // ... and the temp file is cleaned up afterwards.
+    assertEquals(false, SystemFileSystem.exists(tempFile))
+  }
+
+  @Test
+  fun testMoveDeletesCorruptDestinationWhenCopyFails() = runTest {
+    val tempFile = Path("$FILE_PATH.temp") // intentionally never created, so the fallback copy fails
+    SystemFileSystem.sink(Path(FILE_PATH)).buffered().use { it.writeString("stale") } // pre-existing destination
+
+    assertFailsWith<FileNotFoundException> {
+      moveOrCopy(
+        source = tempFile,
+        destination = Path(FILE_PATH),
+        atomicMove = { _, _ -> throw UnsupportedOperationException("Atomic move not supported") },
+      )
+    }
+
+    // The possibly-corrupt destination is removed rather than left half-written.
+    assertEquals(false, SystemFileSystem.exists(Path(FILE_PATH)))
   }
 }
