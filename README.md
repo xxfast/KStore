@@ -2,9 +2,10 @@
 <img src="docs/images/kstore.svg" height="240" align="right"/> 
 
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/xxfast/KStore/branch/master/graph/badge.svg)](https://codecov.io/gh/xxfast/KStore)
 
 [![Kotlin Beta](https://kotl.in/badges/beta.svg)](https://kotlinlang.org/docs/components-stability.html)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.21-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.xxfast/kstore?color=blue)](https://search.maven.org/search?q=g:io.github.xxfast)
 
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
@@ -36,7 +37,7 @@ KStore is published on Maven Central. Latest version [![Maven Central](https://i
 repositories { 
   mavenCentral()
   // or for snapshot builds
-  maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+  maven("https://central.sonatype.com/repository/maven-snapshots/")
 }
 ```
 
