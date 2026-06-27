@@ -1,5 +1,5 @@
 # KStore
-<img src="docs/images/kstore.svg" height="240" align="right"/> 
+<img src="kstore.svg" height="240" align="right"/> 
 
 [![Build](https://github.com/xxfast/KStore/actions/workflows/build.yml/badge.svg)](https://github.com/xxfast/KStore/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/xxfast/KStore/branch/master/graph/badge.svg)](https://codecov.io/gh/xxfast/KStore)
@@ -11,8 +11,6 @@
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
 ![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
 ![badge-mac](http://img.shields.io/badge/platform-macos-111111.svg?style=flat)
-![badge-watchos](http://img.shields.io/badge/platform-watchos-C0C0C0.svg?style=flat)
-![badge-tvos](http://img.shields.io/badge/platform-tvos-808080.svg?style=flat)
 ![badge-jvm](http://img.shields.io/badge/platform-jvm-DB413D.svg?style=flat)
 ![badge-linux](http://img.shields.io/badge/platform-linux-2D3F6C.svg?style=flat)
 ![badge-windows](http://img.shields.io/badge/platform-windows-4D76CD.svg?style=flat)
@@ -86,7 +84,7 @@ API Reference [here](https://xxfast.github.io/KStore/docs/)
 
 ## Licence
 
-    Copyright 2023 Isuru Rajapakse
+    Copyright 2023-2026 Isuru Rajapakse
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

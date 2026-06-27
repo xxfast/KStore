@@ -34,7 +34,7 @@ data class CatV3(
   val isCute: Boolean // renamed field 
 )
 
-val storeV3: KStore<CatV3> = storeOf(filePath = filePath, version = 3) { version, jsonElement ->
+val storeV3: KStore<CatV3> = storeOf(file = file, version = 3) { version, jsonElement ->
   when (version) {
     1 -> jsonElement?.jsonObject?.let {
       val name = it["name"]!!.jsonPrimitive.content

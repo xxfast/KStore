@@ -40,8 +40,8 @@ val store: KStore<Pet> = storeOf(
   version = 0, // optional
   migration = { version, jsonElement -> default }, // optional
 
-  // For kstore-file, the serializer to use. 
-  serializer = Json {
+  // For kstore-file, the json serializer to use. 
+  json = Json {
     ignoreUnknownKeys = true
     encodeDefaults = true
   }, // optional
