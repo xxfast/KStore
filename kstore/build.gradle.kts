@@ -1,11 +1,13 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
+import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinToolingSetupTask
 
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
 }
 
 android {
@@ -14,8 +16,6 @@ android {
   defaultConfig {
     minSdk = 21
   }
-
-  sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -35,22 +35,24 @@ kotlin {
 
   androidTarget {
     compilations.all {
-      kotlinOptions {
-        jvmTarget = "1.8"
+      compilerOptions.configure {
+        jvmTarget.set(JvmTarget.JVM_1_8)
       }
     }
   }
 
   jvm("desktop") {
     compilations.all {
-      kotlinOptions.jvmTarget = "1.8"
+      compilerOptions.configure {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+      }
     }
     testRuns["test"].executionTask.configure {
       useJUnitPlatform()
     }
   }
 
-  js(IR) {
+  js {
     browser()
     nodejs()
   }
@@ -91,7 +93,7 @@ kotlin {
     }
   }
 
-  linuxX64("linux")
+  linuxX64()
   mingwX64("windows")
 
   sourceSets {
@@ -119,31 +121,6 @@ kotlin {
         implementation(libs.androidx.test.junit)
       }
     }
-
-    val desktopMain by getting
-    val desktopTest by getting
-
-    val jsMain by getting
-    val jsTest by getting
-
-    val wasmJsMain by getting
-    val wasmJsTest by getting
-
-    val appleMain by creating {
-      dependsOn(commonMain)
-    }
-    val appleTest by creating
-
-    appleTargets.forEach { target ->
-      getByName("${target.targetName}Main") { dependsOn(appleMain) }
-      getByName("${target.targetName}Test") { dependsOn(appleTest) }
-    }
-
-    val linuxMain by getting
-    val linuxTest by getting
-
-    val windowsMain by getting
-    val windowsTest by getting
   }
 }
 
@@ -154,9 +131,9 @@ kotlin {
 // Node.js Canary is set to 21.0.0-v8-canary20231019bd785be450
 // as that is the last version to ship Windows binaries too.
 //
-rootProject.extensions.configure<NodeJsRootExtension> {
-  nodeVersion = "21.0.0-v8-canary20231019bd785be450"
-  nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
+rootProject.extensions.configure<WasmNodeJsEnvSpec> {
+  version.set("21.0.0-v8-canary20231019bd785be450")
+  downloadBaseUrl.set("https://nodejs.org/download/v8-canary")
 }
 
 rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
@@ -165,6 +142,10 @@ rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
   if (!args.contains(flag)) {
     args.add(flag)
   }
+}
+
+rootProject.tasks.withType<KotlinToolingSetupTask>().configureEach {
+  args.add("--ignore-engines")
 }
 
 dependencies {

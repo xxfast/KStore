@@ -1,15 +1,16 @@
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
+import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinToolingSetupTask
 
 plugins {
   kotlin("multiplatform")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
 }
 
 kotlin {
   explicitApi()
 
-  js(IR) {
+  js {
     browser()
   }
 
@@ -49,9 +50,9 @@ kotlin {
 // as that is the last version to ship Windows binaries too.
 //
 
-rootProject.extensions.configure<NodeJsRootExtension> {
-  nodeVersion = "21.0.0-v8-canary20231019bd785be450"
-  nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
+rootProject.extensions.configure<WasmNodeJsEnvSpec> {
+  version.set("21.0.0-v8-canary20231019bd785be450")
+  downloadBaseUrl.set("https://nodejs.org/download/v8-canary")
 }
 
 rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
@@ -60,4 +61,8 @@ rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
   if (!args.contains(flag)) {
     args.add(flag)
   }
+}
+
+rootProject.tasks.withType<KotlinToolingSetupTask>().configureEach {
+  args.add("--ignore-engines")
 }

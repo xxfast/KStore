@@ -1,8 +1,8 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
-  id("org.jetbrains.kotlinx.kover") version "0.8.2"
-  id("org.jetbrains.dokka") version "1.9.20"
+  id("org.jetbrains.kotlinx.kover") version "0.9.8"
+  id("org.jetbrains.dokka") version "2.2.0"
 }
 
 buildscript {
@@ -44,16 +44,16 @@ allprojects {
         )
 
         credentials {
-          username = gradleLocalProperties(rootDir).getProperty("sonatypeUsername")
-          password = gradleLocalProperties(rootDir).getProperty("sonatypePassword")
+          username = gradleLocalProperties(rootDir, providers).getProperty("sonatypeUsername")
+          password = gradleLocalProperties(rootDir, providers).getProperty("sonatypePassword")
         }
       }
     }
 
     val javadocJar = tasks.register<Jar>("javadocJar") {
-      dependsOn(tasks.dokkaHtml)
+      dependsOn(tasks.named("dokkaGeneratePublicationHtml"))
       archiveClassifier.set("javadoc")
-      from("$buildDir/dokka")
+      from(layout.buildDirectory.dir("dokka/html"))
     }
 
     publications {
@@ -92,8 +92,8 @@ allprojects {
   val publishing = extensions.getByType<PublishingExtension>()
   extensions.configure<SigningExtension> {
     useInMemoryPgpKeys(
-      gradleLocalProperties(rootDir).getProperty("gpgKeySecret"),
-      gradleLocalProperties(rootDir).getProperty("gpgKeyPassword"),
+      gradleLocalProperties(rootDir, providers).getProperty("gpgKeySecret"),
+      gradleLocalProperties(rootDir, providers).getProperty("gpgKeyPassword"),
     )
 
     sign(publishing.publications)
@@ -103,4 +103,13 @@ allprojects {
   project.tasks.withType(AbstractPublishToMaven::class.java).configureEach {
     dependsOn(project.tasks.withType(Sign::class.java))
   }
+}
+
+// Dokka v2 multi-module aggregation: root project aggregates all submodule docs.
+// Running `./gradlew dokkaGenerate` (or `dokkaGeneratePublicationHtml`) at root level
+// produces combined HTML documentation in build/dokka/html/.
+dependencies {
+  dokka(project(":kstore"))
+  dokka(project(":kstore-file"))
+  dokka(project(":kstore-storage"))
 }

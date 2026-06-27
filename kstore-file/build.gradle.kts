@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
 }
 
 android {
@@ -10,8 +12,6 @@ android {
   defaultConfig {
     minSdk = 21
   }
-
-  sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -31,22 +31,24 @@ kotlin {
 
   androidTarget {
     compilations.all {
-      kotlinOptions {
-        jvmTarget = "1.8"
+      compilerOptions.configure {
+        jvmTarget.set(JvmTarget.JVM_1_8)
       }
     }
   }
 
   jvm("desktop") {
     compilations.all {
-      kotlinOptions.jvmTarget = "1.8"
+      compilerOptions.configure {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+      }
     }
     testRuns["test"].executionTask.configure {
       useJUnitPlatform()
     }
   }
 
-  js(IR) {
+  js {
     nodejs()
   }
 
@@ -80,62 +82,28 @@ kotlin {
     }
   }
 
-  linuxX64("linux")
+  linuxX64()
   mingwX64("windows")
 
   sourceSets {
-    sourceSets {
-      val commonMain by getting {
-        dependencies {
-          implementation(project(":kstore"))
-          api(libs.kotlinx.io)
-          implementation(libs.kotlinx.coroutines)
-          implementation(libs.kotlinx.serialization.json.io)
-        }
+    val commonMain by getting {
+      dependencies {
+        implementation(project(":kstore"))
+        api(libs.kotlinx.io)
+        implementation(libs.kotlinx.coroutines)
+        implementation(libs.kotlinx.serialization.json.io)
       }
-
-      val commonTest by getting {
-        dependencies {
-          implementation(kotlin("test"))
-          implementation(libs.kotlinx.coroutines.test)
-          implementation(libs.turbine)
-        }
-      }
-
-      val androidMain by getting
-      val androidUnitTest by getting
-
-      val desktopMain by getting {
-        dependencies {
-        }
-      }
-      val desktopTest by getting
-
-      val jsMain by getting
-
-      val jsTest by getting
-
-      val appleMain by creating {
-        dependsOn(commonMain)
-      }
-      val appleTest by creating
-
-      appleTargets.forEach { target ->
-        getByName("${target.targetName}Main") { dependsOn(appleMain) }
-        getByName("${target.targetName}Test") { dependsOn(appleTest) }
-      }
-
-      val linuxMain by getting {
-        dependencies {
-        }
-      }
-      val linuxTest by getting
-
-      val windowsMain by getting {
-        dependencies {
-        }
-      }
-      val windowsTest by getting
     }
+
+    val commonTest by getting {
+      dependencies {
+        implementation(kotlin("test"))
+        implementation(libs.kotlinx.coroutines.test)
+        implementation(libs.turbine)
+      }
+    }
+
+    val androidMain by getting
+    val androidUnitTest by getting
   }
 }

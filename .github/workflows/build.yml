@@ -24,15 +24,15 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Check api
         run: ./gradlew apiCheck
@@ -56,10 +56,10 @@ jobs:
     strategy:
       matrix:
         config: [
-          { target: android, os: ubuntu-latest, tasks: testDebugUnitTest testReleaseUnitTest, continueOnError: false },
+          { target: android, os: ubuntu-latest, tasks: testDebugUnitTest, continueOnError: false },
           { target: apple, os: macos-latest, tasks: iosX64Test iosSimulatorArm64Test macosX64Test macosArm64Test tvosX64Test tvosSimulatorArm64Test watchosX64Test watchosSimulatorArm64Test, continueOnError: false },
           { target: windows, os: windows-latest, tasks: windowsTest, continueOnError: true }, # https://github.com/square/okio/issues/951
-          { target: linux, os: ubuntu-latest, tasks: linuxTest, continueOnError: false },
+          { target: linux, os: ubuntu-latest, tasks: linuxX64Test, continueOnError: false },
           { target: js, os: ubuntu-latest, tasks: jsTest, continueOnError: false },
           { target: wasm, os: ubuntu-latest, tasks: wasmJsTest, continueOnError: false },
           { target: desktop, os: ubuntu-latest, tasks: desktopTest, continueOnError: false },
@@ -68,15 +68,15 @@ jobs:
     name: Build ${{ matrix.config.target }}
     needs: check
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Test ${{ matrix.config.target }} targets
         continue-on-error: ${{ matrix.config.continueOnError }}
@@ -93,16 +93,16 @@ jobs:
       - build
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Write secrets to local.properties
         if: ${{ github.event_name != 'pull_request' }}
@@ -131,22 +131,22 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Generate api docs with dokka
-        run: ./gradlew dokkaHtmlMultiModule
+        run: ./gradlew dokkaGenerate
 
       - name: Build Writerside docs using Docker
         uses: JetBrains/writerside-github-action@v4
@@ -171,7 +171,7 @@ jobs:
       - name: Move dokka api-doc to docs/api
         run: |
           sudo mkdir -p build/docs/api
-          sudo mv build/dokka/htmlMultiModule/* build/docs/api
+          sudo mv build/dokka/html/* build/docs/api
 
       - name: Upload pages
         uses: actions/upload-pages-artifact@v3

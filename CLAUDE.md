@@ -16,8 +16,8 @@ Use the Gradle wrapper (`./gradlew`). Build requires JDK 17.
 ```bash
 # Per-platform test suites (mirror the CI matrix)
 ./gradlew desktopTest                              # JVM
-./gradlew testDebugUnitTest testReleaseUnitTest    # Android
-./gradlew jsTest / wasmJsTest / linuxTest
+./gradlew testDebugUnitTest                        # Android (AGP 9 dropped testReleaseUnitTest)
+./gradlew jsTest / wasmJsTest / linuxX64Test
 ./gradlew macosArm64Test iosSimulatorArm64Test     # Apple (on macOS)
 
 # Single test
