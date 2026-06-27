@@ -70,6 +70,22 @@ subprojects {
       }
     }
   }
+
+  // Secondary target: GitHub Packages. Maven Central (above) stays the primary registry.
+  // Publish with `./gradlew publishAllPublicationsToGitHubPackagesRepository`. In CI the
+  // credentials come from the auto-provided GITHUB_ACTOR / GITHUB_TOKEN env vars.
+  configure<org.gradle.api.publish.PublishingExtension> {
+    repositories {
+      maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/xxfast/KStore")
+        credentials {
+          username = System.getenv("GITHUB_ACTOR")
+          password = System.getenv("GITHUB_TOKEN")
+        }
+      }
+    }
+  }
 }
 
 // Dokka v2 multi-module aggregation: root project aggregates all submodule docs.
