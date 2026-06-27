@@ -65,16 +65,15 @@ public class VersionedCodec<T : @Serializable Any>(
 
   override suspend fun decode(): T? =
     try {
-      json.decode(serializer, SystemFileSystem.source(file).buffered())
+      SystemFileSystem.source(file).buffered().use { json.decode(serializer, it) }
     } catch (e: SerializationException) {
       val previousVersion: Int =
-        if (SystemFileSystem.exists(versionPath)) json.decode(
-          Int.serializer(),
-          SystemFileSystem.source(versionPath).buffered()
-        )
+        if (SystemFileSystem.exists(versionPath))
+          SystemFileSystem.source(versionPath).buffered().use { json.decode(Int.serializer(), it) }
         else 0
 
-      val data: JsonElement = json.decode(SystemFileSystem.source(file).buffered())
+      val data: JsonElement =
+        SystemFileSystem.source(file).buffered().use { json.decode(it) }
       migration(previousVersion, data)
     } catch (e: FileNotFoundException) {
       null

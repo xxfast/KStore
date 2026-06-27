@@ -24,15 +24,15 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Check api
         run: ./gradlew apiCheck
@@ -56,69 +56,58 @@ jobs:
     strategy:
       matrix:
         config: [
-          { target: android, os: ubuntu-latest, tasks: testDebugUnitTest testReleaseUnitTest, continueOnError: false },
-          { target: apple, os: macos-latest, tasks: iosX64Test iosSimulatorArm64Test macosX64Test macosArm64Test tvosX64Test tvosSimulatorArm64Test watchosX64Test watchosSimulatorArm64Test, continueOnError: false },
-          { target: windows, os: windows-latest, tasks: windowsTest, continueOnError: true }, # https://github.com/square/okio/issues/951
-          { target: linux, os: ubuntu-latest, tasks: linuxTest, continueOnError: false },
-          { target: js, os: ubuntu-latest, tasks: jsTest, continueOnError: false },
-          { target: wasm, os: ubuntu-latest, tasks: wasmJsTest, continueOnError: false },
-          { target: desktop, os: ubuntu-latest, tasks: desktopTest, continueOnError: false },
+          # A macOS host is the only one that can run Apple-target tests, and it runs JVM/JS/Wasm
+          # tests just as well — so everything except the native Linux/Windows tests runs here.
+          { target: macos, os: macos-latest, tasks: iosSimulatorArm64Test macosArm64Test testAndroidHostTest desktopTest jsTest wasmJsTest },
+          # Native Linux/Windows test binaries can only be executed on their own host.
+          { target: linux, os: ubuntu-latest, tasks: linuxX64Test },
+          { target: windows, os: windows-latest, tasks: windowsTest },
         ]
     runs-on: ${{ matrix.config.os }}
     name: Build ${{ matrix.config.target }}
     needs: check
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Test ${{ matrix.config.target }} targets
-        continue-on-error: ${{ matrix.config.continueOnError }}
         run: ./gradlew ${{ matrix.config.tasks }}
 
   release:
-    name: Release ${{ matrix.module }} to Sonatype
-    strategy:
-      matrix:
-        module: [kstore, kstore-file, kstore-storage]
+    name: Publish to Maven Central
     if: ${{ github.event_name != 'pull_request' }}
-    runs-on: macos-latest
+    runs-on: macos-latest # required to build the Apple-target klibs
     needs:
       - build
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Write secrets to local.properties
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          echo sonatypeUsername="${SONATYPE_USERNAME}" >> "local.properties"
-          echo sonatypePassword="${SONATYPE_PASSWORD}" >> "local.properties"
-          echo gpgKeyPassword="${GPG_KEY_PASSWORD}" >> "local.properties"
-          echo gpgKeySecret="${GPG_KEY_SECRET}" >> "local.properties"
+      # Uploads all three modules as a single Central Portal deployment.
+      # Without automaticRelease, it waits for manual approval at central.sonatype.com.
+      - name: Publish to Maven Central
+        run: ./gradlew publishToMavenCentral --no-configuration-cache
         env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          GPG_KEY_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
-          GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
-
-      - name: Release to sonatype
-        run: ./gradlew :${{ matrix.module }}:publishAllPublicationsToMavenRepository
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_SECRET }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
 
 
   documentation:
@@ -131,22 +120,22 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Generate api docs with dokka
-        run: ./gradlew dokkaHtmlMultiModule
+        run: ./gradlew dokkaGenerate
 
       - name: Build Writerside docs using Docker
         uses: JetBrains/writerside-github-action@v4
@@ -171,7 +160,7 @@ jobs:
       - name: Move dokka api-doc to docs/api
         run: |
           sudo mkdir -p build/docs/api
-          sudo mv build/dokka/htmlMultiModule/* build/docs/api
+          sudo mv build/dokka/html/* build/docs/api
 
       - name: Upload pages
         uses: actions/upload-pages-artifact@v3

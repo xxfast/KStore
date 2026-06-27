@@ -1,56 +1,43 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
+import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinToolingSetupTask
 
 plugins {
   kotlin("multiplatform")
-  id("com.android.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
-}
-
-android {
-  compileSdk = 36
-
-  defaultConfig {
-    minSdk = 21
-  }
-
-  sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-  }
-
-  lint {
-    // TODO: Figure out why the linter is failing on CI
-    abortOnError = false
-  }
-
-  namespace = "io.github.xxfast.kstore"
+  id("com.android.kotlin.multiplatform.library")
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
 }
 
 kotlin {
   explicitApi()
+  applyDefaultHierarchyTemplate()
 
-  androidTarget {
-    compilations.all {
-      kotlinOptions {
-        jvmTarget = "1.8"
-      }
+  android {
+    namespace = "io.github.xxfast.kstore"
+    compileSdk = 36
+    minSdk = 21
+
+    withHostTestBuilder {}
+
+    compilerOptions {
+      jvmTarget.set(JvmTarget.JVM_1_8)
     }
   }
 
   jvm("desktop") {
     compilations.all {
-      kotlinOptions.jvmTarget = "1.8"
+      compilerOptions.configure {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+      }
     }
     testRuns["test"].executionTask.configure {
       useJUnitPlatform()
     }
   }
 
-  js(IR) {
+  js {
     browser()
     nodejs()
   }
@@ -61,57 +48,23 @@ kotlin {
     nodejs()
   }
 
-  val macosX64 = macosX64()
-  val macosArm64 = macosArm64()
-  val iosArm64 = iosArm64()
-  val iosX64 = iosX64()
-  val iosSimulatorArm64 = iosSimulatorArm64()
-  val watchosArm32 = watchosArm32()
-  val watchosArm64 = watchosArm64()
-  val watchosX64 = watchosX64()
-  val watchosSimulatorArm64 = watchosSimulatorArm64()
-  val tvosArm64 = tvosArm64()
-  val tvosX64 = tvosX64()
-  val tvosSimulatorArm64 = tvosSimulatorArm64()
-  val appleTargets = listOf(
-    macosX64, macosArm64,
-    iosArm64, iosX64, iosSimulatorArm64,
-    watchosArm32, watchosArm64, watchosX64,
-    watchosSimulatorArm64,
-    tvosArm64, tvosX64, tvosSimulatorArm64,
-  )
-
-  appleTargets.forEach { target ->
-    with(target) {
-      binaries {
-        framework {
-          baseName = "KStore"
-        }
-      }
-    }
-  }
-
-  linuxX64("linux")
-  mingwX64("windows")
+  macosArm64()
+  iosArm64(); iosSimulatorArm64()
+  linuxX64(); mingwX64("windows")
 
   sourceSets {
-    val commonMain by getting {
-      dependencies {
-        implementation(libs.kotlinx.coroutines)
-        implementation(libs.kotlinx.serialization.json)
-      }
+    commonMain.dependencies {
+      implementation(libs.kotlinx.coroutines)
+      implementation(libs.kotlinx.serialization.json)
     }
 
-    val commonTest by getting {
-      dependencies {
-        implementation(kotlin("test"))
-        implementation(libs.kotlinx.coroutines.test)
-        implementation(libs.turbine)
-      }
+    commonTest.dependencies {
+      implementation(kotlin("test"))
+      implementation(libs.kotlinx.coroutines.test)
+      implementation(libs.turbine)
     }
 
-    val androidMain by getting
-    val androidUnitTest by getting {
+    named("androidHostTest") {
       dependencies {
         implementation(libs.junit)
         implementation(libs.junit.jupiter.api)
@@ -119,31 +72,6 @@ kotlin {
         implementation(libs.androidx.test.junit)
       }
     }
-
-    val desktopMain by getting
-    val desktopTest by getting
-
-    val jsMain by getting
-    val jsTest by getting
-
-    val wasmJsMain by getting
-    val wasmJsTest by getting
-
-    val appleMain by creating {
-      dependsOn(commonMain)
-    }
-    val appleTest by creating
-
-    appleTargets.forEach { target ->
-      getByName("${target.targetName}Main") { dependsOn(appleMain) }
-      getByName("${target.targetName}Test") { dependsOn(appleTest) }
-    }
-
-    val linuxMain by getting
-    val linuxTest by getting
-
-    val windowsMain by getting
-    val windowsTest by getting
   }
 }
 
@@ -154,9 +82,9 @@ kotlin {
 // Node.js Canary is set to 21.0.0-v8-canary20231019bd785be450
 // as that is the last version to ship Windows binaries too.
 //
-rootProject.extensions.configure<NodeJsRootExtension> {
-  nodeVersion = "21.0.0-v8-canary20231019bd785be450"
-  nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
+rootProject.extensions.configure<WasmNodeJsEnvSpec> {
+  version.set("21.0.0-v8-canary20231019bd785be450")
+  downloadBaseUrl.set("https://nodejs.org/download/v8-canary")
 }
 
 rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
@@ -165,6 +93,10 @@ rootProject.tasks.withType<KotlinNpmInstallTask>().configureEach {
   if (!args.contains(flag)) {
     args.add(flag)
   }
+}
+
+rootProject.tasks.withType<KotlinToolingSetupTask>().configureEach {
+  args.add("--ignore-engines")
 }
 
 dependencies {

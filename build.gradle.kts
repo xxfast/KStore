@@ -1,8 +1,7 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-
 plugins {
-  id("org.jetbrains.kotlinx.kover") version "0.8.2"
-  id("org.jetbrains.dokka") version "1.9.20"
+  id("org.jetbrains.kotlinx.kover") version "0.9.8"
+  id("org.jetbrains.dokka") version "2.2.0"
+  id("com.vanniktech.maven.publish") version "0.37.0" apply false
 }
 
 buildscript {
@@ -26,81 +25,58 @@ allprojects {
   }
 
   group = "io.github.xxfast"
-  version = "1.0.0"
+  version = "1.1.0-SNAPSHOT"
 
   apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
   apply(plugin = "org.jetbrains.kotlinx.kover")
   apply(plugin = "org.jetbrains.dokka")
-  apply(plugin = "maven-publish")
-  apply(plugin = "signing")
+}
 
-  extensions.configure<PublishingExtension> {
-    repositories {
-      maven {
-        val isSnapshot = version.toString().endsWith("SNAPSHOT")
-        url = uri(
-          if (!isSnapshot) "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
-          else "https://s01.oss.sonatype.org/content/repositories/snapshots"
-        )
+subprojects {
+  apply(plugin = "com.vanniktech.maven.publish")
 
-        credentials {
-          username = gradleLocalProperties(rootDir).getProperty("sonatypeUsername")
-          password = gradleLocalProperties(rootDir).getProperty("sonatypePassword")
+  // Publishes to the Sonatype Central Portal (central.sonatype.com). Credentials/signing
+  // come from Gradle properties: mavenCentralUsername/mavenCentralPassword and
+  // signingInMemoryKey/signingInMemoryKeyPassword (see CI env / ~/.gradle/gradle.properties).
+  configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
+    publishToMavenCentral() // no automaticRelease: deployment waits for manual "Publish" on the portal
+    signAllPublications()
+
+    pom {
+      name.set("KStore")
+      description.set("A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines and kotlinx.serialization")
+      url.set("https://xxfast.github.io/KStore/")
+      licenses {
+        license {
+          name.set("Apache-2.0")
+          url.set("https://opensource.org/licenses/Apache-2.0")
         }
       }
-    }
-
-    val javadocJar = tasks.register<Jar>("javadocJar") {
-      dependsOn(tasks.dokkaHtml)
-      archiveClassifier.set("javadoc")
-      from("$buildDir/dokka")
-    }
-
-    publications {
-      withType<MavenPublication> {
-        artifact(javadocJar)
-
-        pom {
-          name.set("KStore")
-          description.set("A tiny Kotlin multiplatform library that assists in saving and restoring objects to and from disk using kotlinx.coroutines, kotlinx.serialisation and okio")
-          licenses {
-            license {
-              name.set("Apache-2.0")
-              url.set("https://opensource.org/licenses/Apache-2.0")
-            }
-          }
-          url.set("https://xxfast.github.io/KStore/")
-          issueManagement {
-            system.set("Github")
-            url.set("https://github.com/xxfast/KStore/issues")
-          }
-          scm {
-            connection.set("https://github.com/xxfast/KStore.git")
-            url.set("https://github.com/xxfast/KStore")
-          }
-          developers {
-            developer {
-              name.set("Isuru Rajapakse")
-              email.set("isurukusumal36@gmail.com")
-            }
-          }
+      issueManagement {
+        system.set("Github")
+        url.set("https://github.com/xxfast/KStore/issues")
+      }
+      scm {
+        url.set("https://github.com/xxfast/KStore")
+        connection.set("scm:git:git://github.com/xxfast/KStore.git")
+        developerConnection.set("scm:git:ssh://git@github.com/xxfast/KStore.git")
+      }
+      developers {
+        developer {
+          id.set("xxfast")
+          name.set("Isuru Rajapakse")
+          email.set("isurukusumal36@gmail.com")
         }
       }
     }
   }
+}
 
-  val publishing = extensions.getByType<PublishingExtension>()
-  extensions.configure<SigningExtension> {
-    useInMemoryPgpKeys(
-      gradleLocalProperties(rootDir).getProperty("gpgKeySecret"),
-      gradleLocalProperties(rootDir).getProperty("gpgKeyPassword"),
-    )
-
-    sign(publishing.publications)
-  }
-
-  // TODO: remove after https://youtrack.jetbrains.com/issue/KT-46466 is fixed
-  project.tasks.withType(AbstractPublishToMaven::class.java).configureEach {
-    dependsOn(project.tasks.withType(Sign::class.java))
-  }
+// Dokka v2 multi-module aggregation: root project aggregates all submodule docs.
+// Running `./gradlew dokkaGenerate` (or `dokkaGeneratePublicationHtml`) at root level
+// produces combined HTML documentation in build/dokka/html/.
+dependencies {
+  dokka(project(":kstore"))
+  dokka(project(":kstore-file"))
+  dokka(project(":kstore-storage"))
 }
