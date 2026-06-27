@@ -81,12 +81,9 @@ jobs:
         run: ./gradlew ${{ matrix.config.tasks }}
 
   release:
-    name: Release ${{ matrix.module }} to Sonatype
-    strategy:
-      matrix:
-        module: [kstore, kstore-file, kstore-storage]
+    name: Publish to Maven Central
     if: ${{ github.event_name != 'pull_request' }}
-    runs-on: macos-latest
+    runs-on: macos-latest # required to build the Apple-target klibs
     needs:
       - build
 
@@ -102,21 +99,15 @@ jobs:
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Write secrets to local.properties
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          echo sonatypeUsername="${SONATYPE_USERNAME}" >> "local.properties"
-          echo sonatypePassword="${SONATYPE_PASSWORD}" >> "local.properties"
-          echo gpgKeyPassword="${GPG_KEY_PASSWORD}" >> "local.properties"
-          echo gpgKeySecret="${GPG_KEY_SECRET}" >> "local.properties"
+      # Uploads all three modules as a single Central Portal deployment.
+      # Without automaticRelease, it waits for manual approval at central.sonatype.com.
+      - name: Publish to Maven Central
+        run: ./gradlew publishToMavenCentral --no-configuration-cache
         env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          GPG_KEY_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
-          GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
-
-      - name: Release to sonatype
-        run: ./gradlew :${{ matrix.module }}:publishAllPublicationsToMavenRepository
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_SECRET }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
 
 
   documentation:
