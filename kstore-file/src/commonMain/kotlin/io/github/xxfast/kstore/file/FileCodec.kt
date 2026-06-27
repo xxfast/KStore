@@ -75,4 +75,8 @@ public class FileCodec<T : @Serializable Any>(
 
     SystemFileSystem.atomicMove(source = tempFile, destination = file)
   }
+
+  override fun id(): Any {
+    return this.file.toString() + this.serializer.descriptor.serialName
+  }
 }

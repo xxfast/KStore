@@ -12,7 +12,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class KStoreTests {
-  private val store: KStore<Cat> = storeOf(codec = TestCodec())
+  private val codec = TestCodec<Cat>()
+  private val store: KStore<Cat> = storeOf(codec = codec)
 
   @AfterTest
   fun cleanup() {
@@ -103,6 +104,26 @@ class KStoreTests {
     // Mylo will never be sent 😿 because there is already a stored value
     val newStore: KStore<Cat> = KStore(codec = TestCodec(), default = MYLO)
     newStore.updates.test {
+      assertEquals(OREO, awaitItem())
+    }
+  }
+
+  @Test
+  fun testUpdatesWithMultipleInstances() = runTest {
+    val store2 = storeOf(codec = codec)
+    store.updates.test {
+      assertEquals(null, awaitItem())
+      store2.set(MYLO)
+      assertEquals(MYLO, awaitItem())
+      store2.set(OREO)
+      assertEquals(OREO, awaitItem())
+    }
+
+    store2.updates.test {
+      assertEquals(OREO, awaitItem())
+      store.set(MYLO)
+      assertEquals(MYLO, awaitItem())
+      store.set(OREO)
       assertEquals(OREO, awaitItem())
     }
   }

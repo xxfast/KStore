@@ -18,15 +18,22 @@ import kotlinx.serialization.Serializable
  *
  * @return store that contains a value of type [T]
  */
-public inline fun <reified T : @Serializable Any> storeOf(
+public fun <T : @Serializable Any> storeOf(
   codec: Codec<T>,
   default: T? = null,
   enableCache: Boolean = true,
-): KStore<T> = KStore(
-  default = default,
-  enableCache = enableCache,
-  codec = codec
-)
+): KStore<T> {
+  return KStoreFactory.getOrCreate(
+    key = codec,
+    creator = {
+      KStore(
+        default = default,
+        enableCache = enableCache,
+        codec = codec
+      )
+    }
+  )
+}
 
 /**
  * Creates a store with a custom encoder and a decoder
@@ -109,5 +116,6 @@ public class KStore<T : @Serializable Any>(
 
   override fun close() {
     if (lock.isLocked) lock.unlock()
+    KStoreFactory.release(key = codec)
   }
 }
