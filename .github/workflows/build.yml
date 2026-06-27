@@ -75,6 +75,17 @@ jobs:
       - name: Test ${{ matrix.config.target }} targets
         run: ./gradlew ${{ matrix.config.tasks }}
 
+      - name: Upload test results to Codecov
+        # Run even when tests fail — that's when test analytics is most useful.
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          files: "**/build/test-results/**/TEST-*.xml"
+          flags: ${{ matrix.config.target }}
+          # Public repo: uploads are tokenless, so this also works on fork PRs.
+          # CODECOV_TOKEN (if set as a secret) is used for same-repo runs.
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   release:
     name: ${{ matrix.registry.name }}
     if: ${{ github.event_name != 'pull_request' }}
