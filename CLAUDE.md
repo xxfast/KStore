@@ -28,6 +28,16 @@ Use the Gradle wrapper (`./gradlew`). Build requires JDK 17.
 ./gradlew apiDump       # regenerate *.api after an INTENTIONAL public API change, then commit it
 ```
 
+## Publishing
+
+Published to **Maven Central via the Sonatype Central Portal** (central.sonatype.com) using the `com.vanniktech.maven.publish` plugin, configured once for all modules in the root `build.gradle.kts` `subprojects {}` block. OSSRH (`s01.oss.sonatype.org`) is dead — do not reintroduce it.
+
+- CI `release` job (on push to `master`, macOS runner) runs `./gradlew publishToMavenCentral`, uploading all three modules as a **single Central Portal deployment**.
+- Release is **manual**: the upload waits for a human to click *Publish* at central.sonatype.com. (Swap `publishToMavenCentral()` → `publishAndReleaseToMavenCentral()` in the root build to automate.)
+- Credentials are Gradle properties, passed in CI as `ORG_GRADLE_PROJECT_*` env vars: `mavenCentralUsername`/`mavenCentralPassword` (Central Portal user token → GitHub secrets `MAVEN_CENTRAL_USERNAME`/`MAVEN_CENTRAL_PASSWORD`) and `signingInMemoryKey`/`signingInMemoryKeyPassword` (reuses the `GPG_KEY_SECRET`/`GPG_KEY_PASSWORD` secrets). For local publishing put these in `~/.gradle/gradle.properties`.
+- Central versions are **immutable** — bump `version` in the root `build.gradle.kts` before re-releasing.
+- `./gradlew publishToMavenLocal` (with a signing key set) is the dry-run; it stages full artifacts to `~/.m2`.
+
 ## Gotchas
 
 - **`explicitApi()` is on** in every module — public declarations need explicit visibility + return types or compilation fails.
