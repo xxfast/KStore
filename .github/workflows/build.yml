@@ -22,7 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - name: Setup JDK 17
@@ -40,17 +39,13 @@ jobs:
       - name: Generate kover coverage report
         run: ./gradlew koverXmlReport
 
-      - name: Add coverage report to PR
-        if: ${{ github.event_name == 'pull_request' }}
-        id: kover
-        uses: mi-kas/kover-report@v1
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          path: ${{ github.workspace }}/kstore/build/reports/kover/report.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Code Coverage
-          update-comment: true
-          min-coverage-overall: 80
-          min-coverage-changed-files: 80
+          files: kstore/build/reports/kover/report.xml
+          # Public repo: uploads are tokenless, so this also works on fork PRs.
+          # CODECOV_TOKEN (if set as a secret) is used for same-repo runs.
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     strategy:
