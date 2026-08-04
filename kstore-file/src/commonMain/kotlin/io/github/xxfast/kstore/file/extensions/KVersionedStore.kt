@@ -9,6 +9,7 @@ import kotlinx.io.buffered
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -79,33 +80,28 @@ public class VersionedCodec<T : @Serializable Any>(
       // The file doesn't hold the current shape of [T]. Either it was written by an older version of
       // this store - which [migration] can recover from - or it is corrupt/partially written, in which
       // case there is nothing to recover and [migration] is handed what little is known.
-      migration(decodeVersion(), decodeData())
+      // No version file at all means the store predates versioning, so it reads as 0. One that exists
+      // but can't be read leaves the version unknown, same as unreadable data.
+      migration(
+        decodeOrNull(versionPath, Int.serializer(), whenMissing = 0),
+        decodeOrNull(file, JsonElement.serializer(), whenMissing = null),
+      )
     }
 
   /**
-   * Reads the version the file was last written with.
-   * @return 0 when there is no version file - stores written before this one was versioned - or
-   * null when the version file exists but cannot be read, in which case the version is unknown.
+   * Reads [path] with [deserializer], degrading rather than throwing so that a corrupt store can be
+   * migrated or reset instead of crashing on every read.
+   * @return [whenMissing] when there is no such file, or null when its contents cannot be decoded
    */
-  private fun decodeVersion(): Int? =
-    if (!SystemFileSystem.exists(versionPath)) 0
-    else try {
-      SystemFileSystem.source(versionPath).buffered().use { json.decode(Int.serializer(), it) }
-    } catch (e: FileNotFoundException) {
-      0
-    } catch (e: SerializationException) {
-      null
-    }
-
-  /**
-   * Reads the raw contents of the file for [migration] to recover a value from.
-   * @return null when the file cannot be parsed as json at all, i.e. it is corrupt or empty.
-   */
-  private fun decodeData(): JsonElement? =
+  private fun <R : Any> decodeOrNull(
+    path: Path,
+    deserializer: DeserializationStrategy<R>,
+    whenMissing: R?,
+  ): R? =
     try {
-      SystemFileSystem.source(file).buffered().use { json.decode<JsonElement>(it) }
+      SystemFileSystem.source(path).buffered().use { json.decode(deserializer, it) }
     } catch (e: FileNotFoundException) {
-      null
+      whenMissing
     } catch (e: SerializationException) {
       null
     }
