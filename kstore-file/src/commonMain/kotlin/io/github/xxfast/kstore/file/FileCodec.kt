@@ -96,8 +96,11 @@ public class FileCodec<T : @Serializable Any>(
  * @param file path to the file being staged for
  * @return a staging path that no other codec will pick
  */
-public fun uniqueTempFile(file: Path): Path =
-  Path("$file.${Random.nextLong(from = 0, until = Long.MAX_VALUE).toString(radix = 16)}.temp")
+public fun uniqueTempFile(file: Path): Path {
+  val id: Long = Random.nextLong(from = 0, until = Long.MAX_VALUE)
+  val suffix: String = id.toString(radix = 16)
+  return Path("$file.$suffix.temp")
+}
 
 /**
  * Moves [source] onto [destination] atomically via [atomicMove].
