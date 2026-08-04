@@ -22,17 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Check api
         run: ./gradlew apiCheck
@@ -40,85 +39,96 @@ jobs:
       - name: Generate kover coverage report
         run: ./gradlew koverXmlReport
 
-      - name: Add coverage report to PR
-        if: ${{ github.event_name == 'pull_request' }}
-        id: kover
-        uses: mi-kas/kover-report@v1
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          path: ${{ github.workspace }}/kstore/build/reports/kover/report.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Code Coverage
-          update-comment: true
-          min-coverage-overall: 80
-          min-coverage-changed-files: 80
+          files: kstore/build/reports/kover/report.xml
+          # Public repo: uploads are tokenless, so this also works on fork PRs.
+          # CODECOV_TOKEN (if set as a secret) is used for same-repo runs.
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     strategy:
       matrix:
         config: [
-          { target: android, os: ubuntu-latest, tasks: testDebugUnitTest testReleaseUnitTest, continueOnError: false },
-          { target: apple, os: macos-latest, tasks: iosX64Test iosSimulatorArm64Test macosX64Test macosArm64Test tvosX64Test tvosSimulatorArm64Test watchosX64Test watchosSimulatorArm64Test, continueOnError: false },
-          { target: windows, os: windows-latest, tasks: windowsTest, continueOnError: true }, # https://github.com/square/okio/issues/951
-          { target: linux, os: ubuntu-latest, tasks: linuxTest, continueOnError: false },
-          { target: js, os: ubuntu-latest, tasks: jsTest, continueOnError: false },
-          { target: wasm, os: ubuntu-latest, tasks: wasmJsTest, continueOnError: false },
-          { target: desktop, os: ubuntu-latest, tasks: desktopTest, continueOnError: false },
+          # A macOS host is the only one that can run Apple-target tests, and it runs JVM/JS/Wasm
+          # tests just as well — so everything except the native Linux/Windows tests runs here.
+          { target: macos, os: macos-latest, tasks: iosSimulatorArm64Test macosArm64Test testAndroidHostTest desktopTest jsTest wasmJsTest },
+          # Native Linux/Windows test binaries can only be executed on their own host.
+          { target: linux, os: ubuntu-latest, tasks: linuxX64Test },
+          { target: windows, os: windows-latest, tasks: windowsTest },
         ]
     runs-on: ${{ matrix.config.os }}
     name: Build ${{ matrix.config.target }}
     needs: check
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Test ${{ matrix.config.target }} targets
-        continue-on-error: ${{ matrix.config.continueOnError }}
         run: ./gradlew ${{ matrix.config.tasks }}
 
+      - name: Upload test results to Codecov
+        # Run even when tests fail — that's when test analytics is most useful.
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          files: "**/build/test-results/**/TEST-*.xml"
+          flags: ${{ matrix.config.target }}
+          # Public repo: uploads are tokenless, so this also works on fork PRs.
+          # CODECOV_TOKEN (if set as a secret) is used for same-repo runs.
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   release:
-    name: Release ${{ matrix.module }} to Sonatype
-    strategy:
-      matrix:
-        module: [kstore, kstore-file, kstore-storage]
+    name: ${{ matrix.registry.name }}
     if: ${{ github.event_name != 'pull_request' }}
-    runs-on: macos-latest
+    runs-on: macos-latest # required to build the Apple-target klibs
     needs:
       - build
-
+    permissions:
+      contents: read
+      packages: write # for GitHub Packages
+    strategy:
+      # Don't let one registry failing cancel the upload to the other.
+      fail-fast: false
+      matrix:
+        registry:
+          # Uploads all three modules as a single Central Portal deployment. Without
+          # automaticRelease, it waits for manual approval at central.sonatype.com.
+          - name: Publish to Maven Central
+            task: publishToMavenCentral
+          - name: Publish to GitHub Packages
+            task: publishAllPublicationsToGitHubPackagesRepository
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Write secrets to local.properties
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          echo sonatypeUsername="${SONATYPE_USERNAME}" >> "local.properties"
-          echo sonatypePassword="${SONATYPE_PASSWORD}" >> "local.properties"
-          echo gpgKeyPassword="${GPG_KEY_PASSWORD}" >> "local.properties"
-          echo gpgKeySecret="${GPG_KEY_SECRET}" >> "local.properties"
+      - name: ${{ matrix.registry.name }}
+        run: ./gradlew ${{ matrix.registry.task }} --no-configuration-cache
         env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          GPG_KEY_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
-          GPG_KEY_SECRET: ${{ secrets.GPG_KEY_SECRET }}
-
-      - name: Release to sonatype
-        run: ./gradlew :${{ matrix.module }}:publishAllPublicationsToMavenRepository
+          # Maven Central credentials (ignored by the GitHub Packages task, and vice versa).
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_SECRET }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
+          # GitHub Packages credentials — GITHUB_TOKEN is auto-provided, no secret needed.
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
   documentation:
@@ -131,22 +141,22 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Generate api docs with dokka
-        run: ./gradlew dokkaHtmlMultiModule
+        run: ./gradlew dokkaGenerate
 
       - name: Build Writerside docs using Docker
         uses: JetBrains/writerside-github-action@v4
@@ -171,7 +181,7 @@ jobs:
       - name: Move dokka api-doc to docs/api
         run: |
           sudo mkdir -p build/docs/api
-          sudo mv build/dokka/htmlMultiModule/* build/docs/api
+          sudo mv build/dokka/html/* build/docs/api
 
       - name: Upload pages
         uses: actions/upload-pages-artifact@v3

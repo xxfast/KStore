@@ -8,3 +8,9 @@ local.properties
 
 # Mac
 .DS_Store
+
+# IntelliJ — ignore all IDE config except the shared code style, project icon + name
+.idea/*
+!.idea/codeStyles/
+!.idea/icon.svg
+!.idea/.name

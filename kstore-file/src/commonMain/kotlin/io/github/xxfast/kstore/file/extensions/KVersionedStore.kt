@@ -3,11 +3,13 @@ package io.github.xxfast.kstore.file.extensions
 import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
+import io.github.xxfast.kstore.file.moveOrCopy
 import io.github.xxfast.kstore.storeOf
 import kotlinx.io.buffered
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -59,32 +61,78 @@ public class VersionedCodec<T : @Serializable Any>(
   private val serializer: KSerializer<T>,
   private val migration: Migration<T>,
   private val versionPath: Path = Path("$file.version"), // TODO: Save to file metadata instead
+  private val tempPath: Path = Path("$file.temp"),
+  private val tempVersionPath: Path = Path("$versionPath.temp"),
 ) : Codec<T> {
 
+  /**
+   * Decodes the file to a value.
+   * If the file does not exist, null is returned.
+   * If the file does not hold the current shape of [T], the value is recovered through [migration].
+   * @return optional value that is decoded
+   */
   override suspend fun decode(): T? =
     try {
-      json.decode(serializer, SystemFileSystem.source(file).buffered())
-    } catch (e: SerializationException) {
-      val previousVersion: Int =
-        if (SystemFileSystem.exists(versionPath)) json.decode(
-          Int.serializer(),
-          SystemFileSystem.source(versionPath).buffered()
-        )
-        else 0
-
-      val data: JsonElement = json.decode(SystemFileSystem.source(file).buffered())
-      migration(previousVersion, data)
+      SystemFileSystem.source(file).buffered().use { json.decode(serializer, it) }
     } catch (e: FileNotFoundException) {
+      null
+    } catch (e: SerializationException) {
+      // The file doesn't hold the current shape of [T]. Either it was written by an older version of
+      // this store - which [migration] can recover from - or it is corrupt/partially written, in which
+      // case there is nothing to recover and [migration] is handed what little is known.
+      // No version file at all means the store predates versioning, so it reads as 0. One that exists
+      // but can't be read leaves the version unknown, same as unreadable data.
+      migration(
+        decodeOrNull(versionPath, Int.serializer(), whenMissing = 0),
+        decodeOrNull(file, JsonElement.serializer(), whenMissing = null),
+      )
+    }
+
+  /**
+   * Reads [path] with [deserializer], degrading rather than throwing so that a corrupt store can be
+   * migrated or reset instead of crashing on every read.
+   * @return [whenMissing] when there is no such file, or null when its contents cannot be decoded
+   */
+  private fun <R : Any> decodeOrNull(
+    path: Path,
+    deserializer: DeserializationStrategy<R>,
+    whenMissing: R?,
+  ): R? =
+    try {
+      SystemFileSystem.source(path).buffered().use { json.decode(deserializer, it) }
+    } catch (e: FileNotFoundException) {
+      whenMissing
+    } catch (e: SerializationException) {
       null
     }
 
+  /**
+   * Encodes the given value to the file, along with the current [version].
+   * If the value is null, both files are deleted.
+   * If the encoding fails, the temp files are deleted.
+   * On platforms where atomic move is not supported (e.g., Android 7 and below) this falls back to a
+   * non-atomic copy-and-delete; the transactional guarantee does not hold for that fallback path.
+   * @param value optional value to encode
+   */
   override suspend fun encode(value: T?) {
-    if (value != null) {
-      SystemFileSystem.sink(versionPath).buffered().use { json.encode(Int.serializer(), version, it) }
-      SystemFileSystem.sink(file).buffered().use { json.encode(serializer, value, it) }
-    } else {
+    if (value == null) {
       SystemFileSystem.delete(versionPath, mustExist = false)
       SystemFileSystem.delete(file, mustExist = false)
+      return
     }
+
+    try {
+      SystemFileSystem.sink(tempPath).buffered().use { json.encode(serializer, value, it) }
+      SystemFileSystem.sink(tempVersionPath).buffered().use { json.encode(Int.serializer(), version, it) }
+    } catch (e: Throwable) {
+      SystemFileSystem.delete(tempPath, mustExist = false)
+      SystemFileSystem.delete(tempVersionPath, mustExist = false)
+      throw e
+    }
+
+    // Data first, version second. A crash in between leaves the new data with a stale version, which
+    // still decodes directly. The reverse order would claim a version the data hasn't been written to.
+    moveOrCopy(source = tempPath, destination = file)
+    moveOrCopy(source = tempVersionPath, destination = versionPath)
   }
 }

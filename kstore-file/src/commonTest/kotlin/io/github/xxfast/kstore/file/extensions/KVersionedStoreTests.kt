@@ -3,9 +3,14 @@ package io.github.xxfast.kstore.file.extensions
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.file.storeOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.writeString
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -13,19 +18,43 @@ import kotlinx.serialization.json.long
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlin.test.assertFailsWith
 
 @Serializable data class CatV0(val name: String, val lives: Int = 9)
 @Serializable data class CatV1(val name: String, val lives: Int = 9, val cuteness: Int = 12)
 @Serializable data class CatV2(val name: String, val lives: Int = 9, val age: Int = 9 - lives, val kawaiiness: Long)
 @Serializable data class CatV3(val name: String, val lives: Int = 9, val age: Int = 9 - lives, val isCute: Boolean)
 
+@Serializable
+data class CatV41(val name: String, val friends: Map<String, @Serializable(with = TodoSerializer::class) Int>) {
+  object TodoSerializer : KSerializer<Int> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Int", PrimitiveKind.INT)
+    override fun deserialize(decoder: Decoder): Int = TODO("Not yet implemented")
+    override fun serialize(encoder: Encoder, value: Int): Unit = TODO("Not yet implemented")
+  }
+}
+
+@Serializable
+data class CatV42(val name: String, val friends: Map<String, Int>)
+
+
 val MYLO_V0 = CatV0(name = "mylo", lives = 7)
 val MYLO_V1 = CatV1(name = "mylo", lives = 7, cuteness = 12)
 val MYLO_V2 = CatV2(name = "mylo", lives = 7, age = 2, kawaiiness = 12L)
 val MYLO_V3 = CatV3(name = "mylo", lives = 7, age = 2, isCute = true)
+val MYLO_V41 = CatV41(name = "mylo", friends = mapOf("oreo" to 5, "kat" to 10))
+val MYLO_V42 = CatV42(name = "mylo", friends = mapOf("oreo" to 5, "kat" to 10))
 
 class KVersionedStoreTests {
   private val file: Path = Path("test_migration.json")
+  private val versionFile: Path = Path("$file.version")
+
+  private fun write(path: Path, contents: String) {
+    SystemFileSystem.sink(path).buffered().use { it.writeString(contents) }
+  }
 
   private val storeV0: KStore<CatV0> = storeOf(file = file)
 
@@ -73,10 +102,15 @@ class KVersionedStoreTests {
     }
   }
 
+  private val storeV41: KStore<CatV41> = storeOf(file = file, version = 4)
+  private val storeV42: KStore<CatV42> = storeOf(file = file, version = 4)
+
   @AfterTest
   fun cleanup() {
     SystemFileSystem.delete(file, mustExist = false)
-    SystemFileSystem.delete(Path("${file.name}.version"), mustExist = false)
+    SystemFileSystem.delete(versionFile, mustExist = false)
+    SystemFileSystem.delete(Path("${file.name}.temp"), mustExist = false)
+    SystemFileSystem.delete(Path("${file.name}.version.temp"), mustExist = false)
   }
 
   @Test
@@ -126,5 +160,65 @@ class KVersionedStoreTests {
     val expect: CatV2? = null
     val actual: CatV2? = storeV2.get()
     assertEquals(expect, actual)
+  }
+
+  // Corrupt or partially written stores must decode to null rather than crash - see issues #80, #157, #162
+
+  @Test
+  fun testDecodeEmptyFileWithEmptyVersionFile() = runTest {
+    write(file, "")
+    write(versionFile, "")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testDecodeEmptyFileWithVersionFile() = runTest {
+    write(file, "")
+    write(versionFile, "1")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testDecodeTruncatedFile() = runTest {
+    write(file, """{"name":"mylo","liv""")
+    write(versionFile, "1")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testDecodeEmptyFileWithoutVersionFile() = runTest {
+    write(file, "")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testCorruptStoreRepairsOnNextWrite() = runTest {
+    write(file, "")
+    write(versionFile, "")
+    assertEquals(null, storeV2.get())
+
+    storeV2.set(MYLO_V2)
+    assertEquals(MYLO_V2, storeV2.get())
+  }
+
+  @Test
+  fun testMigrationWithUnreadableVersionFile() = runTest {
+    // The data is intact and from v1, but the version file didn't survive. The version is unknown,
+    // so the migration can't place the data and falls through to its else branch rather than crashing.
+    storeV1.set(MYLO_V1)
+    write(versionFile, "")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testTransactionalEncode() = runTest {
+    assertFailsWith<NotImplementedError> { storeV41.set(MYLO_V41) }
+    assertEquals(null, storeV41.get())
+
+    storeV42.set(MYLO_V42)
+    assertFailsWith<NotImplementedError> { storeV41.set(MYLO_V41) }
+
+    assertEquals(MYLO_V42, storeV42.get())
+    assertFailsWith<NotImplementedError> { storeV41.get() }
   }
 }

@@ -7,28 +7,28 @@ KStore provides you with some convenient extensions to manage stores that contai
 ## Create a list store
 `listStoreOf` is the same as `storeOf`, but defaults to empty list instead of `null`
 ```kotlin
-val listStore: KStore<List<Pet>> = listStoreOf(file = "path/to/file") 
+val listStore: KStore<List<Pet>> = listStoreOf(file = Path("path/to/file")) 
 ```
 
 ## Get values
 ```kotlin
-val pets: List<Cat> = listStore.getOrEmpty()
-val pet: Cat = store.get(0)
+val pets: List<Pet> = listStore.getOrEmpty()
+val pet: Pet? = listStore.get(0)
 ```
 or observe values
 ```kotlin
-val pets: Flow<List<Cat>> = listStore.updatesOrEmpty
+val pets: Flow<List<Pet>> = listStore.updatesOrEmpty
 ```
 
 ## Add or remove elements
 ```kotlin
-listStore.plus(cat)
-listStore.minus(cat)
+listStore.plus(pet)
+listStore.minus(pet)
 ```
 
 ## Map elements
 ```kotlin
-listStore.map { cat -> cat.copy(cat.age = cat.age + 1) }
-listStore.mapIndexed { index, cat -> cat.copy(cat.age = index) }
+listStore.map { pet -> pet.copy(age = pet.age + 1) }
+listStore.mapIndexed { index, pet -> pet.copy(age = index) }
 ```
 

@@ -40,14 +40,55 @@ val store: KStore<Pet> = storeOf(
   version = 0, // optional
   migration = { version, jsonElement -> default }, // optional
 
-  // For kstore-file, the serializer to use. 
-  serializer = Json {
+  // For kstore-file, the json serializer to use. 
+  json = Json {
     ignoreUnknownKeys = true
     encodeDefaults = true
   }, // optional
 )
 ```
 { collapsible="true" collapsed-title="val store: KStore<Pet> = storeOf"  }
+
+You can also use binary codecs for storage (e.g. Protobuf, Cbor)
+
+```kotlin
+// Boilerplate implementation for a BinaryCodec
+public class BinaryCodec<T : @Serializable Any>(
+  private val key: String,
+  private val format: BinaryFormat,
+  private val serializer: KSerializer<T>,
+  private val storage: Storage,
+) : Codec<T> {
+  override suspend fun encode(value: T?) {
+    if (value != null) storage[key] = format.encodeToByteArray(serializer, value)
+    else storage.remove(key)
+  }
+
+  override suspend fun decode(): T? = storage[key]
+    ?.let { format.decodeFromByteArray(serializer, it) }
+}
+
+// Protobuf implementation
+public inline fun <reified T : @Serializable Any> ProtobufCodec(
+  key: String,
+  // Other formats can be found here: https://kotlinlang.org/api/kotlinx.serialization/
+  format: BinaryFormat = Protobuf,
+  storage: Storage = localStorage,
+): BinaryCodec<T> = BinaryCodec(
+  key = key,
+  format = format,
+  serializer = format.serializersModule.serializer(),
+  storage = storage,
+)
+
+// Use the `Codec` to create a store
+val store = KStore<Pet> = storeOf(
+    codec = ProtobufCodec<Pet>,
+    default = Pet(),
+    enableCache = true
+)
+```
+{ collapsible="true" collapsed-title="// Boilerplate implementation for a BinaryCodec" }
 
 ## Use your store
 
