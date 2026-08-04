@@ -3,8 +3,10 @@ package io.github.xxfast.kstore.file.extensions
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.file.storeOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.writeString
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encoding.Decoder
@@ -48,6 +50,11 @@ val MYLO_V42 = CatV42(name = "mylo", friends = mapOf("oreo" to 5, "kat" to 10))
 
 class KVersionedStoreTests {
   private val file: Path = Path("test_migration.json")
+  private val versionFile: Path = Path("$file.version")
+
+  private fun write(path: Path, contents: String) {
+    SystemFileSystem.sink(path).buffered().use { it.writeString(contents) }
+  }
 
   private val storeV0: KStore<CatV0> = storeOf(file = file)
 
@@ -101,7 +108,7 @@ class KVersionedStoreTests {
   @AfterTest
   fun cleanup() {
     SystemFileSystem.delete(file, mustExist = false)
-    SystemFileSystem.delete(Path("${file.name}.version"), mustExist = false)
+    SystemFileSystem.delete(versionFile, mustExist = false)
     SystemFileSystem.delete(Path("${file.name}.temp"), mustExist = false)
     SystemFileSystem.delete(Path("${file.name}.version.temp"), mustExist = false)
   }
@@ -153,6 +160,54 @@ class KVersionedStoreTests {
     val expect: CatV2? = null
     val actual: CatV2? = storeV2.get()
     assertEquals(expect, actual)
+  }
+
+  // Corrupt or partially written stores must decode to null rather than crash - see issues #80, #157, #162
+
+  @Test
+  fun testDecodeEmptyFileWithEmptyVersionFile() = runTest {
+    write(file, "")
+    write(versionFile, "")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testDecodeEmptyFileWithVersionFile() = runTest {
+    write(file, "")
+    write(versionFile, "1")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testDecodeTruncatedFile() = runTest {
+    write(file, """{"name":"mylo","liv""")
+    write(versionFile, "1")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testDecodeEmptyFileWithoutVersionFile() = runTest {
+    write(file, "")
+    assertEquals(null, storeV2.get())
+  }
+
+  @Test
+  fun testCorruptStoreRepairsOnNextWrite() = runTest {
+    write(file, "")
+    write(versionFile, "")
+    assertEquals(null, storeV2.get())
+
+    storeV2.set(MYLO_V2)
+    assertEquals(MYLO_V2, storeV2.get())
+  }
+
+  @Test
+  fun testMigrationWithUnreadableVersionFile() = runTest {
+    // The data is intact and from v1, but the version file didn't survive. The version is unknown,
+    // so the migration can't place the data and falls through to its else branch rather than crashing.
+    storeV1.set(MYLO_V1)
+    write(versionFile, "")
+    assertEquals(null, storeV2.get())
   }
 
   @Test
