@@ -3,7 +3,7 @@ package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
-import kotlin.random.Random
+import kotlin.uuid.Uuid
 import kotlinx.io.buffered
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
@@ -93,12 +93,16 @@ public class FileCodec<T : @Serializable Any>(
  * Note this is one staging file per codec, not per write, so a process killed mid-write leaves at
  * most one behind per store. The next write is unaffected either way.
  *
+ * The suffix comes from [Uuid.random] rather than [kotlin.random.Random] on purpose. Random.Default
+ * is a PRNG seeded from the clock on some targets, so two processes cold starting in the same tick
+ * can draw the same sequence and land on the same staging path, which is the one case this is meant
+ * to prevent. Uuid.random draws from the platform's secure source and has no shared seed.
+ *
  * @param file path to the file being staged for
  * @return a staging path that no other codec will pick
  */
 public fun uniqueTempFile(file: Path): Path {
-  val id: Long = Random.nextLong(from = 0, until = Long.MAX_VALUE)
-  val suffix: String = id.toString(radix = 16)
+  val suffix: String = Uuid.random().toHexString()
   return Path("$file.$suffix.temp")
 }
 
