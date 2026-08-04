@@ -35,10 +35,16 @@ class FileCodecTests {
         .use { DefaultJson.encodeToSink(value, it) }
     }
 
+  /** Staging files left beside the store, which should be none once a write settles */
+  private fun stagingFiles(): List<Path> =
+    SystemFileSystem.list(Path(FILE_PATH).parent ?: Path("."))
+      .filter { it.name.startsWith(Path(FILE_PATH).name) && it.name.endsWith(".temp") }
+
   @AfterTest
   fun cleanUp() {
     SystemFileSystem.delete(Path(FILE_PATH), false)
     SystemFileSystem.delete(Path("$FILE_PATH.temp"), false)
+    stagingFiles().forEach { SystemFileSystem.delete(it, false) }
   }
 
   @Test
@@ -81,6 +87,61 @@ class FileCodecTests {
   fun testDecodeMalformedFile() = runTest {
     SystemFileSystem.sink(Path(FILE_PATH)).buffered().use { it.writeString("💩") }
     assertFailsWith<SerializationException> { codec.decode() }
+  }
+
+  // Codecs sharing a file must not share a staging file, or concurrent writes interleave into one
+  // buffer and whichever moves last publishes the mixture - see issue #85
+
+  @Test
+  fun testUniqueTempFileDiffersEveryCall() {
+    val file = Path(FILE_PATH)
+    val staging: Set<Path> = List(100) { uniqueTempFile(file) }.toSet()
+    assertEquals(100, staging.size)
+  }
+
+  @Test
+  fun testUniqueTempFileStagesBesideTheTargetFile() {
+    // atomicMove is only atomic within one filesystem, so staging has to sit next to the target
+    val file = Path("some/dir/pets.json")
+    assertEquals(Path("some/dir").toString(), uniqueTempFile(file).parent.toString())
+  }
+
+  @Test
+  fun testCodecDoesNotStageThroughTheSharedPath() = runTest {
+    // The path every codec used to stage through. Stand in for another codec's in-flight write.
+    val shared = Path("$FILE_PATH.temp")
+    SystemFileSystem.sink(shared).buffered().use { it.writeString("another codec's staging") }
+
+    codec.encode(listOf(MYLO))
+
+    // This codec staged somewhere of its own, so it neither read nor consumed the other write
+    assertEquals(listOf(MYLO), codec.decode())
+    assertEquals(true, SystemFileSystem.exists(shared))
+  }
+
+  @Test
+  fun testSeparateCodecsOnSameFileDoNotShareStaging() = runTest {
+    val other: FileCodec<List<Pet>> = FileCodec(file = Path(FILE_PATH))
+
+    codec.encode(listOf(MYLO))
+    other.encode(listOf(OREO))
+
+    // Last write wins, and it is a whole document rather than a mixture of both
+    assertEquals(listOf(OREO), codec.decode())
+    assertEquals(emptyList(), stagingFiles())
+  }
+
+  @Test
+  fun testFailedEncodeLeavesNoStagingBehind() = runTest {
+    val other: FileCodec<List<Pet>> = FileCodec(file = Path(FILE_PATH))
+    codec.encode(listOf(MYLO))
+
+    // KAT's serializer throws part way through, so this codec fails mid-write
+    assertFailsWith<NotImplementedError> { other.encode(listOf(MYLO, KAT)) }
+
+    // The failure cleans up after itself and leaves the other codec's file intact
+    assertEquals(listOf(MYLO), codec.decode())
+    assertEquals(emptyList(), stagingFiles())
   }
 
   @Test

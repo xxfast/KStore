@@ -4,6 +4,10 @@ public final class io/github/xxfast/kstore/file/FileCodec : io/github/xxfast/kst
 	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class io/github/xxfast/kstore/file/FileCodecKt {
+	public static final fun uniqueTempFile (Lkotlinx/io/files/Path;)Lkotlinx/io/files/Path;
+}
+
 public final class io/github/xxfast/kstore/file/extensions/KVersionedStoreKt {
 	public static final fun DefaultMigration (Ljava/lang/Object;)Lkotlin/jvm/functions/Function2;
 }

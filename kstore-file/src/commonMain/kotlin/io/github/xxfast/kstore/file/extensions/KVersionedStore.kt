@@ -4,6 +4,7 @@ import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.file.moveOrCopy
+import io.github.xxfast.kstore.file.uniqueTempFile
 import io.github.xxfast.kstore.storeOf
 import kotlinx.io.buffered
 import kotlinx.io.files.FileNotFoundException
@@ -61,8 +62,8 @@ public class VersionedCodec<T : @Serializable Any>(
   private val serializer: KSerializer<T>,
   private val migration: Migration<T>,
   private val versionPath: Path = Path("$file.version"), // TODO: Save to file metadata instead
-  private val tempPath: Path = Path("$file.temp"),
-  private val tempVersionPath: Path = Path("$versionPath.temp"),
+  private val tempPath: Path = uniqueTempFile(file),
+  private val tempVersionPath: Path = uniqueTempFile(versionPath),
 ) : Codec<T> {
 
   /**
