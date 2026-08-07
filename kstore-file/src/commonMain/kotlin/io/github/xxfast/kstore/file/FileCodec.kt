@@ -3,6 +3,7 @@ package io.github.xxfast.kstore.file
 
 import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
+import kotlin.uuid.Uuid
 import kotlinx.io.buffered
 import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
@@ -19,12 +20,14 @@ import kotlinx.serialization.json.io.encodeToSink as encode
 /**
  * Creates a store with [FileCodec] with json serializer
  * @param file path to the file that is managed by this store
+ * @param tempFile staging file this codec writes through. Defaults to a path unique to this codec,
+ * so that codecs sharing a [file] never stage into the same buffer - see [uniqueTempFile]
  * @param json JSON Serializer to use. defaults to [DefaultJson]
  * @return store that contains a value of type [T]
  */
 public inline fun <reified T : @Serializable Any> FileCodec(
   file: Path,
-  tempFile: Path = Path("$file.temp"),
+  tempFile: Path = uniqueTempFile(file),
   json: Json = DefaultJson,
 ): FileCodec<T> = FileCodec(
   file = file,
@@ -77,6 +80,30 @@ public class FileCodec<T : @Serializable Any>(
 
     moveOrCopy(source = tempFile, destination = file)
   }
+}
+
+/**
+ * A staging path unique to a single codec, of the form `<file>.<random>.temp`.
+ *
+ * Stores pointing at the same [file] each get their own staging file. Sharing one lets concurrent
+ * writes interleave into a single buffer before either is moved into place, and whichever moves
+ * last publishes the mixture, which is how a store ends up corrupt on disk (see issue #85). With a
+ * staging file each, the move stays atomic and the worst case is last write wins.
+ *
+ * Note this is one staging file per codec, not per write, so a process killed mid-write leaves at
+ * most one behind per store. The next write is unaffected either way.
+ *
+ * The suffix comes from [Uuid.random] rather than [kotlin.random.Random] on purpose. Random.Default
+ * is a PRNG seeded from the clock on some targets, so two processes cold starting in the same tick
+ * can draw the same sequence and land on the same staging path, which is the one case this is meant
+ * to prevent. Uuid.random draws from the platform's secure source and has no shared seed.
+ *
+ * @param file path to the file being staged for
+ * @return a staging path that no other codec will pick
+ */
+public fun uniqueTempFile(file: Path): Path {
+  val suffix: String = Uuid.random().toHexString()
+  return Path("$file.$suffix.temp")
 }
 
 /**

@@ -211,6 +211,21 @@ class KVersionedStoreTests {
   }
 
   @Test
+  fun testCodecDoesNotStageThroughTheSharedPaths() = runTest {
+    // The paths every versioned codec used to stage through - see issue #85
+    val sharedData = Path("$file.temp")
+    val sharedVersion = Path("$versionFile.temp")
+    write(sharedData, "another codec's staging")
+    write(sharedVersion, "another codec's staging")
+
+    storeV2.set(MYLO_V2)
+
+    assertEquals(MYLO_V2, storeV2.get())
+    assertEquals(true, SystemFileSystem.exists(sharedData))
+    assertEquals(true, SystemFileSystem.exists(sharedVersion))
+  }
+
+  @Test
   fun testTransactionalEncode() = runTest {
     assertFailsWith<NotImplementedError> { storeV41.set(MYLO_V41) }
     assertEquals(null, storeV41.get())
