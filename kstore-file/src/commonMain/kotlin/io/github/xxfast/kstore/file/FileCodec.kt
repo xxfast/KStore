@@ -136,4 +136,8 @@ internal fun moveOrCopy(
       SystemFileSystem.delete(source, mustExist = false)
     }
   }
+
+  override fun id(): Any {
+    return this.file.toString() + this.serializer.descriptor.serialName
+  }
 }

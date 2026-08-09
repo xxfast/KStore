@@ -17,4 +17,10 @@ public interface Codec<T: @Serializable Any> {
    * @return optional value that is decoded
    */
   public suspend fun decode(): T?
+
+  /**
+   * Tells the store factory whether to create a new store or reuse an existing one.
+   * @return the id of the codec.
+   */
+  public fun id(): Any = this
 }
