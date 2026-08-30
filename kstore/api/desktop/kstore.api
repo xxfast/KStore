@@ -33,6 +33,17 @@ public final class io/github/xxfast/kstore/extensions/KListStoreKt {
 	public static final fun plus (Lio/github/xxfast/kstore/KStore;[Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class io/github/xxfast/kstore/extensions/VersionedCodec : io/github/xxfast/kstore/Codec {
+	public fun <init> (Lio/github/xxfast/kstore/Codec;ILio/github/xxfast/kstore/Codec;Lio/github/xxfast/kstore/Codec;Lkotlin/jvm/functions/Function2;)V
+	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/xxfast/kstore/extensions/VersionedCodecKt {
+	public static final fun DefaultMigration (Ljava/lang/Object;)Lkotlin/jvm/functions/Function2;
+	public static final fun versioned (Lio/github/xxfast/kstore/Codec;ILio/github/xxfast/kstore/Codec;Lio/github/xxfast/kstore/Codec;Lkotlin/jvm/functions/Function2;)Lio/github/xxfast/kstore/Codec;
+}
+
 public abstract interface annotation class io/github/xxfast/kstore/utils/ExperimentalKStoreApi : java/lang/annotation/Annotation {
 }
 

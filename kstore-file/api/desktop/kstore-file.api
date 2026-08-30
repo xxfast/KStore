@@ -10,12 +10,7 @@ public final class io/github/xxfast/kstore/file/FileCodecKt {
 
 public final class io/github/xxfast/kstore/file/extensions/KVersionedStoreKt {
 	public static final fun DefaultMigration (Ljava/lang/Object;)Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/github/xxfast/kstore/file/extensions/VersionedCodec : io/github/xxfast/kstore/Codec {
-	public fun <init> (Lkotlinx/io/files/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;)V
-	public synthetic fun <init> (Lkotlinx/io/files/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun decode (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun encode (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun VersionedCodec (Lkotlinx/io/files/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;)Lio/github/xxfast/kstore/Codec;
+	public static synthetic fun VersionedCodec$default (Lkotlinx/io/files/Path;ILkotlinx/serialization/json/Json;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;Lkotlinx/io/files/Path;ILjava/lang/Object;)Lio/github/xxfast/kstore/Codec;
 }
 
