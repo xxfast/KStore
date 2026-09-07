@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinToolingSetupTask
 plugins {
   kotlin("multiplatform")
   id("com.android.kotlin.multiplatform.library")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.2"
 }
 
 kotlin {
