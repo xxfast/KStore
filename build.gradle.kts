@@ -1,5 +1,5 @@
 plugins {
-  id("org.jetbrains.kotlinx.kover") version "0.9.9"
+  id("org.jetbrains.kotlinx.kover") version "0.9.11"
   id("org.jetbrains.dokka") version "2.2.0"
   id("com.vanniktech.maven.publish") version "0.37.0" apply false
 }
